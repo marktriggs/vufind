@@ -60,8 +60,9 @@ class Tag extends Browse
                 $legalLetters = $this->_getAlphabetList();
                 $interface->assign('alphabetList', $legalLetters);
                 // Only display tag list when a valid letter is selected:
-                if (isset($_GET['letter']) && 
-                    in_array($_GET['letter'], $legalLetters)) {
+                if (isset($_GET['letter'])
+                    && in_array($_GET['letter'], $legalLetters)
+                ) {
                     $interface->assign('startLetter', $_GET['letter']);
                     // Note -- this does not need to be escaped because 
                     // $_GET['letter'] has already been validated against
@@ -69,8 +70,8 @@ class Tag extends Browse
                     $clause = " AND tags.tag LIKE '{$_GET['letter']}%'";
                     $interface->assign('tagList', $this->_getTagList($clause));
                 }
-            // Default case -- always display tag list for non-alphabetical modes:
             } else {
+                // Default case: always display tag list for non-alphabetical modes:
                 $interface->assign('tagList', $this->_getTagList());
             }
         }
@@ -96,7 +97,8 @@ class Tag extends Browse
     /**
      * Get a list of tags based on current GET parameters.
      *
-     * @param string $extra_where Where clause to add to lookup query; it is caller's responsibility to make sure this is safe!!
+     * @param string $extra_where Where clause to add to lookup query; it is the
+     * caller's responsibility to make sure this is safe!!
      *
      * @return array              Tag details.
      * @access private
