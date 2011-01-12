@@ -45,27 +45,27 @@ class SearchObject_SolrAuth extends SearchObject_Base
 {
     // SOLR QUERY
     // Parsed query
-    private $query = null;
+    private $_query = null;
     // Facets
-    private $facetLimit = 30;
-    private $facetOffset = null;
-    private $facetPrefix = null;
-    private $facetSort = null;
+    private $_facetLimit = 30;
+    private $_facetOffset = null;
+    private $_facetPrefix = null;
+    private $_facetSort = null;
     // Index
-    private $index = null;
+    private $_index = null;
     // Field List
-    private $fields = 'score';
+    private $_fields = 'score';
     // HTTP Method
-    //private $method = HTTP_REQUEST_METHOD_GET;
-    private $method = HTTP_REQUEST_METHOD_POST;
+    //private $_method = HTTP_REQUEST_METHOD_GET;
+    private $_method = HTTP_REQUEST_METHOD_POST;
     // Result
-    private $indexResult;
+    private $_indexResult;
 
     // OTHER VARIABLES
     // Index
-    private $indexEngine = null;
+    private $_indexEngine = null;
     // Used to pass hidden filter queries to Solr
-    private $hiddenFilters = array();
+    private $_hiddenFilters = array();
 
     /**
      * Constructor. Initialise some details about the server
@@ -80,7 +80,7 @@ class SearchObject_SolrAuth extends SearchObject_Base
         global $configArray;
 
         // Initialise the index
-        $this->indexEngine = new SolrAuth($configArray['Index']['url']);
+        $this->_indexEngine = new SolrAuth($configArray['Index']['url']);
 
         // Set up appropriate results action:
         $this->resultsModule = 'Authority';
@@ -124,9 +124,9 @@ class SearchObject_SolrAuth extends SearchObject_Base
 
         // Debugging
         if ($configArray['System']['debug']) {
-            $this->indexEngine->debug = true;
+            $this->_indexEngine->debug = true;
         } else {
-            $this->indexEngine->debug = false;
+            $this->_indexEngine->debug = false;
         }
     }
 
@@ -173,7 +173,7 @@ class SearchObject_SolrAuth extends SearchObject_Base
 
         // If a query override has been specified, log it here
         if (isset($_REQUEST['q'])) {
-            $this->query = $_REQUEST['q'];
+            $this->_query = $_REQUEST['q'];
         }
 
         return true;
@@ -192,7 +192,7 @@ class SearchObject_SolrAuth extends SearchObject_Base
         parent::purge();
 
         // Make some Solr-specific adjustments:
-        $this->query        = null;
+        $this->_query        = null;
     }
 
     /**
@@ -203,7 +203,7 @@ class SearchObject_SolrAuth extends SearchObject_Base
      */
     public function getQuery()
     {
-        return $this->query;
+        return $this->_query;
     }
 
     /**
@@ -214,7 +214,7 @@ class SearchObject_SolrAuth extends SearchObject_Base
      */
     public function getIndexEngine()
     {
-        return $this->indexEngine;
+        return $this->_indexEngine;
     }
 
     /**
@@ -243,7 +243,7 @@ class SearchObject_SolrAuth extends SearchObject_Base
      */
     public function setQueryString($newQuery)
     {
-        $this->query = $newQuery;
+        $this->_query = $newQuery;
     }
 
     /**
@@ -261,7 +261,7 @@ class SearchObject_SolrAuth extends SearchObject_Base
         // 'index' = index order, most likely alphabetical
         // more info : http://wiki.apache.org/solr/SimpleFacetParameters#facet.sort
         if ($newSort == 'count' || $newSort == 'index') {
-            $this->facetSort = $newSort;
+            $this->_facetSort = $newSort;
         }
     }
 
@@ -278,7 +278,7 @@ class SearchObject_SolrAuth extends SearchObject_Base
      */
     public function addFacetPrefix($prefix)
     {
-        $this->facetPrefix = $prefix;
+        $this->_facetPrefix = $prefix;
     }
 
     /**
@@ -290,8 +290,8 @@ class SearchObject_SolrAuth extends SearchObject_Base
      */
     public function getIndexError()
     {
-        return isset($this->indexResult['error']) ?
-            $this->indexResult['error'] : false;
+        return isset($this->_indexResult['error']) ?
+            $this->_indexResult['error'] : false;
     }
 
     /**
@@ -304,7 +304,7 @@ class SearchObject_SolrAuth extends SearchObject_Base
      */
     public function addHiddenFilter($fq)
     {
-        $this->hiddenFilters[] = $fq;
+        $this->_hiddenFilters[] = $fq;
     }
 
     /**
@@ -331,18 +331,18 @@ class SearchObject_SolrAuth extends SearchObject_Base
         }
 
         // Build Query
-        $query = $this->indexEngine->buildQuery($search);
+        $query = $this->_indexEngine->buildQuery($search);
         if (PEAR::isError($query)) {
             return $query;
         }
 
         // Only use the query we just built if there isn't an override in place.
-        if ($this->query == null) {
-            $this->query = $query;
+        if ($this->_query == null) {
+            $this->_query = $query;
         }
 
         // Define Filter Query
-        $filterQuery = $this->hiddenFilters;
+        $filterQuery = $this->_hiddenFilters;
         foreach ($this->filterList as $field => $filter) {
             foreach ($filter as $value) {
                 // Special case -- allow trailing wildcards:
@@ -357,24 +357,24 @@ class SearchObject_SolrAuth extends SearchObject_Base
         // If we are only searching one field use the DisMax handler
         //    for that field. If left at null let solr take care of it
         if (count($search) == 1 && isset($search[0]['index'])) {
-            $this->index = $search[0]['index'];
+            $this->_index = $search[0]['index'];
         }
 
         // Build a list of facets we want from the index
         $facetSet = array();
         if (!empty($this->facetConfig)) {
-            $facetSet['limit'] = $this->facetLimit;
+            $facetSet['limit'] = $this->_facetLimit;
             foreach ($this->facetConfig as $facetField => $facetName) {
                 $facetSet['field'][] = $facetField;
             }
-            if ($this->facetOffset != null) {
-                $facetSet['offset'] = $this->facetOffset;
+            if ($this->_facetOffset != null) {
+                $facetSet['offset'] = $this->_facetOffset;
             }
-            if ($this->facetPrefix != null) {
-                $facetSet['prefix'] = $this->facetPrefix;
+            if ($this->_facetPrefix != null) {
+                $facetSet['prefix'] = $this->_facetPrefix;
             }
-            if ($this->facetSort != null) {
-                $facetSet['sort'] = $this->facetSort;
+            if ($this->_facetSort != null) {
+                $facetSet['sort'] = $this->_facetSort;
             }
         }
 
@@ -388,9 +388,9 @@ class SearchObject_SolrAuth extends SearchObject_Base
         // The first record to retrieve:
         //  (page - 1) * limit = start
         $recordStart = ($this->page - 1) * $this->limit;
-        $this->indexResult = $this->indexEngine->search(
-            $this->query,      // Query string
-            $this->index,      // DisMax Handler
+        $this->_indexResult = $this->_indexEngine->search(
+            $this->_query,     // Query string
+            $this->_index,     // DisMax Handler
             $filterQuery,      // Filter query
             $recordStart,      // Starting record
             $this->limit,      // Records per page
@@ -398,8 +398,8 @@ class SearchObject_SolrAuth extends SearchObject_Base
             '',                // Spellcheck query
             '',                // Spellcheck dictionary
             $finalSort,        // Field to sort on
-            $this->fields,     // Fields to return
-            $this->method,     // HTTP Request method
+            $this->_fields,    // Fields to return
+            $this->_method,    // HTTP Request method
             $returnIndexErrors // Include errors in response?
         );
 
@@ -407,7 +407,7 @@ class SearchObject_SolrAuth extends SearchObject_Base
         $this->stopQueryTimer();
 
         // How many results were there?
-        $this->resultsTotal = $this->indexResult['response']['numFound'];
+        $this->resultsTotal = $this->_indexResult['response']['numFound'];
 
         // If extra processing is needed for recommendations, do it now:
         if ($recommendations && is_array($this->recommend)) {
@@ -419,7 +419,7 @@ class SearchObject_SolrAuth extends SearchObject_Base
         }
 
         // Return the result set
-        return $this->indexResult;
+        return $this->_indexResult;
     }
 
     /**
@@ -445,13 +445,13 @@ class SearchObject_SolrAuth extends SearchObject_Base
         $list = array();
 
         // If we have no facets to process, give up now
-        if (!is_array($this->indexResult['facet_counts']['facet_fields'])) {
+        if (!is_array($this->_indexResult['facet_counts']['facet_fields'])) {
             return $list;
         }
 
         // Loop through every field returned by the result set
         $validFields = array_keys($filter);
-        foreach ($this->indexResult['facet_counts']['facet_fields'] as $field => $data) {
+        foreach ($this->_indexResult['facet_counts']['facet_fields'] as $field => $data) {
             // Skip filtered fields and empty arrays:
             if (!in_array($field, $validFields) || count($data) < 1) {
                 continue;
