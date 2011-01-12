@@ -69,8 +69,10 @@ class Record extends Base
         parent::__construct();
 
         // Assign the ID of the last search so the user can return to it.
-        $interface->assign('lastsearch', isset($_SESSION['lastSearchURL']) ?
-            $_SESSION['lastSearchURL'] : false);
+        $interface->assign(
+            'lastsearch',
+            isset($_SESSION['lastSearchURL']) ? $_SESSION['lastSearchURL'] : false
+        );
 
         $this->id = $_GET['id'];
         $interface->assign('id', $this->id);
@@ -139,8 +141,11 @@ class Record extends Base
         $interface->assign('coinsID', $coinsID);
 
         // Set Proxy URL
-        $interface->assign('proxy', isset($configArray['EZproxy']['host']) ?
-            $configArray['EZproxy']['host'] : false);
+        $interface->assign(
+            'proxy',
+            isset($configArray['EZproxy']['host'])
+            ? $configArray['EZproxy']['host'] : false
+        );
 
         $interface->setPageTitle($this->_getBestTitle());
     }
@@ -153,7 +158,7 @@ class Record extends Base
      */
     public function launch()
     {
-        require_once 'Holdings.php';
+        include_once 'Holdings.php';
         Holdings::launch();
     }
 

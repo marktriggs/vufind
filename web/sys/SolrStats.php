@@ -47,6 +47,8 @@ class SolrStats extends Solr
     /**
      * Constructor
      *
+     * @param string $host The URL for the local Solr Server
+     *
      * @access public
      */
     public function __construct($host)
