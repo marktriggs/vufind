@@ -79,12 +79,14 @@ class Advanced extends Action
         $specialFacets
             = $searchObject->getFacetSetting('Advanced_Settings', 'special_facets');
         if (stristr($specialFacets, 'illustrated')) {
-            $interface->assign('illustratedLimit',
-                $this->_getIllustrationSettings($savedSearch));
+            $interface->assign(
+                'illustratedLimit', $this->_getIllustrationSettings($savedSearch)
+            );
         }
         if (stristr($specialFacets, 'daterange')) {
-            $interface->assign('dateRangeLimit',
-                $this->_getDateRangeSettings($savedSearch));
+            $interface->assign(
+                'dateRangeLimit', $this->_getDateRangeSettings($savedSearch)
+            );
         }
 
         // Send search type settings to the template
@@ -100,7 +102,7 @@ class Advanced extends Action
         $interface->setTemplate('advanced.tpl');
         $interface->display('layout.tpl');
     }
-    
+
     /**
      * Get the possible legal values for the illustration limit radio buttons.
      *
@@ -120,7 +122,7 @@ class Advanced extends Action
         $illAny = array(
             'text' => 'No Preference', 'value' => -1, 'selected' => false
         );
-        
+
         // Find the selected value by analyzing facets -- if we find match, remove
         // the offending facet to avoid inappropriate items appearing in the
         // "applied filters" sidebar!
@@ -180,7 +182,7 @@ class Advanced extends Action
     private function _loadSavedSearch()
     {
         global $interface;
-        
+
         // Are we editing an existing search?
         if (isset($_REQUEST['edit'])) {
             // Go find it
@@ -188,7 +190,9 @@ class Advanced extends Action
             $search->id = $_REQUEST['edit'];
             if ($search->find(true)) {
                 // Check permissions
-                if ($search->session_id == session_id() || $search->user_id == $user->id) {
+                if ($search->session_id == session_id()
+                    || $search->user_id == $user->id
+                ) {
                     // Retrieve the search details
                     $minSO = unserialize($search->search_object);
                     $savedSearch = SearchObjectFactory::deminify($minSO);
@@ -201,16 +205,16 @@ class Advanced extends Action
                     } else {
                         $interface->assign('editErr', 'notAdvanced');
                     }
-                // No permissions
                 } else {
+                    // No permissions
                     $interface->assign('editErr', 'noRights');
                 }
-            // Not found
             } else {
+                // Not found
                 $interface->assign('editErr', 'notFound');
             }
         }
-        
+
         return false;
     }
 
@@ -232,7 +236,7 @@ class Advanced extends Action
             foreach ($list['list'] as $value) {
                 // Build the filter string for the URL:
                 $fullFilter = $facet.':"'.$value['untranslated'].'"';
-                
+
                 // If we haven't already found a selected facet and the current
                 // facet has been applied to the search, we should store it as
                 // the selected facet for the current control.
@@ -246,10 +250,10 @@ class Advanced extends Action
                 } else {
                     $selected = false;
                 }
-                $currentList[$value['value']] = 
-                    array('filter' => $fullFilter, 'selected' => $selected);
+                $currentList[$value['value']]
+                    = array('filter' => $fullFilter, 'selected' => $selected);
             }
-            
+
             // Perform a natural case sort on the array of facet values:
             $keys = array_keys($currentList);
             natcasesort($keys);

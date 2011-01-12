@@ -29,6 +29,16 @@
 
 require_once 'Base.php';
 
+/**
+ * Advanced search action for WorldCat module
+ *
+ * @category VuFind
+ * @package  Controller_WorldCat
+ * @author   Andrew S. Nagy <vufind-tech@lists.sourceforge.net>
+ * @author   Demian Katz <demian.katz@villanova.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/building_a_module Wiki
+ */
 class Advanced extends Base
 {
     /**
@@ -47,7 +57,9 @@ class Advanced extends Base
         $savedSearch = $this->_loadSavedSearch();
 
         // Send search type settings to the template
-        $interface->assign('advSearchTypes', $this->searchObject->getAdvancedTypes());
+        $interface->assign(
+            'advSearchTypes', $this->searchObject->getAdvancedTypes()
+        );
 
         // If we found a saved search, let's assign some details to the interface:
         if ($savedSearch) {
@@ -93,12 +105,12 @@ class Advanced extends Base
                     } else {
                         $interface->assign('editErr', 'notAdvanced');
                     }
-                // No permissions
                 } else {
+                    // No permissions
                     $interface->assign('editErr', 'noRights');
                 }
-            // Not found
             } else {
+                // Not found
                 $interface->assign('editErr', 'notFound');
             }
         }

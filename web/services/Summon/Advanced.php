@@ -54,12 +54,16 @@ class Advanced extends Base
         $savedSearch = $this->_loadSavedSearch();
 
         // Send search type settings to the template
-        $interface->assign('advSearchTypes', $this->searchObject->getAdvancedTypes());
+        $interface->assign(
+            'advSearchTypes', $this->searchObject->getAdvancedTypes()
+        );
 
         // Get checkbox filters to present narrow options; this may also strip some
         // filters out of the $savedSearch object to prevent redundant information
         // being retrieved via the getFilterList() method.
-        $interface->assign('checkboxFilters', $this->_getCheckboxFilters($savedSearch));
+        $interface->assign(
+            'checkboxFilters', $this->_getCheckboxFilters($savedSearch)
+        );
 
         // Process settings to control special-purpose facets not supported by the
         //     more generic configuration options.
@@ -67,8 +71,9 @@ class Advanced extends Base
         $special = isset($config['Advanced_Facet_Settings']['special_facets']) ?
             $config['Advanced_Facet_Settings']['special_facets'] : '';
         if (stristr($special, 'daterange')) {
-            $interface->assign('dateRangeLimit',
-                $this->_getDateRangeSettings($savedSearch));
+            $interface->assign(
+                'dateRangeLimit', $this->_getDateRangeSettings($savedSearch)
+            );
         }
 
         // If we found a saved search, let's assign some details to the interface:
@@ -132,7 +137,9 @@ class Advanced extends Base
             $search->id = $_REQUEST['edit'];
             if ($search->find(true)) {
                 // Check permissions
-                if ($search->session_id == session_id() || $search->user_id == $user->id) {
+                if ($search->session_id == session_id()
+                    || $search->user_id == $user->id
+                ) {
                     // Retrieve the search details
                     $minSO = unserialize($search->search_object);
                     $savedSearch = SearchObjectFactory::deminify($minSO);
@@ -145,12 +152,12 @@ class Advanced extends Base
                     } else {
                         $interface->assign('editErr', 'notAdvanced');
                     }
-                // No permissions
                 } else {
+                    // No permissions
                     $interface->assign('editErr', 'noRights');
                 }
-            // Not found
             } else {
+                // Not found
                 $interface->assign('editErr', 'notFound');
             }
         }
