@@ -43,8 +43,7 @@ require_once 'sys/Pager.php';
  */
 class Home extends Action
 {
-    private $db;
-    private $lang;
+    private $_lang;
 
     /**
      * Process parameters and display the page.
@@ -85,7 +84,7 @@ class Home extends Action
         $interface->assign('author', $_GET['author']);
 
         // What language should we use?
-        $this->lang = $configArray['Site']['language'];
+        $this->_lang = $configArray['Site']['language'];
 
         // Retrieve User Search History -- note that we only want to offer a
         // "back to search" link if the saved URL is not for the current action;
@@ -97,10 +96,12 @@ class Home extends Action
         // search, and it is better to display nothing than to provide an infinite
         // loop of links.  Perhaps this can be solved more elegantly with a stack
         // or with multiple session variables, but for now this seems okay.
-        $interface->assign('lastsearch', 
-            (isset($_SESSION['lastSearchURL']) && 
-            !strstr($_SESSION['lastSearchURL'], 'Author/Home')) ? 
-            $_SESSION['lastSearchURL'] : false);
+        $interface->assign(
+            'lastsearch',
+            (isset($_SESSION['lastSearchURL']) &&
+            !strstr($_SESSION['lastSearchURL'], 'Author/Home'))
+            ? $_SESSION['lastSearchURL'] : false
+        );
 
         if (!$interface->is_cached('layout.tpl|Author' . $_GET['author'])) {
             // Clean up author string
@@ -117,7 +118,9 @@ class Home extends Action
                 $fname = $author[1];
                 if (isset($author[2])) {
                     // Remove punctuation
-                    if ((strlen($author[2]) > 2) && (substr($author[2], -1) == '.')) {
+                    if ((strlen($author[2]) > 2)
+                        && (substr($author[2], -1) == '.')
+                    ) {
                         $author[2] = substr($author[2], 0, -1);
                     }
                     $fname = $author[2] . ' ' . $fname;
@@ -125,7 +128,7 @@ class Home extends Action
             }
 
             // Remove dates
-            $fname = preg_replace('/[0-9]+-[0-9]*/', '', $fname);            
+            $fname = preg_replace('/[0-9]+-[0-9]*/', '', $fname);
 
             // Build Author name to display.
             if (substr($fname, -3, 1) == ' ') {
@@ -133,8 +136,9 @@ class Home extends Action
                 $authorName = $fname . ' ';
             } else {
                 // No initial so strip any punctuation from the end
-                if ((substr(trim($fname), -1) == ',') ||
-                    (substr(trim($fname), -1) == '.')) {
+                if ((substr(trim($fname), -1) == ',')
+                    || (substr(trim($fname), -1) == '.')
+                ) {
                     $authorName = substr(trim($fname), 0, -1) . ' ';
                 } else {
                     $authorName = $fname . ' ';
@@ -146,9 +150,10 @@ class Home extends Action
             // Pull External Author Content
             if ($searchObject->getPage() == 1) {
                 // Only load Wikipedia info if turned on in config file:
-                if (isset($configArray['Content']['authors']) &&
-                    stristr($configArray['Content']['authors'], 'wikipedia')) {
-                    // Only use first two characters of language string; Wikipedia 
+                if (isset($configArray['Content']['authors'])
+                    && stristr($configArray['Content']['authors'], 'wikipedia')
+                ) {
+                    // Only use first two characters of language string; Wikipedia
                     // uses language domains but doesn't break them up into regional
                     // variations like pt-br or en-gb.
                     $wiki_lang = substr($interface->getLanguage(), 0, 2);
@@ -183,8 +188,9 @@ class Home extends Action
         $interface->assign('recordCount', $summary['resultTotal']);
         $interface->assign('recordStart', $summary['startRecord']);
         $interface->assign('recordEnd',   $summary['endRecord']);
-        $interface->assign('sideRecommendations',
-            $searchObject->getRecommendationsTemplates('side'));
+        $interface->assign(
+            'sideRecommendations', $searchObject->getRecommendationsTemplates('side')
+        );
 
         // Big one - our results
         $interface->assign('recordSet', $searchObject->getResultRecordHTML());
@@ -223,10 +229,10 @@ class Home extends Action
     public function getWikipedia($author, $lang = null)
     {
         if ($lang) {
-            $this->lang = $lang;
+            $this->_lang = $lang;
         }
 
-        $url = "http://$this->lang.wikipedia.org/w/api.php" .
+        $url = "http://$this->_lang.wikipedia.org/w/api.php" .
                '?action=query&prop=revisions&rvprop=content&format=php' .
                '&list=allpages&titles=' . urlencode($author);
         $client = new Proxy_Request();
@@ -256,7 +262,7 @@ class Home extends Action
      */
     private function _getWikipediaImageURL($imageName)
     {
-        $url = "http://$this->lang.wikipedia.org/w/api.php" .
+        $url = "http://$this->_lang.wikipedia.org/w/api.php" .
                '?prop=imageinfo&action=query&iiprop=url&iiurlwidth=150&format=php' .
                '&titles=Image:' . $imageName;
 
@@ -289,7 +295,7 @@ class Home extends Action
 
         return isset($imageUrl) ? $imageUrl : false;
     }
-    
+
     /**
      * _parseWikipedia
      *
@@ -375,12 +381,13 @@ class Home extends Action
                 $parts = explode('|', $matches[2][0]);
                 $imageName = str_replace(' ', '_', $parts[0]);
                 if (count($parts) > 1) {
-                    $image_caption = strip_tags(preg_replace('/({{).*(}})/U', '', 
-                        $parts[count($parts) - 1]));
+                    $image_caption = strip_tags(
+                        preg_replace('/({{).*(}})/U', '', $parts[count($parts) - 1])
+                    );
                 }
             }
         }
- 
+
         // Given an image name found above, look up the associated URL:
         if (isset($imageName)) {
             $imageUrl = $this->_getWikipediaImageURL($imageName);
@@ -405,17 +412,17 @@ class Home extends Action
         $body   = trim(substr($body, 0, $end));
 
         // Remove unwanted image/file links
-        // Nested brackets make this annoying: We can't add 'File' or 'Image' as 
-        //    mandatory because the recursion fails, or as optional because then 
+        // Nested brackets make this annoying: We can't add 'File' or 'Image' as
+        //    mandatory because the recursion fails, or as optional because then
         //    normal links get hit.
         //    ... unless there's a better pattern? TODO
-        // eg. [[File:Johann Sebastian Bach.jpg|thumb|Bach in a 1748 portrait by 
+        // eg. [[File:Johann Sebastian Bach.jpg|thumb|Bach in a 1748 portrait by
         //     [[Elias Gottlob Haussmann|Haussmann]]]]
         $open    = "\\[";
         $close   = "\\]";
         $content = "(?>[^\\[\\]]+)";  // Anything but [ or ]
         // We can either find content or recursive brackets:
-        $recursive_match = "($content|(?R))*"; 
+        $recursive_match = "($content|(?R))*";
         preg_match_all("/".$open.$recursive_match.$close."/Us", $body, $new_matches);
         // Loop through every match (link) we found
         if (is_array($new_matches)) {
@@ -424,16 +431,18 @@ class Home extends Action
                 if (is_array($nm)) {
                     foreach ($nm as $n) {
                         // If it's a file link get rid of it
-                        if (strtolower(substr($n, 0, 7)) == "[[file:" ||
-                            strtolower(substr($n, 0, 8)) == "[[image:") {
+                        if (strtolower(substr($n, 0, 7)) == "[[file:"
+                            || strtolower(substr($n, 0, 8)) == "[[image:"
+                        ) {
                             $body = str_replace($n, "", $body);
                         }
                     }
-                // Or just a normal array
                 } else {
+                    // Or just a normal array...
                     // If it's a file link get rid of it
-                    if (strtolower(substr($n, 0, 7)) == "[[file:" ||
-                        strtolower(substr($n, 0, 8)) == "[[image:") {
+                    if (strtolower(substr($n, 0, 7)) == "[[file:"
+                        || strtolower(substr($n, 0, 8)) == "[[image:"
+                    ) {
                         $body = str_replace($nm, "", $body);
                     }
                 }
@@ -446,9 +455,11 @@ class Home extends Action
 
         // Convert wikipedia links
         $pattern[] = '/(\x5b\x5b)([^\x5d|]*)(\x5d\x5d)/Us';
-        $replacement[] = '<a href="' . $configArray['Site']['url'] . '/Search/Results?lookfor=%22$2%22&amp;type=AllFields">$2</a>';
+        $replacement[] = '<a href="' . $configArray['Site']['url'] .
+            '/Search/Results?lookfor=%22$2%22&amp;type=AllFields">$2</a>';
         $pattern[] = '/(\x5b\x5b)([^\x5d]*)\x7c([^\x5d]*)(\x5d\x5d)/Us';
-        $replacement[] = '<a href="' . $configArray['Site']['url'] . '/Search/Results?lookfor=%22$2%22&amp;type=AllFields">$3</a>';
+        $replacement[] = '<a href="' . $configArray['Site']['url'] .
+            '/Search/Results?lookfor=%22$2%22&amp;type=AllFields">$3</a>';
 
         // Fix pronunciation guides
         $pattern[] = '/({{)pron-en\|([^}]*)(}})/Us';
@@ -471,12 +482,12 @@ class Home extends Action
         // Formatting
         $pattern[] = "/'''([^']*)'''/Us";
         $replacement[] = '<strong>$1</strong>';
-        
+
         // Trim leading newlines (which can result from leftovers after stripping
         // other items above).  We want this to be greedy.
         $pattern[] = '/^\n*/s';
         $replacement[] = '';
-        
+
         // Convert multiple newlines into two breaks
         // We DO want this to be greedy
         $pattern[] = "/\n{2,}/s";
