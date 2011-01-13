@@ -52,7 +52,7 @@
   <div class="searchtools">
     <strong>{translate text='Search Tools'}:</strong>
     {*<a href="{$rssLink|escape}" class="feed">{translate text='Get RSS Feed'}</a>*}
-    <a href="{$url}/Search/Email" class="mail" class="mailSearch mail" id="mailSearch{$searchId|escape}" title="{translate text='Email this Search'}">{translate text='Email this Search'}</a>
+    <a href="{$url}/Search/Email" class="mailSearch mail" id="mailSearch{$searchId|escape}" title="{translate text='Email this Search'}">{translate text='Email this Search'}</a>
     {if $savedSearch}<a href="{$url}/MyResearch/SaveSearch?delete={$searchId}" class="delete">{translate text='save_search_remove'}</a>{else}<a href="{$url}/MyResearch/SaveSearch?save={$searchId}" class="add">{translate text='save_search'}</a>{/if}
   </div>
 </div>
