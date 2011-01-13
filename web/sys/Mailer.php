@@ -91,6 +91,10 @@ class VuFindMailer
             return new PEAR_Error('Invalid Sender Email Address');
         }
 
+        // Change error handling behavior to avoid termination during mail
+        // process....
+        PEAR::setErrorHandling(PEAR_ERROR_RETURN);
+
         // Get mail object
         $mail =& Mail::factory('smtp', $this->settings);
         if (PEAR::isError($mail)) {
@@ -101,7 +105,12 @@ class VuFindMailer
         $headers = array('From' => $from, 'To' => $to, 'Subject' => $subject,
             'Date' => date('D, d M Y H:i:s O'),
             'Content-Type' => 'text/plain; charset="UTF-8"');
-        return $mail->send($to, $headers, $body);
+        $result = $mail->send($to, $headers, $body);
+
+        // Restore standard error handling:
+        PEAR::setErrorHandling(PEAR_ERROR_CALLBACK, 'handlePEARError');
+
+        return $result;
     }
 }
 
