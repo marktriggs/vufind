@@ -12,6 +12,7 @@
 
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+    {if $addHeader}{$addHeader}{/if}
 
     <title>{$pageTitle|truncate:64:"..."}</title>
 
