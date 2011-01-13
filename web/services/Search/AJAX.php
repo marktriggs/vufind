@@ -177,89 +177,6 @@ class AJAX extends Action
         }
     }
 
-    function GetSuggestion()
-    {
-        global $configArray;
-
-        // Setup Search Engine Connection
-        $class = $configArray['Index']['engine'];
-        $db = new $class($configArray['Index']['url']);
-
-        $query = 'titleStr:"' . $_GET['phrase'] . '*"';
-        $result = $db->query($query, 0, 10);
-
-        $resultList = '';
-        if (isset($result['record'])) {
-            foreach ($result['record'] as $record) {
-                if (strlen($record['title']) > 40) {
-                    $resultList .= htmlspecialchars(substr($record['title'], 0, 40)) . ' ...|';
-                } else {
-                    $resultList .= htmlspecialchars($record['title']) . '|';
-                }
-            }
-            echo '<result>' . $resultList . '</result>';
-        }
-    }
-
-    // Saves a search to User's Account
-    function SaveSearch()
-    {
-        require_once 'services/MyResearch/lib/User.php';
-        require_once 'services/MyResearch/lib/Search.php';
-
-        //check if user is logged in
-        if (!($user = UserAccount::isLoggedIn())) {
-            echo "<result>Please Log in.</result>";
-            return;
-        }
-
-        $lookfor = $_GET['lookfor'];
-        $limitto = urldecode($_GET['limit']);
-        $type = $_GET['type'];
-
-        $search = new SearchEntry();
-        $search->user_id = $user->id;
-        $search->limitto = $limitto;
-        $search->lookfor = $lookfor;
-        $search->type = $type;
-        if (!$search->find()) {
-            $search = new SearchEntry();
-            $search->user_id = $user->id;
-            $search->lookfor = $lookfor;
-            $search->limitto = $limitto;
-            $search->type = $type;
-            $search->created = date('Y-m-d');
-
-            $search->insert();
-        }
-        echo "<result>Done</result>";
-    }
-
-    function GetSaveStatus()
-    {
-        require_once 'services/MyResearch/lib/User.php';
-        require_once 'services/MyResearch/lib/Resource.php';
-
-        // check if user is logged in
-        if (!($user = UserAccount::isLoggedIn())) {
-            echo "<result>Unauthorized</result>";
-            return;
-        }
-
-        // Check if resource is saved to favorites
-        $resource = new Resource();
-        $resource->record_id = $_GET['id'];
-        if ($resource->find(true)) {
-            if ($user->hasResource($resource)) {
-                echo '<result>Saved</result>';
-            } else {
-                echo '<result>Not Saved</result>';
-            }
-        } else {
-            echo '<result>Not Saved</result>';
-        }
-    }
-
     /**
      * Get Save Statuses
      *
@@ -311,35 +228,6 @@ class AJAX extends Action
             echo '</item>';
         }
     }
-
-    function GetSavedData()
-    {
-        require_once 'services/MyResearch/lib/User.php';
-        require_once 'services/MyResearch/lib/Resource.php';
-
-        // check if user is logged in
-        if ((!$user = UserAccount::isLoggedIn())) {
-            echo "<result>Unauthorized</result>";
-            return;
-        }
-
-        echo "<result>\n";
-
-        $saved = $user->getSavedData($_GET['id']);
-        if ($saved->notes) {
-            echo "  <Notes>$saved->notes</Notes>\n";
-        }
-
-        $myTagList = $user->getTags($_GET['id']);
-        if (count($myTagList)) {
-            foreach ($myTagList as $tag) {
-                echo "  <Tag>" . $tag->tag . "</Tag>\n";
-            }
-        }
-
-        echo '</result>';
-    }
-
 }
 
 ?>
