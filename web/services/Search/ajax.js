@@ -115,32 +115,40 @@ function doGetSaveStatuses()
     }
 
     var now = new Date();
-    var ts = Date.UTC(now.getFullYear(),now.getMonth(),now.getDay(),now.getHours(),now.getMinutes(),now.getSeconds(),now.getMilliseconds());
+    var ts = Date.UTC(
+        now.getFullYear(), now.getMonth(), now.getDay(), now.getHours(),
+        now.getMinutes(), now.getSeconds(), now.getMilliseconds()
+    );
 
-    var url = path + "/Search/AJAX?method=GetSaveStatuses";
+    var url = path + "/AJAX/JSON?method=getSaveStatuses";
     for (var i=0; i<GetSaveStatusList.length; i++) {
-        url += "&id" + i + "=" + encodeURIComponent(GetSaveStatusList[i]);
+        url += "&id[]" + "=" + encodeURIComponent(GetSaveStatusList[i]);
     }
     url += "&time="+ts;
 
     var callback =
     {
         success: function(http) {
-            var response = http.responseXML.documentElement;
-            var items = response.getElementsByTagName('item');
-
-            for (var i=0; i<items.length; i++) {
-                var elemId = items[i].getAttribute('id');
-
-                var result = items[i].getElementsByTagName('result').item(0).firstChild.data;
-                if (result != 'False') {
-                    YAHOO.util.Dom.addClass(document.getElementById('saveLink' + elemId), 'savedFavorite');
-                    var lists = eval('(' + result + ')');
-                    var listNames = '';
-                    for (var j=0; j<lists.length;j++) {
-                        listNames += '<li><a href="'+path+'/MyResearch/MyList/'+lists[j].list_id+'">'+jsEntityEncode(lists[j].title)+'</a></li>';
+            var response = eval('(' + http.responseText + ')');
+            if (response && response.status == 'OK') {
+                // Collect lists together by ID:
+                var lists = [];
+                for (var i = 0; i < response.data.length; i++) {
+                    var current = response.data[i];
+                    if (lists[current.record_id] == null) {
+                        lists[current.record_id] = '';
                     }
-                    getElem('lists' + elemId).innerHTML = listNames;
+                    lists[current.record_id] += '<li><a href="' + path +
+                        '/MyResearch/MyList/' + current.list_id + '">' +
+                        jsEntityEncode(current.list_title) + '</a></li>';
+                }
+
+                // Render all the grouped lists to the page:
+                for (var i in lists) {
+                    YAHOO.util.Dom.addClass(
+                        document.getElementById('saveLink' + i), 'savedFavorite'
+                    );
+                    getElem('lists' + i).innerHTML = lists[i];
                 }
             }
         }

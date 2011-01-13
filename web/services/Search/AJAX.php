@@ -176,58 +176,6 @@ class AJAX extends Action
             echo ' </item>';
         }
     }
-
-    /**
-     * Get Save Statuses
-     *
-     * This is responsible for printing the save status for a collection of
-     * records in XML format.
-     *
-     * @access  public
-     * @author  Chris Delis <cedelis@uillinois.edu>
-     */
-    function GetSaveStatuses()
-    {
-        require_once 'services/MyResearch/lib/User.php';
-        require_once 'services/MyResearch/lib/Resource.php';
-
-        // check if user is logged in
-        if (!($user = UserAccount::isLoggedIn())) {
-            echo "<result>Unauthorized</result>";
-            return;
-        }
-
-        for ($i=0; ; $i++) {
-            if (! isset($_GET['id' . $i])) break;
-            $id = $_GET['id' . $i];
-            echo '<item id="' . htmlspecialchars($id) . '">';
-
-            // Check if resource is saved to favorites
-            $resource = new Resource();
-            $resource->record_id = $id;
-            if ($resource->find(true)) {
-                $data = $user->getSavedData($id);
-                if ($data) {
-                    echo '<result>';
-                    // Convert the resource list into JSON so it's easily readable
-                    // by the calling Javascript code.  Note that we have to entity
-                    // encode it so it can embed cleanly inside our XML response.
-                    $json = array();
-                    foreach ($data as $list) {
-                        $json[] = array('id' => $list->id, 'title' => $list->list_title, 'list_id' => $list->list_id);
-                    }
-                    echo htmlspecialchars(json_encode($json));
-                    echo '</result>';
-                } else {
-                    echo '<result>False</result>';
-                }
-            } else {
-                echo '<result>False</result>';
-            }
-
-            echo '</item>';
-        }
-    }
 }
 
 ?>
