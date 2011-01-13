@@ -61,19 +61,25 @@ class Record extends Base
         parent::__construct();
 
         // Fetch Record
-        $summon = new Summon($configArray['Summon']['apiId'], $configArray['Summon']['apiKey']);
+        $summon = new Summon(
+            $configArray['Summon']['apiId'], $configArray['Summon']['apiKey']
+        );
         $record = $summon->getRecord($_REQUEST['id']);
         if (PEAR::isError($record)) {
             PEAR::raiseError($record);
         } else if (!isset($record['documents'][0])) {
-            PEAR::raiseError(new PEAR_Error("Cannot access record {$_REQUEST['id']}"));
+            PEAR::raiseError(
+                new PEAR_Error("Cannot access record {$_REQUEST['id']}")
+            );
         } else {
             $this->record = $record['documents'][0];
         }
 
         // Set Proxy URL
-        $interface->assign('proxy', isset($configArray['EZproxy']['host']) ?
-            $configArray['EZproxy']['host'] : false);
+        $interface->assign(
+            'proxy', isset($configArray['EZproxy']['host'])
+            ? $configArray['EZproxy']['host'] : false
+        );
 
         // Send record ID to template
         $interface->assign('id', $_REQUEST['id']);
@@ -94,8 +100,10 @@ class Record extends Base
         $interface->setPageTitle($this->record['Title'][0]);
 
         // Assign the ID of the last search so the user can return to it.
-        $interface->assign('lastsearch', isset($_SESSION['lastSearchURL']) ?
-            $_SESSION['lastSearchURL'] : false);
+        $interface->assign(
+            'lastsearch',
+            isset($_SESSION['lastSearchURL']) ? $_SESSION['lastSearchURL'] : false
+        );
 
         // Retrieve tags associated with the record
         $resource = new Resource();

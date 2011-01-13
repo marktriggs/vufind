@@ -88,10 +88,11 @@ class Record extends Action
         $this->recordDriver = RecordDriverFactory::initRecordDriver($record);
 
         if ($this->recordDriver->hasRDF()) {
-            $interface->assign('addHeader', '<link rel="alternate" ' .
-                'type="application/rdf+xml" title="RDF Representation" href="' .
-                $configArray['Site']['url']  . '/Record/' . 
-                urlencode($_REQUEST['id']) . '/RDF">');
+            $interface->assign(
+                'addHeader', '<link rel="alternate" type="application/rdf+xml" ' .
+                'title="RDF Representation" href="' . $configArray['Site']['url'] .
+                '/Record/' . urlencode($_REQUEST['id']) . '/RDF" />' . "\n"
+            );
         }
         $interface->assign('coreMetadata', $this->recordDriver->getCoreMetadata());
 
@@ -132,8 +133,10 @@ class Record extends Action
         $interface->assign('resultTotal', $scrollData['resultTotal']);
 
         // Retrieve User Search History
-        $interface->assign('lastsearch', isset($_SESSION['lastSearchURL']) ?
-            $_SESSION['lastSearchURL'] : false);
+        $interface->assign(
+            'lastsearch',
+            isset($_SESSION['lastSearchURL']) ? $_SESSION['lastSearchURL'] : false
+        );
 
         $this->cacheId = 'Record|' . $_REQUEST['id'] . '|' . get_class($this);
         if (!$interface->is_cached($this->cacheId)) {
@@ -163,8 +166,10 @@ class Record extends Action
         $interface->assign('exportFormats', $this->recordDriver->getExportFormats());
 
         // Set AddThis User
-        $interface->assign('addThis', isset($configArray['AddThis']['key']) ?
-            $configArray['AddThis']['key'] : false);
+        $interface->assign(
+            'addThis', isset($configArray['AddThis']['key'])
+            ? $configArray['AddThis']['key'] : false
+        );
 
         // Set Proxy URL
         if (isset($configArray['EZproxy']['host'])) {

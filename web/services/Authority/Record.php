@@ -109,8 +109,10 @@ class Record extends Base
         }
 
         // Assign the ID of the last search so the user can return to it.
-        $interface->assign('lastsearch', isset($_SESSION['lastSearchURL']) ?
-            $_SESSION['lastSearchURL'] : false);
+        $interface->assign(
+            'lastsearch',
+            isset($_SESSION['lastSearchURL']) ? $_SESSION['lastSearchURL'] : false
+        );
 
         // Display Page
         $interface->setTemplate('record.tpl');
