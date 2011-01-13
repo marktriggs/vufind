@@ -74,7 +74,7 @@ class Record extends Base
             isset($_SESSION['lastSearchURL']) ? $_SESSION['lastSearchURL'] : false
         );
 
-        $this->id = $_GET['id'];
+        $this->id = $_REQUEST['id'];
         $interface->assign('id', $this->id);
 
         $this->cacheId = 'WCRecord|' . $this->id . '|' . get_class($this);
@@ -86,7 +86,7 @@ class Record extends Base
 
         // Fetch Record
         $this->worldcat = new Worldcat();
-        $record = $this->worldcat->getRecord($_GET['id']);
+        $record = $this->worldcat->getRecord($this->id);
         if (PEAR::isError($record)) {
             PEAR::raiseError($record);
         }
@@ -116,7 +116,7 @@ class Record extends Base
 
         // Retrieve tags associated with the record
         $resource = new Resource();
-        $resource->record_id = $_GET['id'];
+        $resource->record_id = $this->id;
         $resource->source = 'WorldCat';
         $tags = $resource->getTags();
         $interface->assign('tagList', is_array($tags) ? $tags : array());

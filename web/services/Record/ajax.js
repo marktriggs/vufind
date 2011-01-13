@@ -28,15 +28,6 @@ function saveRecord(id, formElem, strings)
     performSaveRecord(id, formElem, strings, 'VuFind', successCallback);
 }
 
-function SendEmail(id, to, from, message, strings)
-{
-    var url = path + "/Record/" + encodeURIComponent(id) + "/AJAX";
-    var params = "from=" + encodeURIComponent(from) + "&" +
-                 "to=" + encodeURIComponent(to) + "&" +
-                 "message=" + encodeURIComponent(message);
-    sendAJAXEmail(url, params, strings);
-}
-
 function SaveTag(id, formElem, strings)
 {
     var tags = formElem.elements['tag'].value;

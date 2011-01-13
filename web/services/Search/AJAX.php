@@ -235,23 +235,6 @@ class AJAX extends Action
         echo "<result>Done</result>";
     }
 
-    // Email Search Results
-    function SendEmail()
-    {
-        require_once 'services/Search/Email.php';
-
-        $emailService = new Email();
-        $result = $emailService->sendEmail($_REQUEST['url'], $_REQUEST['to'],
-            $_REQUEST['from'], $_REQUEST['message']);
-
-        if (PEAR::isError($result)) {
-            echo '<result>Error</result>';
-            echo '<details>' . htmlspecialchars(translate($result->getMessage())) . '</details>';
-        } else {
-            echo '<result>Done</result>';
-        }
-    }
-
     function GetSaveStatus()
     {
         require_once 'services/MyResearch/lib/User.php';

@@ -62,11 +62,11 @@ class Record extends Base
 
         // Fetch Record
         $summon = new Summon($configArray['Summon']['apiId'], $configArray['Summon']['apiKey']);
-        $record = $summon->getRecord($_GET['id']);
+        $record = $summon->getRecord($_REQUEST['id']);
         if (PEAR::isError($record)) {
             PEAR::raiseError($record);
         } else if (!isset($record['documents'][0])) {
-            PEAR::raiseError(new PEAR_Error("Cannot access record {$_GET['id']}"));
+            PEAR::raiseError(new PEAR_Error("Cannot access record {$_REQUEST['id']}"));
         } else {
             $this->record = $record['documents'][0];
         }
@@ -76,7 +76,7 @@ class Record extends Base
             $configArray['EZproxy']['host'] : false);
 
         // Send record ID to template
-        $interface->assign('id', $_GET['id']);
+        $interface->assign('id', $_REQUEST['id']);
     }
 
     /**
@@ -99,7 +99,7 @@ class Record extends Base
 
         // Retrieve tags associated with the record
         $resource = new Resource();
-        $resource->record_id = $_GET['id'];
+        $resource->record_id = $_REQUEST['id'];
         $resource->source = 'Summon';
         $tags = $resource->getTags();
         $interface->assign('tagList', is_array($tags) ? $tags : array());

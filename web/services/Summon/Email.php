@@ -63,14 +63,17 @@ class Email extends Record
         }
 
         // Display Page
+        $interface->assign(
+            'formTargetPath', '/Summon/Email?id=' . urlencode($_REQUEST['id'])
+        );
         if (isset($_GET['lightbox'])) {
             $interface->assign('title', $_GET['message']);
-            return $interface->fetch('Summon/email.tpl');
+            return $interface->fetch('Record/email.tpl');
         } else {
             $interface->setPageTitle('Email Record');
-            $interface->assign('subTemplate', 'email.tpl');
+            $interface->assign('subTemplate', '../Record/email.tpl');
             $interface->setTemplate('view-alt.tpl');
-            $interface->display('layout.tpl', 'RecordEmail' . $_GET['id']);
+            $interface->display('layout.tpl', 'RecordEmail' . $_REQUEST['id']);
         }
     }
 
@@ -92,7 +95,7 @@ class Email extends Record
             $this->record['Title'][0];
         $interface->assign('from', $from);
         $interface->assign('title', $this->record['Title'][0]);
-        $interface->assign('recordID', $_GET['id']);
+        $interface->assign('recordID', $_REQUEST['id']);
         $interface->assign('message', $message);
         $body = $interface->fetch('Emails/summon-record.tpl');
 

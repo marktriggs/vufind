@@ -3,7 +3,7 @@
     <ul>
       {* TODO: citations <li><a href="{$url}/Summon/Cite?id={$id|escape:"url"}" class="citeRecord summonRecord cite" id="citeRecord{$id|escape}" title="{translate text="Cite this"}">{translate text="Cite this"}</a></li> *}
       <li><a href="{$url}/Summon/SMS?id={$id|escape:"url"}" class="smsRecord smsSummon sms" id="smsRecord{$id|escape}" title="{translate text="Text this"}">{translate text="Text this"}</a></li>
-      <li><a href="{$url}/Summon/Email?id={$id|escape:"url"}" class="mailSummonRecord mail" id="mailRecord{$id|escape}" title="{translate text="Email this"}">{translate text="Email this"}</a></li>
+      <li><a href="{$url}/Summon/Email?id={$id|escape:"url"}" class="mailRecord mailSummon mail" id="mailRecord{$id|escape}" title="{translate text="Email this"}">{translate text="Email this"}</a></li>
       {* TODO: export 
       {if is_array($exportFormats) && count($exportFormats) > 0}
       <li>

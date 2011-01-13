@@ -71,7 +71,7 @@ class Record extends Action
 
         // Store ID of current record (this is needed to generate appropriate
         // links, and it is independent of which record driver gets used).
-        $interface->assign('id', $_GET['id']);
+        $interface->assign('id', $_REQUEST['id']);
 
         // Setup Search Engine Connection
         $class = $configArray['Index']['engine'];
@@ -82,7 +82,7 @@ class Record extends Action
         }
 
         // Retrieve the record from the index
-        if (!($record = $this->db->getRecord($_GET['id']))) {
+        if (!($record = $this->db->getRecord($_REQUEST['id']))) {
             PEAR::raiseError(new PEAR_Error('Record Does Not Exist'));
         }
         $this->recordDriver = RecordDriverFactory::initRecordDriver($record);
@@ -90,8 +90,8 @@ class Record extends Action
         if ($this->recordDriver->hasRDF()) {
             $interface->assign('addHeader', '<link rel="alternate" ' .
                 'type="application/rdf+xml" title="RDF Representation" href="' .
-                $configArray['Site']['url']  . '/Record/' . urlencode($_GET['id']) .
-                '/RDF">');
+                $configArray['Site']['url']  . '/Record/' . 
+                urlencode($_REQUEST['id']) . '/RDF">');
         }
         $interface->assign('coreMetadata', $this->recordDriver->getCoreMetadata());
 
@@ -125,7 +125,7 @@ class Record extends Action
 
         // Assign the next/previous record data:
         $scroller = new ResultScroller();
-        $scrollData = $scroller->getScrollData($_GET['id']);
+        $scrollData = $scroller->getScrollData($_REQUEST['id']);
         $interface->assign('previousRecord', $scrollData['previousRecord']);
         $interface->assign('nextRecord', $scrollData['nextRecord']);
         $interface->assign('currentRecordPosition', $scrollData['currentPosition']);
@@ -135,10 +135,10 @@ class Record extends Action
         $interface->assign('lastsearch', isset($_SESSION['lastSearchURL']) ?
             $_SESSION['lastSearchURL'] : false);
 
-        $this->cacheId = 'Record|' . $_GET['id'] . '|' . get_class($this);
+        $this->cacheId = 'Record|' . $_REQUEST['id'] . '|' . get_class($this);
         if (!$interface->is_cached($this->cacheId)) {
             // Find Similar Records
-            $similar = $this->db->getMoreLikeThis($_GET['id']);
+            $similar = $this->db->getMoreLikeThis($_REQUEST['id']);
 
             // Send the similar items to the template; if there is only one, we need
             // to force it to be an array or things will not display correctly.

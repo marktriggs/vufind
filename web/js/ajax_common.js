@@ -1,20 +1,6 @@
 /* This file contains AJAX routines that are shared by multiple VuFind modules.
  */
 
-/* Extract the first value found within the specified tag in the AJAX transaction.
- */
-function getAJAXResponseValue(transaction, tag)
-{
-    if (transaction.responseXML && transaction.responseXML.documentElement) {
-        var response = transaction.responseXML.documentElement;
-        var tmp = response.getElementsByTagName(tag);
-        if (tmp && tmp.item(0)) {
-            return tmp.item(0).firstChild.nodeValue;
-        }
-    }
-    return false;
-}
-
 /* Create a new list for storing favorites:
  */
 function addList(form, failMsg)
@@ -65,11 +51,13 @@ function addList(form, failMsg)
 /* Given a base URL and a set of parameters, use AJAX to send an email; this assumes
  * that a lightbox is already open.
  */
-function sendAJAXEmail(url, params, strings, methodName)
+function sendAJAXEmail(params, strings, methodName)
 {
+    var url = path + "/AJAX/JSON";
+
     // Set default for method name if not provided:
     if (methodName == null) {
-        methodName = 'SendEmail';
+        methodName = 'emailRecord';
     }
     var userParagraph = '<p class="userMsg">';
     var errorParagraph = '<p class="error">';
@@ -81,18 +69,16 @@ function sendAJAXEmail(url, params, strings, methodName)
     var callback =
     {
         success: function(transaction) {
-            var value = getAJAXResponseValue(transaction, 'result');
-            if (value) {
-                if (value == "Done") {
-                    document.getElementById('popupMessages').innerHTML = userParagraph + strings.success + endParagraph;
-                    setTimeout("hideLightbox();", 3000);
-                } else {
-                    var errorDetails = getAJAXResponseValue(transaction, 'details');
-                    document.getElementById('popupMessages').innerHTML = errorParagraph + strings.failure + (errorDetails ? ': '+ errorDetails : '') + endParagraph;
-                    document.getElementById('popupDetails').style.display = 'block';
-                }
+            var value = eval('(' + transaction.responseText + ')');
+            if (value && value.status == 'OK') {
+                document.getElementById('popupMessages').innerHTML = userParagraph + strings.success + endParagraph;
+                setTimeout("hideLightbox();", 3000);
             } else {
-                document.getElementById('popupMessages').innerHTML = errorParagraph + strings.failure + endParagraph;
+                var errorDetails = strings.failure;
+                if (value && value.data && value.data.length > 0) {
+                    errorDetails += ': ' + value.data;
+                }
+                document.getElementById('popupMessages').innerHTML = errorParagraph + errorDetails + endParagraph;
                 document.getElementById('popupDetails').style.display = 'block';
             }
         },
@@ -109,12 +95,24 @@ function sendAJAXEmail(url, params, strings, methodName)
  */
 function SendURLEmail(to, from, message, strings)
 {
-    var url = path + "/Search/AJAX";
     var params = "url=" + URLEncode(window.location.href) + "&" +
                  "from=" + encodeURIComponent(from) + "&" +
                  "to=" + encodeURIComponent(to) + "&" +
                  "message=" + encodeURIComponent(message);
-    sendAJAXEmail(url, params, strings);
+    sendAJAXEmail(params, strings, 'emailSearch');
+}
+
+/* Send information on the specified record in an email to a specific address, from
+ * a specific address, and including some message text.
+ */
+function sendRecordEmail(id, to, from, message, module, strings)
+{
+    var params = "from=" + encodeURIComponent(from) + "&" +
+                 "to=" + encodeURIComponent(to) + "&" +
+                 "message=" + encodeURIComponent(message) + "&" +
+                 "id=" + encodeURIComponent(id) + "&" +
+                 "type=" + encodeURIComponent(module);
+    sendAJAXEmail(params, strings);
 }
 
 /* Send an ID Search in an email to a specific address, from a specific address,
@@ -132,13 +130,12 @@ function SendIDEmail(to, from, ids, message, strings)
         idList[0] = ids.attributes['value'].nodeValue;
     }
     idJoin = idList.join(" ");
-    var url = path + "/Search/AJAX";
     var params = "url=" + URLEncode(path + "/Search/Results?lookfor=" +
                  encodeURIComponent(idJoin) + "&type=ids") + "&" +
                  "from=" + encodeURIComponent(from) + "&" +
                  "to=" + encodeURIComponent(to) + "&" +
                  "message=" + encodeURIComponent(message);
-    sendAJAXEmail(url, params, strings);
+    sendAJAXEmail(params, strings, 'emailSearch');
 }
 
 /* Given a string of ids and a set of parameters, use AJAX to export favorites; this assumes

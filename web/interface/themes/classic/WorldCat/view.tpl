@@ -1,5 +1,4 @@
 <script language="JavaScript" type="text/javascript" src="{$path}/js/ajax_common.js"></script>
-<script language="JavaScript" type="text/javascript" src="{$path}/services/WorldCat/ajax.js"></script>
 
 <div id="bd">
   <div id="yui-main" class="content">

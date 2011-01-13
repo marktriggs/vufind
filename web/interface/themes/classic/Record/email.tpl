@@ -5,9 +5,10 @@
   <div id="popupMessages"></div>
   <div id="popupDetails"> 
 
-  <form action="{$url}/Record/{$id|escape:"url"}/Email" method="post" id="popupForm" name="popupForm"
-        onSubmit='SendEmail(&quot;{$id|escape}&quot;, this.elements[&quot;to&quot;].value,
+  <form action="{$url}{$formTargetPath|escape}" method="post" id="popupForm" name="popupForm"
+        onSubmit='sendRecordEmail(&quot;{$id|escape}&quot;, this.elements[&quot;to&quot;].value,
         this.elements[&quot;from&quot;].value, this.elements[&quot;message&quot;].value,
+        &quot;{$module|escape}&quot;,
         {* Pass translated strings to Javascript -- ugly but necessary: *}
         {literal}{{/literal}sending: &quot;{translate text='email_sending'}&quot;, 
          success: &quot;{translate text='email_success'}&quot;,

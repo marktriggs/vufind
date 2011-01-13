@@ -65,14 +65,17 @@ class Email extends Record
         }
 
         // Display Page
+        $interface->assign(
+            'formTargetPath', '/WorldCat/Email?id=' . urlencode($this->id)
+        );
         if (isset($_GET['lightbox'])) {
             $interface->assign('title', $_GET['message']);
-            return $interface->fetch('WorldCat/email.tpl');
+            return $interface->fetch('Record/email.tpl');
         } else {
             $interface->setPageTitle('Email Record');
-            $interface->assign('subTemplate', 'email.tpl');
+            $interface->assign('subTemplate', '../Record/email.tpl');
             $interface->setTemplate('view-alt.tpl');
-            $interface->display('layout.tpl', 'RecordEmail' . $_GET['id']);
+            $interface->display('layout.tpl', 'RecordEmail' . $this->id);
         }
     }
 
@@ -104,7 +107,7 @@ class Email extends Record
         $subject = translate("Library Catalog Record") . ": " . $title;
         $interface->assign('from', $from);
         $interface->assign('title', $title);
-        $interface->assign('recordID', $_GET['id']);
+        $interface->assign('recordID', $this->id);
         $interface->assign('message', $message);
         $body = $interface->fetch('Emails/worldcat-record.tpl');
 

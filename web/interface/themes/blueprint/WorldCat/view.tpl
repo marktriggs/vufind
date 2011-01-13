@@ -3,7 +3,7 @@
     <ul>
       {* TODO: WorldCat citations <li><a href="{$url}/WorldCat/{$id}/Cite" class="citeWCRecord cite" id="citeRecord{$id|escape}" title="{translate text="Cite this"}">{translate text="Cite this"}</a></li> *}
       <li><a href="{$url}/WorldCat/SMS?id={$id|escape:"url"}" class="smsRecord smsWorldCat sms" id="smsRecord{$id|escape}" title="{translate text="Text this"}">{translate text="Text this"}</a></li>
-      <li><a href="{$url}/WorldCat/Email?id={$id|escape:"url"}" class="mailWCRecord mail" id="mailRecord{$id|escape}" title="{translate text="Email this"}">{translate text="Email this"}</a></li>
+      <li><a href="{$url}/WorldCat/Email?id={$id|escape:"url"}" class="mailRecord mailWorldCat mail" id="mailRecord{$id|escape}" title="{translate text="Email this"}">{translate text="Email this"}</a></li>
       {* TODO: WorldCat Export <li><a href="{$url}/WorldCat/{$id}/Export?style=endnote" class="export">{translate text="Import Record"}</a>
         <ul class="menu" id="exportMenu">
         <li><a href="{$url}/WorldCat/{$id}/Export?style=refworks">{translate text="Import to"} RefWorks</a></li>

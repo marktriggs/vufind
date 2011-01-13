@@ -66,6 +66,9 @@ class Email extends Record
         }
 
         // Display Page
+        $interface->assign(
+            'formTargetPath', '/Record/' . urlencode($_GET['id']) . '/Email'
+        );
         if (isset($_GET['lightbox'])) {
             $interface->assign('title', $_GET['message']);
             return $interface->fetch('Record/email.tpl');

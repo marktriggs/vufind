@@ -313,7 +313,9 @@ class JSON extends Action
      */
     public function emailRecord()
     {
-        include_once 'services/Record/Email.php';
+        // Load the appropriate module based on the "type" parameter:
+        $type = isset($_REQUEST['type']) ? $_REQUEST['type'] : 'Record';
+        include_once 'services/' . $type . '/Email.php';
 
         $emailService = new Email();
         $result = $emailService->sendEmail(

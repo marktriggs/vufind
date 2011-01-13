@@ -77,7 +77,13 @@ $(document).ready(function(){
     });
     $('a.mailRecord').click(function() {
         var id = this.id.substr('mailRecord'.length);
-        var $dialog = getLightbox('Record', 'Email', id, null, this.title);
+        var module = 'Record';
+        if ($(this).hasClass('mailSummon')) {
+            module = 'Summon';
+        } else if ($(this).hasClass('mailWorldCat')) {
+            module = 'WorldCat';
+        }
+        var $dialog = getLightbox(module, 'Email', id, null, this.title);
         return false;
     });
     $('a.tagRecord').click(function() {
