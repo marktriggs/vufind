@@ -91,8 +91,9 @@ class SMS extends Record
         global $interface;
 
         $interface->assign('carriers', $this->_sms->getCarriers());
-        $interface->assign('formTargetPath',
-            '/Record/' . urlencode($_GET['id']) . '/SMS');
+        $interface->assign(
+            'formTargetPath', '/Record/' . urlencode($_GET['id']) . '/SMS'
+        );
 
         if (isset($_GET['lightbox'])) {
             // Use for lightbox

@@ -86,8 +86,9 @@ class SMS extends Record
         global $interface;
 
         $interface->assign('carriers', $this->_sms->getCarriers());
-        $interface->assign('formTargetPath',
-            '/Summon/SMS?id=' . urlencode($_GET['id']));
+        $interface->assign(
+            'formTargetPath', '/Summon/SMS?id=' . urlencode($_GET['id'])
+        );
 
         if (isset($_GET['lightbox'])) {
             // Use for lightbox
@@ -117,8 +118,10 @@ class SMS extends Record
         $interface->assign('recordID', $_GET['id']);
         $message = $interface->fetch('Emails/summon-sms.tpl');
 
-        return $this->_sms->text($_REQUEST['provider'], $_REQUEST['to'],
-            $configArray['Site']['email'], $message);
+        return $this->_sms->text(
+            $_REQUEST['provider'], $_REQUEST['to'], $configArray['Site']['email'],
+            $message
+        );
     }
 }
 ?>
