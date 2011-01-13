@@ -90,8 +90,10 @@ class AddTag extends Action
 
         if (isset($_POST['submit'])) {
             $result = $this->save($this->_user);
-            header("Location: " . $configArray['Site']['url'] . '/Record/' .
-                urlencode($_GET['id']) . '/Home');
+            header(
+                "Location: " . $configArray['Site']['url'] . '/Record/' .
+                urlencode($_GET['id']) . '/Home'
+            );
         } else {
             return $this->_displayForm();
         }
