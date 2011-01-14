@@ -99,13 +99,13 @@ class IndexRecord implements RecordInterface
      * @access protected
      */
     protected $snippet = false;
-    
+
     /**
-     * Constructor.  We build the object using all the data retrieved 
-     * from the (Solr) index (which also happens to include the 
-     * 'fullrecord' field containing raw metadata).  Since we have to 
-     * make a search call to find out which record driver to construct, 
-     * we will already have this data available, so we might as well 
+     * Constructor.  We build the object using all the data retrieved
+     * from the (Solr) index (which also happens to include the
+     * 'fullrecord' field containing raw metadata).  Since we have to
+     * make a search call to find out which record driver to construct,
+     * we will already have this data available, so we might as well
      * just pass it into the constructor.
      *
      * @param array $indexFields All fields retrieved from the index.
@@ -128,7 +128,7 @@ class IndexRecord implements RecordInterface
     }
 
     /**
-     * Get text that can be displayed to represent this record in 
+     * Get text that can be displayed to represent this record in
      * breadcrumbs.
      *
      * @return string Breadcrumb text to represent this record.
@@ -140,9 +140,9 @@ class IndexRecord implements RecordInterface
     }
 
     /**
-     * Assign necessary Smarty variables and return a template name 
-     * to load in order to display the requested citation format.  
-     * For legal values, see getCitationFormats().  Returns null if 
+     * Assign necessary Smarty variables and return a template name
+     * to load in order to display the requested citation format.
+     * For legal values, see getCitationFormats().  Returns null if
      * format is not supported.
      *
      * @param string $format Citation format to display.
@@ -152,17 +152,18 @@ class IndexRecord implements RecordInterface
      */
     public function getCitation($format)
     {
-        require_once 'sys/CitationBuilder.php';
-        
+        include_once 'sys/CitationBuilder.php';
+
         // Build author list:
         $authors = array();
         $primary = $this->getPrimaryAuthor();
         if (!empty($primary)) {
             $authors[] = $primary;
         }
-        $authors = array_unique(array_merge($authors, 
-            $this->getSecondaryAuthors()));
-        
+        $authors = array_unique(
+            array_merge($authors, $this->getSecondaryAuthors())
+        );
+
         // Collect all details for citation builder:
         $publishers = $this->getPublishers();
         $pubDates = $this->getPublicationDates();
@@ -176,7 +177,7 @@ class IndexRecord implements RecordInterface
             'pubDate' => count($pubDates) > 0 ? $pubDates[0] : null,
             'edition' => array($this->getEdition())
         );
-        
+
         // Build the citation:
         $citation = new CitationBuilder($details);
         switch($format) {
@@ -188,7 +189,7 @@ class IndexRecord implements RecordInterface
     }
 
     /**
-     * Get an array of strings representing citation formats supported 
+     * Get an array of strings representing citation formats supported
      * by this record's data (empty if none).  Legal values: "APA", "MLA".
      *
      * @return array Strings representing citation formats.
@@ -200,8 +201,8 @@ class IndexRecord implements RecordInterface
     }
 
     /**
-     * Assign necessary Smarty variables and return a template name to 
-     * load in order to display core metadata (the details shown in the 
+     * Assign necessary Smarty variables and return a template name to
+     * load in order to display core metadata (the details shown in the
      * top portion of the record view pages, above the tabs).
      *
      * @return string Name of Smarty template file to display.
@@ -211,14 +212,14 @@ class IndexRecord implements RecordInterface
     {
         global $configArray;
         global $interface;
-        
+
         // Assign required variables (some of these are also used by templates for
         // tabs, since every tab can assume that the core data is already assigned):
         $this->assignTagList();
         $interface->assign('isbn', $this->getCleanISBN());  // needed for covers
         $interface->assign('recordFormat', $this->getFormats());
         $interface->assign('recordLanguage', $this->getLanguages());
-        
+
         // These variables are only used by the core template, and they are prefixed
         // with "core" to prevent conflicts with other variable names.
         $interface->assign('coreShortTitle', $this->getShortTitle());
@@ -231,7 +232,7 @@ class IndexRecord implements RecordInterface
         $interface->assign('coreEdition', $this->getEdition());
         $interface->assign('coreSeries', $this->getSeries());
         $interface->assign('coreSubjects', $this->getAllSubjectHeadings());
-        
+
         // Only display OpenURL link if the option is turned on and we have
         // an ISSN.  We may eventually want to make this rule more flexible,
         // but for now the ISSN restriction is designed to be consistent with
@@ -243,12 +244,13 @@ class IndexRecord implements RecordInterface
 
         // Only load URLs if we have no OpenURL or we are configured to allow
         // URLs and OpenURLs to coexist:
-        if (!isset($configArray['OpenURL']['replace_other_urls']) ||
-            !$configArray['OpenURL']['replace_other_urls'] || !$hasOpenURL) {
+        if (!isset($configArray['OpenURL']['replace_other_urls'])
+            || !$configArray['OpenURL']['replace_other_urls'] || !$hasOpenURL
+        ) {
             $interface->assign('coreURLs', $this->getURLs());
         }
 
-        // The secondary author array may contain a corporate or primary author; 
+        // The secondary author array may contain a corporate or primary author;
         // let's be sure we filter out duplicate values.
         $mainAuthor = $this->getPrimaryAuthor();
         $corpAuthor = $this->getCorporateAuthor();
@@ -266,28 +268,29 @@ class IndexRecord implements RecordInterface
         $interface->assign('coreMainAuthor', $mainAuthor);
         $interface->assign('coreCorporateAuthor', $corpAuthor);
         $interface->assign('coreContributors', $secondaryAuthors);
-        
+
         // Assign only the first piece of summary data for the core; we'll get the
         // rest as part of the extended data.
         $summary = $this->getSummary();
         $summary = count($summary) > 0 ? $summary[0] : null;
         $interface->assign('coreSummary', $summary);
-        
+
         // Send back the template name:
         return 'RecordDrivers/Index/core.tpl';
     }
 
     /**
-     * Get an array of search results for other editions of the title 
-     * represented by this record (empty if unavailable).  In most cases, 
+     * Get an array of search results for other editions of the title
+     * represented by this record (empty if unavailable).  In most cases,
      * this will use the XISSN/XISBN logic to find matches.
      *
-     * @return mixed Editions in index engine result format (or null if no hits, or PEAR_Error object).
+     * @return mixed Editions in index engine result format (or null if no
+     * hits, or PEAR_Error object).
      * @access public
      */
     public function getEditions()
     {
-        require_once 'sys/WorldCatUtils.php';
+        include_once 'sys/WorldCatUtils.php';
         $wc = new WorldCatUtils();
 
         // Try to build an array of OCLC Number, ISBN or ISSN-based sub-queries:
@@ -317,7 +320,7 @@ class IndexRecord implements RecordInterface
         // If we have query parts, we should try to find related records:
         if (!empty($parts)) {
             // Assemble the query parts and filter out current record:
-            $query = '(' . implode(' OR ', $parts) . ') NOT id:' . 
+            $query = '(' . implode(' OR ', $parts) . ') NOT id:' .
                 $this->getUniqueID();
 
             // Perform the search and return either results or an error:
@@ -357,16 +360,16 @@ class IndexRecord implements RecordInterface
      */
     public function getExcerpts()
     {
-        require_once 'sys/Excerpts.php';
-        
+        include_once 'sys/Excerpts.php';
+
         $ed = new ExternalExcerpts($this->getCleanISBN());
         return $ed->fetch();
     }
 
     /**
-     * Assign necessary Smarty variables and return a template name to 
-     * load in order to export the record in the requested format.  For 
-     * legal values, see getExportFormats().  Returns null if format is 
+     * Assign necessary Smarty variables and return a template name to
+     * load in order to export the record in the requested format.  For
+     * legal values, see getExportFormats().  Returns null if format is
      * not supported.
      *
      * @param string $format Export format to display.
@@ -381,8 +384,8 @@ class IndexRecord implements RecordInterface
     }
 
     /**
-     * Get an array of strings representing formats in which this record's 
-     * data may be exported (empty if none).  Legal values: "RefWorks", 
+     * Get an array of strings representing formats in which this record's
+     * data may be exported (empty if none).  Legal values: "RefWorks",
      * "EndNote", "MARC", "RDF".
      *
      * @return array Strings representing export formats.
@@ -395,9 +398,9 @@ class IndexRecord implements RecordInterface
     }
 
     /**
-     * Assign necessary Smarty variables and return a template name to 
-     * load in order to display extended metadata (more details beyond 
-     * what is found in getCoreMetadata() -- used as the contents of the 
+     * Assign necessary Smarty variables and return a template name to
+     * load in order to display extended metadata (more details beyond
+     * what is found in getCoreMetadata() -- used as the contents of the
      * Description tab of the record view).
      *
      * @return string Name of Smarty template file to display.
@@ -407,7 +410,7 @@ class IndexRecord implements RecordInterface
     {
         global $interface;
 
-        // Assign various values for display by the template; we'll prefix 
+        // Assign various values for display by the template; we'll prefix
         // everything with "extended" to avoid clashes with values assigned
         // elsewhere.
         $interface->assign('extendedSummary', $this->getSummary());
@@ -431,8 +434,8 @@ class IndexRecord implements RecordInterface
     }
 
     /**
-     * Assign necessary Smarty variables and return a template name to 
-     * load in order to display holdings extracted from the base record 
+     * Assign necessary Smarty variables and return a template name to
+     * load in order to display holdings extracted from the base record
      * (i.e. URLs in MARC 856 fields) and, if necessary, the ILS driver.
      * Returns null if no data is available.
      *
@@ -455,8 +458,9 @@ class IndexRecord implements RecordInterface
 
         // Display regular URLs unless OpenURL is present and configured to
         // replace them:
-        if (!isset($configArray['OpenURL']['replace_other_urls']) ||
-            !$configArray['OpenURL']['replace_other_urls'] || !$hasOpenURL) {
+        if (!isset($configArray['OpenURL']['replace_other_urls'])
+            || !$configArray['OpenURL']['replace_other_urls'] || !$hasOpenURL
+        ) {
             $interface->assign('holdingURLs', $this->getURLs());
         }
         $interface->assign('holdingLCCN', $this->getLCCN());
@@ -475,7 +479,8 @@ class IndexRecord implements RecordInterface
      * user's favorites list.
      *
      * @param object $user      User object owning tag/note metadata.
-     * @param int    $listId    ID of list containing desired tags/notes (or null to show tags/notes from all user's lists).
+     * @param int    $listId    ID of list containing desired tags/notes (or null
+     * to show tags/notes from all user's lists).
      * @param bool   $allowEdit Should we display edit controls?
      *
      * @return string           Name of Smarty template file to display.
@@ -512,7 +517,7 @@ class IndexRecord implements RecordInterface
     }
 
     /**
-     * Get the OpenURL parameters to represent this record (useful for the 
+     * Get the OpenURL parameters to represent this record (useful for the
      * title attribute of a COinS span tag).
      *
      * @return string OpenURL parameters.
@@ -525,7 +530,7 @@ class IndexRecord implements RecordInterface
         // configurations (this moved between the RC2 and 1.0 releases).
         global $configArray;
         $coinsID = isset($configArray['OpenURL']['rfr_id']) ?
-            $configArray['OpenURL']['rfr_id'] : 
+            $configArray['OpenURL']['rfr_id'] :
             $configArray['COinS']['identifier'];
         if (empty($coinsID)) {
             $coinsID = 'vufind.svn.sourceforge.net';
@@ -543,10 +548,10 @@ class IndexRecord implements RecordInterface
             'rft.title' => $this->getTitle(),
             'rft.date' => $pubDate
         );
-        
+
         // Add additional parameters based on the format of the record:
         $formats = $this->getFormats();
-        
+
         // If we have multiple formats, Book and Journal are most important...
         if (in_array('Book', $formats)) {
             $format = 'Book';
@@ -563,7 +568,7 @@ class IndexRecord implements RecordInterface
             $series = $this->getSeries();
             if (count($series) > 0) {
                 // Handle both possible return formats of getSeries:
-                $params['rft.series'] = is_array($series[0]) ? 
+                $params['rft.series'] = is_array($series[0]) ?
                     $series[0]['name'] : $series[0];
             }
             $params['rft.au'] = $this->getPrimaryAuthor();
@@ -587,7 +592,7 @@ class IndexRecord implements RecordInterface
             break;
              */
             $params['rft.issn'] = $this->getCleanISSN();
-            
+
             // Including a date in a title-level Journal OpenURL may be too
             // limiting -- in some link resolvers, it may cause the exclusion
             // of databases if they do not cover the exact date provided!
@@ -596,8 +601,9 @@ class IndexRecord implements RecordInterface
             // If we're working with the SFX resolver, we should add a
             // special parameter to ensure that electronic holdings links
             // are shown even though no specific date or issue is specified:
-            if (isset($configArray['OpenURL']['resolver']) &&
-                strtolower($configArray['OpenURL']['resolver']) == 'sfx') {
+            if (isset($configArray['OpenURL']['resolver'])
+                && strtolower($configArray['OpenURL']['resolver']) == 'sfx'
+            ) {
                 $params['sfx.ignore_date_threshold'] = 1;
             }
         default:
@@ -644,7 +650,7 @@ class IndexRecord implements RecordInterface
      */
     public function getReviews()
     {
-        require_once 'sys/Reviews.php';
+        include_once 'sys/Reviews.php';
 
         $rev = new ExternalReviews($this->getCleanISBN());
         return $rev->fetch();
@@ -697,8 +703,9 @@ class IndexRecord implements RecordInterface
 
         // Display regular URLs unless OpenURL is present and configured to
         // replace them:
-        if (!isset($configArray['OpenURL']['replace_other_urls']) ||
-            !$configArray['OpenURL']['replace_other_urls'] || !$hasOpenURL) {
+        if (!isset($configArray['OpenURL']['replace_other_urls'])
+            || !$configArray['OpenURL']['replace_other_urls'] || !$hasOpenURL
+        ) {
             $interface->assign('summURLs', $this->getURLs());
         } else {
             $interface->assign('summURLs', array());
@@ -714,8 +721,8 @@ class IndexRecord implements RecordInterface
     }
 
     /**
-     * Assign necessary Smarty variables and return a template name to 
-     * load in order to display the full record information on the Staff 
+     * Assign necessary Smarty variables and return a template name to
+     * load in order to display the full record information on the Staff
      * View tab of the record view page.
      *
      * @return string Name of Smarty template file to display.
@@ -729,8 +736,8 @@ class IndexRecord implements RecordInterface
     }
 
     /**
-     * Assign necessary Smarty variables and return a template name to 
-     * load in order to display the Table of Contents extracted from the 
+     * Assign necessary Smarty variables and return a template name to
+     * load in order to display the Table of Contents extracted from the
      * record.  Returns null if no Table of Contents is available.
      *
      * @return string Name of Smarty template file to display.
@@ -739,11 +746,11 @@ class IndexRecord implements RecordInterface
     public function getTOC()
     {
         global $interface;
-        
+
         if (!$this->hasTOC()) {
             return null;
         }
-        
+
         $interface->assign('toc', $this->fields['contents']);
         return 'RecordDrivers/Index/toc.tpl';
     }
@@ -765,7 +772,8 @@ class IndexRecord implements RecordInterface
      * Return an XML representation of the record using the specified format.
      * Return false if the format is unsupported.
      *
-     * @param string $format Name of format to use (corresponds with OAI-PMH metadataPrefix parameter).
+     * @param string $format Name of format to use (corresponds with OAI-PMH
+     * metadataPrefix parameter).
      *
      * @return mixed         XML, or false if format unsupported.
      * @access public
@@ -876,7 +884,7 @@ class IndexRecord implements RecordInterface
     public function hasTOC()
     {
         // Do we have a table of contents stored in the index?
-        return (isset($this->fields['contents']) && 
+        return (isset($this->fields['contents']) &&
             count($this->fields['contents']) > 0);
     }
 
@@ -902,7 +910,7 @@ class IndexRecord implements RecordInterface
     protected function assignTagList()
     {
         global $interface;
-        
+
         // Retrieve tags associated with the record
         $resource = new Resource();
         $resource->record_id = $this->getUniqueID();
@@ -934,7 +942,7 @@ class IndexRecord implements RecordInterface
     protected function getAllSubjectHeadings()
     {
         $topic = isset($this->fields['topic']) ? $this->fields['topic'] : array();
-        $geo = isset($this->fields['geographic']) ? 
+        $geo = isset($this->fields['geographic']) ?
             $this->fields['geographic'] : array();
         $genre = isset($this->fields['genre']) ? $this->fields['genre'] : array();
 
@@ -989,7 +997,7 @@ class IndexRecord implements RecordInterface
     {
         // Use the callnumber-a field from the Solr index; the plain callnumber
         // field is normalized to have no spaces, so it is unsuitable for display.
-        return isset($this->fields['callnumber-a']) ? 
+        return isset($this->fields['callnumber-a']) ?
             $this->fields['callnumber-a'] : '';
     }
 
@@ -1002,7 +1010,7 @@ class IndexRecord implements RecordInterface
      */
     protected function getCleanISBN()
     {
-        require_once 'sys/ISBN.php';
+        include_once 'sys/ISBN.php';
 
         // Get all the ISBNs and initialize the return value:
         $isbns = $this->getISBNs();
@@ -1027,7 +1035,7 @@ class IndexRecord implements RecordInterface
         }
         return $isbn13;
     }
-    
+
     /**
      * Get just the base portion of the first listed ISSN (or false if no ISSNs).
      *
@@ -1072,7 +1080,7 @@ class IndexRecord implements RecordInterface
     }
 
     /**
-     * Get the date coverage for a record which spans a period of time (i.e. a 
+     * Get the date coverage for a record which spans a period of time (i.e. a
      * journal).  Use getPublicationDates for publication dates of particular
      * monographic items.
      *
@@ -1081,7 +1089,7 @@ class IndexRecord implements RecordInterface
      */
     protected function getDateSpan()
     {
-        return isset($this->fields['dateSpan']) ? 
+        return isset($this->fields['dateSpan']) ?
             $this->fields['dateSpan'] : array();
     }
 
@@ -1266,7 +1274,7 @@ class IndexRecord implements RecordInterface
         return isset($this->fields['issn']) && is_array($this->fields['issn']) ?
             $this->fields['issn'] : array();
     }
-    
+
     /**
      * Get an array of all the languages associated with the record.
      *
@@ -1275,7 +1283,7 @@ class IndexRecord implements RecordInterface
      */
     protected function getLanguages()
     {
-        return isset($this->fields['language']) ? 
+        return isset($this->fields['language']) ?
             $this->fields['language'] : array();
     }
 
@@ -1299,7 +1307,7 @@ class IndexRecord implements RecordInterface
      */
     protected function getPhysicalDescriptions()
     {
-        return isset($this->fields['physical']) ? 
+        return isset($this->fields['physical']) ?
             $this->fields['physical'] : array();
     }
 
@@ -1371,7 +1379,7 @@ class IndexRecord implements RecordInterface
      */
     protected function getPublicationDates()
     {
-        return isset($this->fields['publishDate']) ? 
+        return isset($this->fields['publishDate']) ?
             $this->fields['publishDate'] : array();
     }
 
@@ -1387,19 +1395,23 @@ class IndexRecord implements RecordInterface
         $places = $this->getPlacesOfPublication();
         $names = $this->getPublishers();
         $dates = $this->getPublicationDates();
-        
+
         $i = 0;
         $retval = array();
         while (isset($places[$i]) || isset($names[$i]) || isset($dates[$i])) {
             // Put all the pieces together, and do a little processing to clean up
             // unwanted whitespace.
-            $retval[] = trim(str_replace('  ', ' ', 
-                ((isset($places[$i]) ? $places[$i] . ' ' : '') .
-                (isset($names[$i]) ? $names[$i] . ' ' : '') .
-                (isset($dates[$i]) ? $dates[$i] : ''))));
+            $retval[] = trim(
+                str_replace(
+                    '  ', ' ',
+                    ((isset($places[$i]) ? $places[$i] . ' ' : '') .
+                    (isset($names[$i]) ? $names[$i] . ' ' : '') .
+                    (isset($dates[$i]) ? $dates[$i] : ''))
+                )
+            );
             $i++;
         }
-        
+
         return $retval;
     }
 
@@ -1423,7 +1435,7 @@ class IndexRecord implements RecordInterface
      */
     protected function getPublishers()
     {
-        return isset($this->fields['publisher']) ? 
+        return isset($this->fields['publisher']) ?
             $this->fields['publisher'] : array();
     }
 
@@ -1464,7 +1476,7 @@ class IndexRecord implements RecordInterface
         // Not currently stored in the Solr index
         return array();
     }
-    
+
     /**
      * Get an array of all secondary authors (complementing getPrimaryAuthor()).
      *
@@ -1473,10 +1485,10 @@ class IndexRecord implements RecordInterface
      */
     protected function getSecondaryAuthors()
     {
-        return isset($this->fields['author2']) ? 
+        return isset($this->fields['author2']) ?
             $this->fields['author2'] : array();
     }
-    
+
     /**
      * Get an array of all series names containing the record.  Array entries may
      * be either the name string, or an associative array with 'name' and 'number'
@@ -1494,7 +1506,7 @@ class IndexRecord implements RecordInterface
         return isset($this->fields['series2']) ?
             $this->fields['series2'] : array();
     }
-    
+
     /**
      * Get the short (pre-subtitle) title of the record.
      *
@@ -1503,7 +1515,7 @@ class IndexRecord implements RecordInterface
      */
     protected function getShortTitle()
     {
-        return isset($this->fields['title_short']) ? 
+        return isset($this->fields['title_short']) ?
             $this->fields['title_short'] : '';
     }
 
@@ -1515,7 +1527,7 @@ class IndexRecord implements RecordInterface
      */
     protected function getSubtitle()
     {
-        return isset($this->fields['title_sub']) ? 
+        return isset($this->fields['title_sub']) ?
             $this->fields['title_sub'] : '';
     }
 
@@ -1566,7 +1578,7 @@ class IndexRecord implements RecordInterface
         return isset($this->fields['title']) ?
             $this->fields['title'] : '';
     }
-    
+
     /**
      * Get the text of the part/section portion of the title.
      *
@@ -1580,7 +1592,8 @@ class IndexRecord implements RecordInterface
     }
 
     /**
-     * Get the statement of responsibility that goes with the title (i.e. "by John Smith").
+     * Get the statement of responsibility that goes with the title (i.e. "by John
+     * Smith").
      *
      * @return string
      * @access protected
@@ -1623,7 +1636,7 @@ class IndexRecord implements RecordInterface
     protected function openURLActive($area)
     {
         global $configArray;
-        
+
         // Doesn't matter the target area if no OpenURL resolver is specified:
         if (!isset($configArray['OpenURL']['url'])) {
             return false;
@@ -1653,22 +1666,24 @@ class IndexRecord implements RecordInterface
         // Remove all blanks.
         $raw = preg_replace('{[ \t]+}', '', $raw);
 
-        // If there is a forward slash (/) in the string, remove it, and remove all characters to the right of the forward slash.
+        // If there is a forward slash (/) in the string, remove it, and remove all
+        // characters to the right of the forward slash.
         if (strpos($raw, '/') > 0) {
             $tmpArray = explode("/", $raw);
             $raw = $tmpArray[0];
         }
         /* If there is a hyphen in the string:
             a. Remove it.
-            b. Inspect the substring following (to the right of) the (removed) hyphen.
-                Then (and assuming that steps 1 and 2 have been carried out):
-                    i.  All these characters should be digits, and there should be six
-                    or less.
+            b. Inspect the substring following (to the right of) the (removed)
+               hyphen. Then (and assuming that steps 1 and 2 have been carried out):
+                    i.  All these characters should be digits, and there should be
+                    six or less.
                     ii. If the length of the substring is less than 6, left-fill the
                     substring with zeros until  the length is six.
         */
         if (strpos($raw, '-') > 0) {
-            // haven't checked for i. above. If they aren't all digits, there is nothing that can be done, so might as well leave it.
+            // haven't checked for i. above. If they aren't all digits, there is
+            // nothing that can be done, so might as well leave it.
             $tmpArray = explode("-", $raw);
             $raw = $tmpArray[0] . str_pad($tmpArray[1], 6, "0", STR_PAD_LEFT);
         }
@@ -1683,7 +1698,7 @@ class IndexRecord implements RecordInterface
      */
     protected function getOCLC()
     {
-        return isset($this->fields['oclc_num']) ? 
+        return isset($this->fields['oclc_num']) ?
             $this->fields['oclc_num'] : array();
     }
 }
