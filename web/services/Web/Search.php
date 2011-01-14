@@ -60,8 +60,10 @@ class Search extends Action
         // you can append a string to the user's queries.  This can be useful
         // for filtering to a particular type of content or subsection of the
         // site using various advanced Google operators (i.e. inurl:example).
-        $interface->assign('queryAddition', isset($_GET['queryAddition']) ?
-            $_GET['queryAddition'] : false);
+        $interface->assign(
+            'queryAddition',
+            isset($_GET['queryAddition']) ? $_GET['queryAddition'] : false
+        );
 
         // Load recommendation module settings -- default to CatalogResults if
         // no settings were found.
