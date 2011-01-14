@@ -89,6 +89,11 @@ class VuFind
      */
     public static function harvestTextFile($url)
     {
+        // Skip blank URLs:
+        if (empty($url)) {
+            return '';
+        }
+
         $text = file_get_contents($url);
         if ($text === false) {
             echo "Unable to access {$url}.\n";
