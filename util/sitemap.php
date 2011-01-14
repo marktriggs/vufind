@@ -71,21 +71,9 @@ while ($keep_going == 1) {
     if (count($current_page_info_array["sitemap"]["idSet"]) < 1) {
         $keep_going = 0;
     } else {
-        $smf = fopen($fileWhole, 'w');
-        if (!$smf) {
-            PEAR::raiseError(new PEAR_Error("Can't open file - " . $fileWhole));
-        }
-        fwrite($smf, '<?xml version="1.0" encoding="UTF-8"?>' . "\n");
-        fwrite($smf, '<urlset' . "\n");
-        fwrite($smf, '     xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"' . "\n");
-        fwrite($smf, '     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' . "\n");
-        fwrite($smf, '     xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9' . "\n");
-        fwrite($smf, '     http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">' . "\n\n");
-
-        for ($i = 0; $i < count($current_page_info_array["sitemap"]["idSet"]); $i++) {
-            $loc = htmlspecialchars(
-                $result_url . $current_page_info_array["sitemap"]["idSet"][$i]
-            );
+        $smf = openSitemapFile($fileWhole, 'urlset');
+        foreach ($current_page_info_array["sitemap"]["idSet"] as $current) {
+            $loc = htmlspecialchars($result_url . urlencode($current));
             fwrite($smf, '<url>' . "\n");
             fwrite($smf, '  <loc>' . $loc . '</loc>' . "\n");
             fwrite($smf, '  <changefreq>' . $frequency . '</changefreq>' . "\n");
@@ -103,16 +91,7 @@ while ($keep_going == 1) {
 if (isset($sitemapArray['SitemapIndex']['indexFileName'])) {
     $fileWhole = $sitemapArray['Sitemap']['fileLocation'] . "/" .
         $sitemapArray['SitemapIndex']['indexFileName']. ".xml";
-    $smf = fopen($fileWhole, 'w');
-    if (!$smf) {
-        PEAR::raiseError(new PEAR_Error("Can't open file - " . $fileWhole));
-    }
-    fwrite($smf, '<?xml version="1.0" encoding="UTF-8"?>' . "\n");
-    fwrite($smf, '<sitemapindex' . "\n");
-    fwrite($smf, '     xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"' . "\n");
-    fwrite($smf, '     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' . "\n");
-    fwrite($smf, '     xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9' . "\n");
-    fwrite($smf, '     http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">' . "\n");
+    $smf = openSitemapFile($fileWhole, 'sitemapindex');
 
     // Add a <sitemap /> group for a static sitemap file. See sitemap.ini for more
     // information on this option.
@@ -122,15 +101,9 @@ if (isset($sitemapArray['SitemapIndex']['indexFileName'])) {
         // Only add the <sitemap /> group if the file exists in the directory where
         // the other sitemap files are saved, i.e. ['Sitemap']['fileLocation']
         if (file_exists($baseSitemapFile)) {
-            $loc = htmlspecialchars(
-                $configArray['Site']['url'] . "/" . 
-                $sitemapArray['SitemapIndex']['baseSitemapFileName']. ".xml"
+            writeSitemapIndexLine(
+                $smf, $sitemapArray['SitemapIndex']['baseSitemapFileName']
             );
-            $lastmod = htmlspecialchars(date("Y-m-d"));
-            fwrite($smf, '  <sitemap>' . "\n");
-            fwrite($smf, '    <loc>' . $loc . '</loc>' . "\n");
-            fwrite($smf, '    <lastmod>' . $lastmod . '</lastmod>' . "\n");
-            fwrite($smf, '  </sitemap>' . "\n");
         } else {
             print "WARNING: Can't open file " . $baseSitemapFile . ". " .
                 "The sitemap index will be generated without this sitemap file.\n";
@@ -140,18 +113,67 @@ if (isset($sitemapArray['SitemapIndex']['indexFileName'])) {
     // Add <sitemap /> group for each sitemap file generated.
     for ($i = 1; $i < $currentPage - 1; $i++) {
         $sitemapNumber = ($i == 1) ? "" : "-" . $i;
-        $loc = htmlspecialchars(
-            $configArray['Site']['url'] . "/" .
-            $sitemapArray['Sitemap']['fileName'] . $sitemapNumber . ".xml"
+        writeSitemapIndexLine(
+            $smf, $sitemapArray['Sitemap']['fileName'] . $sitemapNumber
         );
-        $lastmod = htmlspecialchars(date("Y-m-d"));
-        fwrite($smf, '  <sitemap>' . "\n");
-        fwrite($smf, '    <loc>' . $loc . '</loc>' . "\n");
-        fwrite($smf, '    <lastmod>' . $lastmod . '</lastmod>' . "\n");
-        fwrite($smf, '  </sitemap>' . "\n");
     }
 
     fwrite($smf, '</sitemapindex>');
     fclose($smf);
+}
+
+/**
+ * Start writing a sitemap file (including the top-level open tag).
+ *
+ * @param string $filename Filename to open.
+ * @param string $startTag Top-level tag in file.
+ *
+ * @return int             File handle of open file.
+ */
+function openSitemapFile($filename, $startTag)
+{
+    $smf = fopen($filename, 'w');
+    if (!$smf) {
+        PEAR::raiseError(new PEAR_Error("Can't open file - " . $filename));
+    }
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n" .
+        '<' . $startTag . "\n" .
+        '     xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"' . "\n" .
+        '     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' . "\n" .
+        "     xsi:schemaLocation=\"http://www.sitemaps.org/schemas/sitemap/0.9\n" .
+        '     http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">' . "\n\n";
+    fwrite($smf, $xml);
+
+    return $smf;
+}
+
+/**
+ * Write a line to the sitemap index file.
+ *
+ * @param int    $smf      File handle to write to.
+ * @param string $filename Filename (not including path) to store.
+ *
+ * @return void
+ */
+function writeSitemapIndexLine($smf, $filename)
+{
+    global $configArray;
+    global $sitemapArray;
+
+    // Pick the appropriate base URL based on the configuration files:
+    if (!isset($sitemapArray['SitemapIndex']['baseSitemapUrl'])
+        || empty($sitemapArray['SitemapIndex']['baseSitemapUrl'])
+    ) {
+        $baseUrl = $configArray['Site']['url'];
+    } else {
+        $baseUrl = $sitemapArray['SitemapIndex']['baseSitemapUrl'];
+    }
+
+    $loc = htmlspecialchars("{$baseUrl}/{$filename}.xml");
+    $lastmod = htmlspecialchars(date("Y-m-d"));
+    fwrite($smf, '  <sitemap>' . "\n");
+    fwrite($smf, '    <loc>' . $loc . '</loc>' . "\n");
+    fwrite($smf, '    <lastmod>' . $lastmod . '</lastmod>' . "\n");
+    fwrite($smf, '  </sitemap>' . "\n");
 }
 ?>
