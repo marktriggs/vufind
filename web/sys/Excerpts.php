@@ -179,7 +179,8 @@ class ExternalExcerpts
                 }
 
                 // Test XML Response
-                if (!($xmldoc2 = @DOMDocument::loadXML($client->getResponseBody()))) {
+                $xmldoc2 = @DOMDocument::loadXML($client->getResponseBody());
+                if (!$xmldoc2) {
                     return new PEAR_Error('Invalid XML');
                 }
 

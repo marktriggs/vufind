@@ -322,8 +322,10 @@ class ExternalReviews
                     continue;
                 }
                 // Decode the content and strip unwanted <a> tags:
-                $review[$i]['Content'] = preg_replace('/<a>|<a [^>]*>|<\/a>/', '',
-                    html_entity_decode($xmldoc2->saveXML($nodes->item(0))));
+                $review[$i]['Content'] = preg_replace(
+                    '/<a>|<a [^>]*>|<\/a>/', '',
+                    html_entity_decode($xmldoc2->saveXML($nodes->item(0)))
+                );
 
                 // Get the marc field for copyright (997)
                 $nodes = $xmldoc2->GetElementsbyTagName("Fld997");
@@ -379,7 +381,7 @@ class ExternalReviews
 
         // Only add api-key if one has been provided in config.ini. If no key is
         // provided, a link to the Guardian can still be shown.
-        if (strlen($id) > 0){
+        if (strlen($id) > 0) {
             $url = $url . "&api-key=" . $id;
         }
 
@@ -395,29 +397,36 @@ class ExternalReviews
             $json = $client->getResponseBody();
             // parse json
             $data = json_decode($json, true);
-            if ($data){
+            if ($data) {
                 $result = array();
                 $i = 0;
                 foreach ($data['response']['results'] as $review) {
                     $result[$i]['Date'] = $review['webPublicationDate'];
                     $result[$i]['Summary'] = $review['fields']['headline'] . ". " .
-                        preg_replace('/<p>|<p [^>]*>|<\/p>/', '',
-                        html_entity_decode($review['fields']['trailText']));
+                        preg_replace(
+                            '/<p>|<p [^>]*>|<\/p>/', '',
+                            html_entity_decode($review['fields']['trailText'])
+                        );
                     $result[$i]['ReviewURL'] = $review['fields']['shortUrl'];
 
                     // TODO: Make this configurable (or store it locally), so users
                     //       running VuFind behind SSL don't get warnings due to
                     //       inclusion of this non-SSL image URL:
-                    $poweredImage =
-                        "http://image.guardian.co.uk/sys-images/Guardian/Pix/pictures/2010/03/01/poweredbyguardianBLACK.png";
+                    $poweredImage
+                        = 'http://image.guardian.co.uk/sys-images/Guardian/' .
+                        'Pix/pictures/2010/03/01/poweredbyguardianBLACK.png';
+
                     $result[$i]['Copyright'] = "<a href=\"" .
-                        $review['fields']['shortUrl'] . "\" target=\"new\"><img src=\"{$poweredImage}\" alt=\"Powered by the Guardian\" /></a>";
+                        $review['fields']['shortUrl'] . "\" target=\"new\">" .
+                        "<img src=\"{$poweredImage}\" " .
+                        "alt=\"Powered by the Guardian\" /></a>";
 
                     $result[$i]['Source'] = $review['fields']['byline'];
                     // Only return Content if the body tag contains a usable review
-                    if ((strlen($review['fields']['body']) > 0) &&
-                        (!strstr($review['fields']['body'],
-                        "Redistribution rights for this field are unavailable"))) {
+                    $redist = "Redistribution rights for this field are unavailable";
+                    if ((strlen($review['fields']['body']) > 0)
+                        && (!strstr($review['fields']['body'], $redist))
+                    ) {
                         $result[$i]['Content'] = $review['fields']['body'];
                     }
                     $i++;
