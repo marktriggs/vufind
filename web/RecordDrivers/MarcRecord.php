@@ -278,7 +278,8 @@ class MarcRecord extends IndexRecord
      * Return an XML representation of the record using the specified format.
      * Return false if the format is unsupported.
      *
-     * @param string $format Name of format to use (corresponds with OAI-PMH metadataPrefix parameter).
+     * @param string $format Name of format to use (corresponds with OAI-PMH
+     * metadataPrefix parameter).
      *
      * @return mixed         XML, or false if format unsupported.
      * @access public
@@ -296,9 +297,12 @@ class MarcRecord extends IndexRecord
 
             // Set up proper namespacing and extract just the <record> tag:
             $xml->record->addAttribute('xmlns', "http://www.loc.gov/MARC21/slim");
-            $xml->record->addAttribute('xsi:schemaLocation',
-                "http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd",
-                'http://www.w3.org/2001/XMLSchema-instance');
+            $xml->record->addAttribute(
+                'xsi:schemaLocation',
+                'http://www.loc.gov/MARC21/slim ' .
+                'http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd',
+                'http://www.w3.org/2001/XMLSchema-instance'
+            );
             $xml->record->addAttribute('type', 'Bibliographic');
             return $xml->record->asXML();
         }
@@ -429,7 +433,9 @@ class MarcRecord extends IndexRecord
 
         if (is_null($this->catalog)) {
             try {
-                $this->catalog = new CatalogConnection($configArray['Catalog']['driver']);
+                $this->catalog = new CatalogConnection(
+                    $configArray['Catalog']['driver']
+                );
             } catch (PDOException $e) {
                 // What should we do with this error?
                 if ($configArray['System']['debug']) {
@@ -478,7 +484,8 @@ class MarcRecord extends IndexRecord
         // Initialize return array
         $matches = array();
 
-        // Try to look up the specified field, return empty array if it doesn't exist.
+        // Try to look up the specified field, return empty array if it doesn't
+        // exist.
         $fields = $this->marcRecord->getFields($field);
         if (!is_array($fields)) {
             return $matches;
@@ -685,7 +692,8 @@ class MarcRecord extends IndexRecord
      * Support method for getSeries() -- given a field specification, look for
      * series information in the MARC record.
      *
-     * @param array $fieldInfo Associative array of field => subfield information (used to find series name)
+     * @param array $fieldInfo Associative array of field => subfield information
+     * (used to find series name)
      *
      * @return array
      * @access private
@@ -821,7 +829,8 @@ class MarcRecord extends IndexRecord
     }
 
     /**
-     * Get the statement of responsibility that goes with the title (i.e. "by John Smith").
+     * Get the statement of responsibility that goes with the title (i.e. "by John
+     * Smith").
      *
      * @return string
      * @access protected
@@ -869,7 +878,8 @@ class MarcRecord extends IndexRecord
     /**
      * Redirect to the RefWorks site and then die -- support method for getExport().
      *
-     * @access  protected
+     * @return void
+     * @access protected
      */
     protected function redirectToRefWorks()
     {
