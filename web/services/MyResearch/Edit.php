@@ -102,7 +102,9 @@ class Edit extends Action
             preg_match_all('/"[^"]*"|[^ ]+/', $_POST['tags' . $listId], $tagArray);
             
             // Save extracted tags and notes:
-            $user->addResource($resource, $list, $tagArray[0], $_POST['notes' . $listId]);
+            $user->addResource(
+                $resource, $list, $tagArray[0], $_POST['notes' . $listId]
+            );
         }
     }
     
@@ -118,7 +120,7 @@ class Edit extends Action
         global $configArray;
 
         if (!($user = UserAccount::isLoggedIn())) {
-            require_once 'Login.php';
+            include_once 'Login.php';
             Login::launch();
             exit();
         }
@@ -135,7 +137,10 @@ class Edit extends Action
             } else {
                 $nextAction = 'Favorites';
             }
-            header('Location: ' . $configArray['Site']['url'] . '/MyResearch/' . $nextAction);
+            header(
+                'Location: ' . $configArray['Site']['url'] . '/MyResearch/' .
+                $nextAction
+            );
             exit();
         }
 

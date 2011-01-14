@@ -49,16 +49,18 @@ class Cite extends Record
     public function launch()
     {
         global $interface;
-        
+
         $citationCount = 0;
         $formats = $this->recordDriver->getCitationFormats();
         foreach ($formats as $current) {
-            $interface->assign(strtolower($current), 
-                $this->recordDriver->getCitation($current));
+            $interface->assign(
+                strtolower($current),
+                $this->recordDriver->getCitation($current)
+            );
             $citationCount++;
         }
         $interface->assign('citationCount', $citationCount);
-        
+
         if (isset($_GET['lightbox'])) {
             // Use for lightbox
             $interface->assign('title', $_GET['message']);
