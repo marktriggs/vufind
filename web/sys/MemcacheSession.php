@@ -23,6 +23,7 @@
  * @package  Session_Handlers
  * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/creating_a_session_handler Wiki
  */
 require_once 'SessionInterface.php';
 
@@ -33,11 +34,20 @@ require_once 'SessionInterface.php';
  * @package  Session_Handlers
  * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/creating_a_session_handler Wiki
  */
 class MemcacheSession extends SessionInterface
 {
     static private $connection;
 
+    /**
+     * Initialize the session handler.
+     *
+     * @param int $lt Session lifetime (in seconds)
+     *
+     * @return void
+     * @access public
+     */
     public function init($lt)
     {
         global $configArray;
@@ -60,16 +70,43 @@ class MemcacheSession extends SessionInterface
         parent::init($lt);
     }
 
+    /**
+     * Read function must return string value always to make save handler work as
+     * expected. Return empty string if there is no data to read.
+     *
+     * @param string $sess_id The session ID to read
+     *
+     * @return string
+     * @access public
+     */
     static public function read($sess_id)
     {
         return self::$connection->get("vufind_sessions/{$sess_id}");
     }
 
+    /**
+     * Write function that is called when session data is to be saved.
+     *
+     * @param string $sess_id The current session ID
+     * @param string $data    The session data to write
+     *
+     * @return void
+     * @access public
+     */
     static public function write($sess_id, $data)
     {
         return self::$connection->set("vufind_sessions/{$sess_id}", $data, 0, self::$lifetime);
     }
 
+    /**
+     * The destroy handler, this is executed when a session is destroyed with
+     * session_destroy() and takes the session id as its only parameter.
+     *
+     * @param string $sess_id The session ID to destroy
+     *
+     * @return void
+     * @access public
+     */
     static public function destroy($sess_id)
     {
         // Perform standard actions required by all session methods:
