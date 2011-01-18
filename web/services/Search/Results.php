@@ -182,7 +182,6 @@ class Results extends Action
             $interface->assign('recordSet', $searchObject->getResultRecordHTML());
 
             // Setup Display
-            $interface->assign('sitepath', $configArray['Site']['path']);
             $interface->assign('subpage', 'Search/list-list.tpl');
             $interface->setTemplate('list.tpl');
 

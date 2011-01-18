@@ -195,9 +195,6 @@ class Home extends Action
         // Big one - our results
         $interface->assign('recordSet', $searchObject->getResultRecordHTML());
 
-        // Setup Display
-        $interface->assign('sitepath', $configArray['Site']['path']);
-
         // Process Paging
         $link = $searchObject->renderLinkPageTemplate();
         $options = array('totalItems' => $summary['resultTotal'],
