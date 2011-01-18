@@ -23,6 +23,7 @@
  * @package  Support_Classes
  * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/system_classes Wiki
  */
 
 // Suppress error output when importing the PEAR HTTP_Request module; some versions
@@ -39,43 +40,48 @@
  * @package  Support_Classes
  * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/system_classes Wiki
  */
 class Proxy_Request extends HTTP_Request
 {
-    private $useProxy = null;
+    private $_useProxy = null;
 
     /**
      * Disable the proxy manually
      *
      * @return void
+     * @access public
      */
-    function disableProxy()
+    public function disableProxy()
     {
-        $this->useProxy = false;
+        $this->_useProxy = false;
     }
 
     /**
      * Enable the proxy manually
      *
      * @return void
+     * @access public
      */
-    function useProxy()
+    public function useProxy()
     {
-        $this->useProxy = true;
+        $this->_useProxy = true;
     }
 
     /**
      * Time to send the request
      *
-     * @param bool $saveBody
+     * @param bool $saveBody Whether to save response body in response object
+     * property
      *
      * @return void
+     * @access public
      */
-    function SendRequest($saveBody = true)
+    public function sendRequest($saveBody = true)
     {
         // Unless the user has expressly set the proxy setting
         $defaultProxy = null;
-        if ($this->useProxy == null) {
+        if ($this->_useProxy == null) {
             // Is this localhost traffic?
             if (strstr($this->getUrl(), "localhost") !== false) {
                 // Yes, don't proxy
@@ -84,14 +90,16 @@ class Proxy_Request extends HTTP_Request
         }
 
         // Setup the proxy if needed
-        //   useProxy + defaultProxy both need to be null or true
-        if ($this->useProxy !== false && $defaultProxy !== false) {
+        //   _useProxy + defaultProxy both need to be null or true
+        if ($this->_useProxy !== false && $defaultProxy !== false) {
             global $configArray;
 
             // Proxy server settings
             if (isset($configArray['Proxy']['host'])) {
                 if (isset($configArray['Proxy']['port'])) {
-                    $this->setProxy($configArray['Proxy']['host'], $configArray['Proxy']['port']);
+                    $this->setProxy(
+                        $configArray['Proxy']['host'], $configArray['Proxy']['port']
+                    );
                 } else {
                     $this->setProxy($configArray['Proxy']['host']);
                 }
