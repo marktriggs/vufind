@@ -91,7 +91,7 @@
         <div class="clear"></div>
       {/if}
       {if $illustratedLimit}
-        <fieldset>
+        <fieldset class="span-4">
           <legend>{translate text="Illustrated"}:</legend>
           {foreach from=$illustratedLimit item="current"}
             <input id="illustrated_{$current.value|escape}" type="radio" name="illustration" value="{$current.value|escape}"{if $current.selected} checked="checked"{/if}/> 
@@ -99,6 +99,20 @@
           {/foreach}
         </fieldset>
       {/if}
+      {if $dateRangeLimit}
+        {* Load the publication date slider UI widget *}
+        {js filename="pubdate_slider.js"} 
+        <input type="hidden" name="daterange[]" value="publishDate"/>
+        <fieldset class="publishDateLimit span-5" id="publishDate">
+          <legend>{translate text='adv_search_year'}</legend>
+          <label for="publishDatefrom">{translate text='From'}:</label>
+          <input type="text" size="4" maxlength="4" class="yearbox" name="publishDatefrom" id="publishDatefrom" value="{if $dateRangeLimit.0}{$dateRangeLimit.0|escape}{/if}" />
+          <label for="publishDateto">{translate text='To'}:</label>
+          <input type="text" size="4" maxlength="4" class="yearbox" name="publishDateto" id="publishDateto" value="{if $dateRangeLimit.1}{$dateRangeLimit.1|escape}{/if}" />
+          <div id="publishDateSlider"></div>
+        </fieldset>      
+      {/if}
+      <div class="clear"></div>
       <input type="submit" name="submit" value="{translate text="Find"}"/>
     </div>
   </form>

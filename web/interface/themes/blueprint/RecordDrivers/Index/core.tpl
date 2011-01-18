@@ -125,13 +125,14 @@
     <th>{translate text='Subjects'}: </th>
     <td>
       {foreach from=$coreSubjects item=field name=loop}
+      <div class="subjectLine">
         {assign var=subject value=""}
         {foreach from=$field item=subfield name=subloop}
           {if !$smarty.foreach.subloop.first} &gt; {/if}
           {assign var=subject value="$subject $subfield"}
-          <a href="{$url}/Search/Results?lookfor=%22{$subject|escape:"url"}%22&amp;type=Subject">{$subfield|escape}</a>
+          <a title="{$subject|escape}" href="{$url}/Search/Results?lookfor=%22{$subject|escape:"url"}%22&amp;type=Subject" class="subjectHeading">{$subfield|escape}</a>
         {/foreach}
-        <br/>
+      </div>
       {/foreach}
     </td>
   </tr>

@@ -44,7 +44,7 @@
           {/if}
         {/foreach}
         <input type="hidden" name="daterange[]" value="{$title|escape}"/>
-		<fieldset class="publishDateLimit">
+		<fieldset class="publishDateLimit" id="{$title|escape}">
           <legend>{translate text=$cluster.label}</legend>
           <label for="{$title|escape}from">{translate text='From'}:</label>
           <input type="text" size="4" maxlength="4" class="yearbox" name="{$title|escape}from" id="{$title|escape}from" value="{if $dateFacets.$title.0}{$dateFacets.$title.0|escape}{/if}" />

@@ -124,6 +124,20 @@ $(document).ready(function(){
         loadResolverLinks($('#openUrlEmbed'+params.openurl_id).show(), openUrl);
         return false;
     });
+    
+    // add highlighting to subject headings when mouseover
+    $('a.subjectHeading').mouseover(function() {
+        var subjectHeadings = $(this).parent().children('a.subjectHeading');
+        for(var i = 0; i < subjectHeadings.length; i++) {
+            $(subjectHeadings[i]).addClass('highlight');
+            if ($(this).text() == $(subjectHeadings[i]).text()) {
+                break;
+            }
+        }
+    });
+    $('a.subjectHeading').mouseout(function() {
+        $('.subjectHeading').removeClass('highlight');
+    });
 });
 
 /**
