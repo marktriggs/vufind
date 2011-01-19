@@ -2,7 +2,7 @@
 <div class="authorbox">
   <h3>{translate text='Subject Recommendations'}</h3>
     {foreach from=$WorldCatTerms item=section name=sectionLoop key=type}
-      <div class="span-8{if $smarty.foreach.sectionLoop.last} last{/if}">
+      <div class="span-5{if $smarty.foreach.sectionLoop.last} last{/if}">
         <dl>
           <dt>{translate text="wcterms_`$type`"}</dt>
           {foreach from=$section item=subj name=narrowLoop}
