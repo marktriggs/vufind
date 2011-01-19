@@ -34,7 +34,7 @@ function getLightbox(module, action, id, lookfor, message, followupModule, follo
                  '&followupModule=' + encodeURIComponent(followupModule) +
                  '&followupAction=' + encodeURIComponent(followupAction) +
                  '&followupId=' + encodeURIComponent(followupId);
-    var callback = 
+    var callback =
     {
         success: function(transaction) {
             var response = (transaction && transaction.responseText)
@@ -139,6 +139,10 @@ function initAutocomplete(inputBox, suggestionBox, typeDropDown)
 
     // Build the autocomplete control:
     var autoComp = new YAHOO.widget.AutoComplete(inputBox, suggestionBox, dataSource);
+
+    // Disable auto-highlighting (it interferes with the user's ability to submit
+    // their query string by hitting Enter):
+    autoComp.autoHighlight = false;
 
     // Ensure that the autocomplete control sends the current search type as a
     // parameter to the data source:
