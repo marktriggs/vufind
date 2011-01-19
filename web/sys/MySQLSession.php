@@ -61,7 +61,7 @@ class MySQLSession extends SessionInterface
                 return $s->data;
             } else {
                 $s->delete();
-            return '';
+                return '';
             }
         } else {
             // in seconds - easier for calcuating duration

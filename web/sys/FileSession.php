@@ -38,7 +38,7 @@ require_once 'SessionInterface.php';
  */
 class FileSession extends SessionInterface
 {
-    static private $path;
+    static private $_path;
 
     /**
      * Initialize the session handler.
@@ -53,14 +53,17 @@ class FileSession extends SessionInterface
         global $configArray;
 
         // Set defaults if nothing set in config file.
-        self::$path= isset($configArray['Session']['file_save_path']) ?
+        self::$_path= isset($configArray['Session']['file_save_path']) ?
             $configArray['Session']['file_save_path'] : '/tmp/vufind_sessions';
 
         // Die if the session directory does not exist and cannot be created.
-        if (!file_exists(self::$path) || !is_dir(self::$path)) {
-            if (!@mkdir(self::$path)) {
-                PEAR::raiseError(new PEAR_Error("Cannot access session save path: " .
-                    self::$path));
+        if (!file_exists(self::$_path) || !is_dir(self::$_path)) {
+            if (!@mkdir(self::$_path)) {
+                PEAR::raiseError(
+                    new PEAR_Error(
+                        "Cannot access session save path: " . self::$_path
+                    )
+                );
             }
         }
 
@@ -79,7 +82,7 @@ class FileSession extends SessionInterface
      */
     static public function read($sess_id)
     {
-        $sess_file = self::$path . '/sess_' . $sess_id;
+        $sess_file = self::$_path . '/sess_' . $sess_id;
         return (string) @file_get_contents($sess_file);
     }
 
@@ -94,7 +97,7 @@ class FileSession extends SessionInterface
      */
     static public function write($sess_id, $data)
     {
-        $sess_file = self::$path . '/sess_' . $sess_id;
+        $sess_file = self::$_path . '/sess_' . $sess_id;
         if ($fp = @fopen($sess_file, "w")) {
             $return = fwrite($fp, $data);
             fclose($fp);
@@ -119,7 +122,7 @@ class FileSession extends SessionInterface
         parent::destroy($sess_id);
 
         // Perform file-specific cleanup:
-        $sess_file = self::$path . '/sess_' . $sess_id;
+        $sess_file = self::$_path . '/sess_' . $sess_id;
         return(@unlink($sess_file));
     }
 
@@ -134,7 +137,7 @@ class FileSession extends SessionInterface
      */
     static public function gc($maxlifetime)
     {
-        foreach (glob(self::$path . "/sess_*") as $filename) {
+        foreach (glob(self::$_path . "/sess_*") as $filename) {
             if (filemtime($filename) + $maxlifetime < time()) {
                 @unlink($filename);
             }

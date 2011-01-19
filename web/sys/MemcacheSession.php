@@ -38,7 +38,7 @@ require_once 'SessionInterface.php';
  */
 class MemcacheSession extends SessionInterface
 {
-    static private $connection;
+    static private $_connection;
 
     /**
      * Initialize the session handler.
@@ -61,9 +61,13 @@ class MemcacheSession extends SessionInterface
             $configArray['Session']['memcache_connection_timeout'] : 1;
 
         // Connect to Memcache:
-        self::$connection = new Memcache();
-        if (!@self::$connection->connect($host, $port, $timeout)) {
-            PEAR::raiseError(new PEAR_Error("Could not connect to Memcache (host = {$host}, port = {$port})."));
+        self::$_connection = new Memcache();
+        if (!@self::$_connection->connect($host, $port, $timeout)) {
+            PEAR::raiseError(
+                new PEAR_Error(
+                    "Could not connect to Memcache (host = {$host}, port = {$port})."
+                )
+            );
         }
 
         // Call standard session initialization from this point.
@@ -81,7 +85,7 @@ class MemcacheSession extends SessionInterface
      */
     static public function read($sess_id)
     {
-        return self::$connection->get("vufind_sessions/{$sess_id}");
+        return self::$_connection->get("vufind_sessions/{$sess_id}");
     }
 
     /**
@@ -95,7 +99,9 @@ class MemcacheSession extends SessionInterface
      */
     static public function write($sess_id, $data)
     {
-        return self::$connection->set("vufind_sessions/{$sess_id}", $data, 0, self::$lifetime);
+        return self::$_connection->set(
+            "vufind_sessions/{$sess_id}", $data, 0, self::$lifetime
+        );
     }
 
     /**
@@ -113,7 +119,7 @@ class MemcacheSession extends SessionInterface
         parent::destroy($sess_id);
 
         // Perform Memcache-specific cleanup:
-        return self::$connection->delete("vufind_sessions/{$sess_id}");
+        return self::$_connection->delete("vufind_sessions/{$sess_id}");
     }
 }
 
