@@ -53,7 +53,13 @@ class Tags extends DB_DataObject
     ###END_AUTOCODE
     // @codingStandardsIgnoreEnd
 
-    function getResources()
+    /**
+     * Get all resources associated with the current tag.
+     *
+     * @return array
+     * @access public
+     */
+    public function getResources()
     {
         $resList = array();
 

@@ -234,16 +234,27 @@ class User extends DB_DataObject
         return $resourceList;
     }
 
-    function getSavedData($resourceId, $listId = null)
+    /**
+     * Get information saved in a user's favorites for a particular record.
+     *
+     * @param string $resourceId ID of record being checked.
+     * @param int    $listId     Optional list ID (to limit results to a particular
+     * list).
+     *
+     * @return array
+     * @access public
+     */
+    public function getSavedData($resourceId, $listId = null)
     {
         $savedList = array();
 
-        $sql = "SELECT user_resource.*, user_list.title as list_title, user_list.id as list_id " .
-               "FROM user_resource, resource, user_list " .
-               "WHERE resource.id = user_resource.resource_id " .
-               "AND user_resource.list_id = user_list.id " .
-               "AND user_resource.user_id = '$this->id' " .
-               "AND resource.record_id = '$resourceId'";
+        $sql = "SELECT user_resource.*, user_list.title as list_title, " .
+            "user_list.id as list_id " .
+            "FROM user_resource, resource, user_list " .
+            "WHERE resource.id = user_resource.resource_id " .
+            "AND user_resource.list_id = user_list.id " .
+            "AND user_resource.user_id = '$this->id' " .
+            "AND resource.record_id = '$resourceId'";
         if (!is_null($listId)) {
             $sql .= " AND user_resource.list_id='$listId'";
         }
