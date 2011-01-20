@@ -50,10 +50,10 @@ function smarty_function_css($params, &$smarty)
     // Extract details from the config file, Smarty interface and parameters
     // so we can find CSS files:
     global $configArray;
-    global $interface;
+
     $path = $configArray['Site']['path'];
     $local = $configArray['Site']['local'];
-    $themes = explode(',', $interface->getVuFindTheme());
+    $themes = explode(',', $smarty->getVuFindTheme());
     $filename = $params['filename'];
 
     // Loop through the available themes looking for the requested CSS file:
