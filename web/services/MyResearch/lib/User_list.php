@@ -38,6 +38,7 @@ require_once 'DB/DataObject.php';
  */
 class User_list extends DB_DataObject
 {
+    // @codingStandardsIgnoreStart
     ###START_AUTOCODE
     /* the code below is auto generated do not remove the above tag */
 
@@ -54,6 +55,7 @@ class User_list extends DB_DataObject
 
     /* the code above is auto generated do not remove the tag below */
     ###END_AUTOCODE
+    // @codingStandardsIgnoreEnd
 
     /**
      * Load the resources associated with the list.

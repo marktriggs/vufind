@@ -38,6 +38,7 @@ require_once 'DB/DataObject.php';
  */
 class Change_tracker extends DB_DataObject
 {
+    // @codingStandardsIgnoreStart
     ###START_AUTOCODE
     /* the code below is auto generated do not remove the above tag */
 
@@ -54,6 +55,7 @@ class Change_tracker extends DB_DataObject
 
     /* the code above is auto generated do not remove the tag below */
     ###END_AUTOCODE
+    // @codingStandardsIgnoreEnd
 
     private $dateFormat = 'Y-m-d H:i:s';    // date/time format for database
 

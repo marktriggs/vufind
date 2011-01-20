@@ -38,6 +38,7 @@ require_once 'DB/DataObject.php';
  */
 class Resource extends DB_DataObject
 {
+    // @codingStandardsIgnoreStart
     ###START_AUTOCODE
     /* the code below is auto generated do not remove the above tag */
 
@@ -52,6 +53,7 @@ class Resource extends DB_DataObject
 
     /* the code above is auto generated do not remove the tag below */
     ###END_AUTOCODE
+    // @codingStandardsIgnoreEnd
 
     /**
      * Get tags associated with the current resource.

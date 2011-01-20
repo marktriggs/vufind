@@ -38,6 +38,7 @@ require_once 'DB/DataObject.php';
  */
 class Oai_resumption extends DB_DataObject
 {
+    // @codingStandardsIgnoreStart
     ###START_AUTOCODE
     /* the code below is auto generated do not remove the above tag */
 
@@ -51,6 +52,7 @@ class Oai_resumption extends DB_DataObject
 
     /* the code above is auto generated do not remove the tag below */
     ###END_AUTOCODE
+    // @codingStandardsIgnoreEnd
 
     /**
      * Remove all expired tokens from the database.

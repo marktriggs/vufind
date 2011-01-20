@@ -38,6 +38,7 @@ require_once 'DB/DataObject.php';
  */
 class SearchEntry extends DB_DataObject
 {
+    // @codingStandardsIgnoreStart
     ###START_AUTOCODE
     /* the code below is auto generated do not remove the above tag */
 
@@ -53,6 +54,10 @@ class SearchEntry extends DB_DataObject
 
     /* Static get */
     function staticGet($k,$v=NULL) { return DB_DataObject::staticGet('Search',$k,$v); }
+
+    /* the code above is auto generated do not remove the tag below */
+    ###END_AUTOCODE
+    // @codingStandardsIgnoreEnd
 
     /**
      * Get an array of SearchEntry objects for the specified user.
@@ -108,7 +113,4 @@ class SearchEntry extends DB_DataObject
         }
         return $searches;
     }
-
-    /* the code above is auto generated do not remove the tag below */
-    ###END_AUTOCODE
 }
