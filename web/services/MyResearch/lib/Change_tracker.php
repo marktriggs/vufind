@@ -57,35 +57,39 @@ class Change_tracker extends DB_DataObject
     ###END_AUTOCODE
     // @codingStandardsIgnoreEnd
 
-    private $dateFormat = 'Y-m-d H:i:s';    // date/time format for database
+    private $_dateFormat = 'Y-m-d H:i:s';   // date/time format for database
 
-    /* Support method for index() -- create a new row in the database.
+    /**
+     * Support method for index() -- create a new row in the database.
      *
-     * @param   int     $change     The timestamp of the last record change.
-     * @return  bool                True on success, false on failure.
-     * @access  private
+     * @param int $change The timestamp of the last record change.
+     *
+     * @return bool       True on success, false on failure.
+     * @access private
      */
-    private function createRow($change)
+    private function _createRow($change)
     {
         // Save new values to the object:
-        $this->first_indexed = $this->last_indexed = date($this->dateFormat);
-        $this->last_record_change = date($this->dateFormat, $change);
+        $this->first_indexed = $this->last_indexed = date($this->_dateFormat);
+        $this->last_record_change = date($this->_dateFormat, $change);
 
         // Save new values to the database:
         return $this->insert();
     }
 
-    /* Support method for index() -- update an existing row in the database.
+    /**
+     * Support method for index() -- update an existing row in the database.
      *
-     * @param   int     $change     The timestamp of the last record change.
-     * @return  bool                True on success, false on failure.
-     * @access  private
+     * @param int $change The timestamp of the last record change.
+     *
+     * @return bool       True on success, false on failure.
+     * @access private
      */
-    private function updateRow($change)
+    private function _updateRow($change)
     {
         // Save new values to the object:
-        $this->last_indexed = date($this->dateFormat);
-        $this->last_record_change = date($this->dateFormat, $change);
+        $this->last_indexed = date($this->_dateFormat);
+        $this->last_record_change = date($this->_dateFormat, $change);
 
         // If first indexed is null, we're restoring a deleted record, so
         // we need to treat it as new -- we'll use the current time.
@@ -100,16 +104,17 @@ class Change_tracker extends DB_DataObject
         return $this->update();
     }
 
-    /* Update the change tracker table to indicate that a record has been deleted.
+    /**
+     * Update the change tracker table to indicate that a record has been deleted.
      *
      * This method should be called on a "fresh" Change_tracker object.  After the
      * method has been called, the current object will be populated with relevant
      * information about the specified record.
      *
-     * @param  string $core The Solr core holding the record.
-     * @param  string $id   The ID of the record being indexed.
+     * @param string $core The Solr core holding the record.
+     * @param string $id   The ID of the record being indexed.
      *
-     * @return bool         True on success, false on failure.
+     * @return bool        True on success, false on failure.
      * @access public
      */
     public function markDeleted($core, $id)
@@ -127,7 +132,7 @@ class Change_tracker extends DB_DataObject
         }
 
         // Save new value to the object:
-        $this->deleted = date($this->dateFormat);
+        $this->deleted = date($this->_dateFormat);
 
         // Update the database:
         if ($exists) {
@@ -137,7 +142,8 @@ class Change_tracker extends DB_DataObject
         }
     }
 
-    /* Update the change_tracker table to reflect that a record has been indexed.
+    /**
+     * Update the change_tracker table to reflect that a record has been indexed.
      * We need to know the date of the last change to the record (independent of
      * its addition to the index) in order to tell the difference between a
      * reindex of a previously-encountered record and a genuine change.
@@ -161,15 +167,17 @@ class Change_tracker extends DB_DataObject
 
         // No row?  Create one!
         if (!$this->find(true)) {
-            return $this->createRow($change);
-        // Row already exists?  See if it needs to be updated:
+            return $this->_createRow($change);
         } else {
+            // Row already exists?  See if it needs to be updated...
+
             // Are we restoring a previously deleted record, or was the stored
             // record change date before current record change date?  Either way,
             // we need to update the table!
-            if (!empty($this->deleted) ||
-                strtotime($this->last_record_change) < $change) {
-                return $this->updateRow($change);
+            if (!empty($this->deleted)
+                || strtotime($this->last_record_change) < $change
+            ) {
+                return $this->_updateRow($change);
             }
         }
 
