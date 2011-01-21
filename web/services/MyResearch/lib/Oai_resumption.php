@@ -57,6 +57,7 @@ class Oai_resumption extends DB_DataObject
     /**
      * Remove all expired tokens from the database.
      *
+     * @return void
      * @access public
      */
     public function removeExpired()

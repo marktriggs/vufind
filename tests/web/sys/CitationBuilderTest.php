@@ -48,6 +48,7 @@ class CitationBuilderTest extends PHPUnit_Framework_TestCase
      * @access private
      */
     private $_citations = array(
+        // @codingStandardsIgnoreStart
         array(
             'raw' => array(
                 'authors' => array('Shafer, Kathleen Newton'),
@@ -164,6 +165,7 @@ class CitationBuilderTest extends PHPUnit_Framework_TestCase
             'apa' => 'Burch, P. H., Jr., Anonymous, &amp; Elseperson, F. <span style="font-style:italic;">The New Deal to the Carter administration</span>. New York: Holmes &amp; Meier.',
             'mla' => 'Burch, Philip H., Jr., Anonymous, and Firstnamery Elseperson. <span style="font-style: italic;">The New Deal to the Carter Administration</span>. New York: Holmes &amp; Meier.'
         )
+        // @codingStandardsIgnoreEnd
     );
     private $_oldConfigArray;
 
