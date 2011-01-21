@@ -99,12 +99,6 @@ class Results extends Action
             }
         }
 
-        // TODO : Investigate this... do we still need
-        // If user wants to print record show directly print-dialog box
-        if (isset($_GET['print'])) {
-           $interface->assign('print', true);
-        }
-
         // Set Interface Variables
         //   Those we can construct BEFORE the search is executed
         $interface->setPageTitle('Search Results');
@@ -130,10 +124,12 @@ class Results extends Action
         $interface->assign('searchIndex', $searchObject->getSearchIndex());
 
         // We'll need recommendations no matter how many results we found:
-        $interface->assign('topRecommendations',
-            $searchObject->getRecommendationsTemplates('top'));
-        $interface->assign('sideRecommendations',
-            $searchObject->getRecommendationsTemplates('side'));
+        $interface->assign(
+            'topRecommendations', $searchObject->getRecommendationsTemplates('top')
+        );
+        $interface->assign(
+            'sideRecommendations', $searchObject->getRecommendationsTemplates('side')
+        );
 
         if ($searchObject->getResultTotal() < 1) {
             // No record found
@@ -152,8 +148,11 @@ class Results extends Action
 
                 // Unexpected error -- let's treat this as a fatal condition.
                 } else {
-                    PEAR::raiseError(new PEAR_Error('Unable to process query<br />' .
-                        'Solr Returned: ' . $error));
+                    PEAR::raiseError(
+                        new PEAR_Error(
+                            'Unable to process query<br />Solr Returned: ' . $error
+                        )
+                    );
                 }
             }
 
