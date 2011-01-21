@@ -41,8 +41,7 @@ require_once 'services/MyResearch/lib/User.php';
  */
 class ShibbolethAuthentication implements Authentication
 {
-    private $userAttributes;
-    private $username;
+    private $_userAttributes;
 
     /**
      * Constructor
@@ -55,7 +54,7 @@ class ShibbolethAuthentication implements Authentication
     {
         $shibbolethConfigurationParameter
             = new ShibbolethConfigurationParameter($configurationFilePath);
-        $this->userAttributes
+        $this->_userAttributes
             = $shibbolethConfigurationParameter->getUserAttributes();
     }
 
@@ -67,10 +66,10 @@ class ShibbolethAuthentication implements Authentication
      */
     public function authenticate()
     {
-        if (!$this->isUsernamePartOfAssertions()) {
+        if (!$this->_isUsernamePartOfAssertions()) {
             return new PEAR_ERROR('authentication_error_admin');
         }
-        foreach ($this->userAttributes as $key => $value) {
+        foreach ($this->_userAttributes as $key => $value) {
             if ($key != 'username') {
                 if (!preg_match('/'. $value .'/', $_SERVER[$key])) {
                     return new PEAR_ERROR('authentication_error_denied');
@@ -79,27 +78,50 @@ class ShibbolethAuthentication implements Authentication
         }
 
         $user = new User();
-        $user->username = $_SERVER[$this->userAttributes['username']];
-        $userIsInVufindDatabase = $this->isUserInVufindDatabase($user);
-        $this->synchronizeVufindDatabase($userIsInVufindDatabase, $user);
+        $user->username = $_SERVER[$this->_userAttributes['username']];
+        $userIsInVufindDatabase = $this->_isUserInVufindDatabase($user);
+        $this->_synchronizeVufindDatabase($userIsInVufindDatabase, $user);
 
         return $user;
     }
 
-    private function isUsernamePartOfAssertions()
+    /**
+     * Check if username attribute is properly configured.
+     *
+     * @return bool
+     * @access private
+     */
+    private function _isUsernamePartOfAssertions()
     {
-        if (isset($_SERVER[$this->userAttributes['username']])) {
+        if (isset($_SERVER[$this->_userAttributes['username']])) {
             return true;
         }
         return false;
     }
 
-    private function isUserInVufindDatabase($user)
+    /**
+     * Check if user is already found in database.
+     *
+     * @param object $user User to check.
+     *
+     * @return bool
+     * @access private
+     */
+    private function _isUserInVufindDatabase($user)
     {
         return $user->find(true);
     }
 
-    private function synchronizeVufindDatabase($userIsInVufindDatabase, $user)
+    /**
+     * Update the user information in the database.
+     *
+     * @param bool   $userIsInVufindDatabase Is the user already in the database?
+     * @param object $user                   User to store/update.
+     *
+     * @return void
+     * @access private
+     */
+    private function _synchronizeVufindDatabase($userIsInVufindDatabase, $user)
     {
         if ($userIsInVufindDatabase) {
             $user->update();

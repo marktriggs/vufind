@@ -52,6 +52,12 @@ class ShibbolethConfigurationParameterTest extends PHPUnit_Framework_TestCase
         $this->_pathToTestConfigurationFiles = dirname(__FILE__) . '/../../conf';
     }
 
+    /**
+     * Test a configuration with no attributes.
+     *
+     * @return void
+     * @access public
+     */
     public function testWithoutAttributes()
     {
         try {
@@ -66,9 +72,15 @@ class ShibbolethConfigurationParameterTest extends PHPUnit_Framework_TestCase
         $this->fail('An expected UnexpectedValueException has not been raised');
     }
 
+    /**
+     * Test a configuration with a missing attribute value.
+     *
+     * @return void
+     * @access public
+     */
     public function testWithMissingAttributeValue()
     {
-       try {
+        try {
             $shibConfigParam = new shibbolethConfigurationParameter(
                 $this->_pathToTestConfigurationFiles .
                 "/authn/shib/attribute-value-is-missing-config.ini"
@@ -80,6 +92,12 @@ class ShibbolethConfigurationParameterTest extends PHPUnit_Framework_TestCase
         $this->fail('An expected UnexpectedValueException has not been raised');
     }
 
+    /**
+     * Test a configuration with missing username.
+     *
+     * @return void
+     * @access public
+     */
     public function testWithoutUsername()
     {
         try {
@@ -94,9 +112,15 @@ class ShibbolethConfigurationParameterTest extends PHPUnit_Framework_TestCase
         $this->fail('An expected UnexpectedValueException has not been raised');
     }
 
+    /**
+     * Test a successful configuration.
+     *
+     * @return void
+     * @access public
+     */
     public function testWithCorrectAttributeListAndUsername()
     {
-        try{
+        try {
             $shibConfigParam = new shibbolethConfigurationParameter(
                 $this->_pathToTestConfigurationFiles .
                 "/authn/shib/good-config.ini"
@@ -104,7 +128,7 @@ class ShibbolethConfigurationParameterTest extends PHPUnit_Framework_TestCase
             $userAttributes = $shibConfigParam->getUserAttributes();
             $this->assertTrue(is_array($userAttributes));
             $this->assertTrue(count($userAttributes) > 0);
-            foreach ($userAttributes as $key => $value){
+            foreach ($userAttributes as $key => $value) {
                 //echo "key = {$key}, value = {$value}\n";
             }
         } catch (Exception $unexpected){

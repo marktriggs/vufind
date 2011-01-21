@@ -38,84 +38,134 @@ require_once 'ConfigurationReader.php';
  */
 class ShibbolethConfigurationParameter
 {
-    private $configurationFilePath;
-    private $userAttributes;
+    private $_configurationFilePath;
+    private $_userAttributes;
 
+    /**
+     * Constructor
+     *
+     * @access public
+     */
     public function __construct($configurationFilePath = '')
     {
-        $this->configurationFilePath = $configurationFilePath;
+        $this->_configurationFilePath = $configurationFilePath;
     }
 
+    /**
+     * Obtain user attributes from the configuration file.
+     *
+     * @return array
+     * @access public
+     */
     public function getUserAttributes()
     {
-        $this->getFullSectionParameters();
-        $this->checkIfUsernameExists();
-        $this->filterFullSectionParameter();
-        $this->sortUserAttributes();
-        $this->checkIfAnyAttributeValueIsEmpty();
-        $this->checkIfAtLeastOneUserAttributeIsSet();
-        return $this->userAttributes;
+        $this->_getFullSectionParameters();
+        $this->_checkIfUsernameExists();
+        $this->_filterFullSectionParameter();
+        $this->_sortUserAttributes();
+        $this->_checkIfAnyAttributeValueIsEmpty();
+        $this->_checkIfAtLeastOneUserAttributeIsSet();
+        return $this->_userAttributes;
     }
 
-    private function getFullSectionParameters()
+    /**
+     * Load user attribute settings from config.ini.
+     *
+     * @return void
+     * @access private
+     */
+    private function _getFullSectionParameters()
     {
         $configurationReader
-            = new ConfigurationReader($this->configurationFilePath);
-        $this->userAttributes
+            = new ConfigurationReader($this->_configurationFilePath);
+        $this->_userAttributes
             = $configurationReader->readConfiguration("Shibboleth");
     }
 
-    private function checkIfUsernameExists()
+    /**
+     * Throw an exception of the required username setting is missing.
+     *
+     * @return void
+     * @access private
+     */
+    private function _checkIfUsernameExists()
     {
-        if (empty($this->userAttributes['username'])) {
+        if (empty($this->_userAttributes['username'])) {
             throw new UnexpectedValueException(
                 "Username is missing in your configuration file : '" .
-                $this->configurationFilePath . "'"
+                $this->_configurationFilePath . "'"
             );
         }
     }
 
-    private function filterFullSectionParameter()
+    /**
+     * Eliminate unwanted values from the userAttributes property.
+     *
+     * @return void
+     * @access private
+     */
+    private function _filterFullSectionParameter()
     {
         $filterPatternAttribute = "/userattribute_[0-9]{1,}/";
         $filterPatternAttributeValue = "/userattribute_value_[0-9]{1,}/";
-        foreach ($this->userAttributes as $key => $value) {
+        foreach ($this->_userAttributes as $key => $value) {
             if (!preg_match($filterPatternAttribute, $key)
                 && !preg_match($filterPatternAttributeValue, $key)
                 && $key != "username"
             ) {
-                unset($this->userAttributes[$key]);
+                unset($this->_userAttributes[$key]);
             }
         }
     }
 
-    private function sortUserAttributes()
+    /**
+     * Build an associative array of attribute name => attribute value by parsing
+     * the userattribute_* settings from config.ini.  Store the result in the object.
+     *
+     * @return void
+     * @access private
+     */
+    private function _sortUserAttributes()
     {
         $filterPatternAttributes = "/userattribute_[0-9]{1,}/";
-         $sortedUserAttributes['username'] = $this->userAttributes['username'];
-        foreach ($this->userAttributes as $key => $value) {
+        $sortedUserAttributes['username'] = $this->_userAttributes['username'];
+        foreach ($this->_userAttributes as $key => $value) {
             if (preg_match($filterPatternAttributes, $key)) {
                 $sortedUserAttributes[$value]
-                    = $this->getUserAttributeValue(substr($key, 14));
+                    = $this->_getUserAttributeValue(substr($key, 14));
             }
         }
-        $this->userAttributes = $sortedUserAttributes;
+        $this->_userAttributes = $sortedUserAttributes;
     }
 
-    private function getUserAttributeValue($userAttributeNumber)
+    /**
+     * Find the configuration value for a specific attribute.
+     *
+     * @param int $userAttributeNumber The configuration index to look up
+     *
+     * @return string
+     * @access private
+     */
+    private function _getUserAttributeValue($userAttributeNumber)
     {
         $filterPatternAttributeValues = "/userattribute_value_[" .
             $userAttributeNumber . "]{1,}/";
-        foreach ($this->userAttributes as $key => $value) {
+        foreach ($this->_userAttributes as $key => $value) {
             if (preg_match($filterPatternAttributeValues, $key)) {
                 return $value;
             }
         }
     }
 
-    private function checkIfAnyAttributeValueIsEmpty()
+    /**
+     * Throw an exception if attributes are missing/empty.
+     *
+     * @return void
+     * @access private
+     */
+    private function _checkIfAnyAttributeValueIsEmpty()
     {
-        foreach ($this->userAttributes as $key => $value) {
+        foreach ($this->_userAttributes as $key => $value) {
             if (empty($value)) {
                 throw new UnexpectedValueException(
                     "User attribute value of " . $key. " is missing!"
@@ -124,12 +174,18 @@ class ShibbolethConfigurationParameter
         }
     }
 
-    private function checkIfAtLeastOneUserAttributeIsSet()
+    /**
+     * Throw an exception if attribute configuration is empty.
+     *
+     * @return void
+     * @access private
+     */
+    private function _checkIfAtLeastOneUserAttributeIsSet()
     {
-        if (count($this->userAttributes) == 1) {
+        if (count($this->_userAttributes) == 1) {
             throw new UnexpectedValueException(
                 "You must at least set one user attribute in your configuration " .
-                "file '" . $this->configurationFilePath  . "'.", 3
+                "file '" . $this->_configurationFilePath  . "'.", 3
             );
         }
     }
