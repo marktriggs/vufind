@@ -40,7 +40,7 @@
       {else}
         href="{$url}/MyResearch/MyList/{$listSelected|escape:"url"}?delete={$listId|escape:"url"}"
       {/if}
-      class="delete tool" onClick="return confirm('Are you sure you want to delete this?');">{translate text='Delete'}</a>
+      class="delete tool" onClick="return confirm('{translate text='confirm_delete'}');">{translate text='Delete'}</a>
     </div>
   {/if}
 </div>
