@@ -60,6 +60,13 @@ class JSON_Browse extends JSON
      */
     public function getOptionsAsHTML()
     {
+        global $interface;
+        
+        if (isset($_GET['next_query_field']) && !empty($_GET['next_query_field'])) {
+            $interface->assign('next_query_field', $_GET['next_query_field']);
+            $interface->assign('next_facet_field', $_GET['next_facet_field']);
+            $interface->assign('next_target', $_GET['next_target']);
+        }
         $this->output($this->_processSearch('Browse/options.tpl'), JSON::STATUS_OK);
     }
 
@@ -123,20 +130,20 @@ class JSON_Browse extends JSON
         if (isset($_GET['facet_prefix'])) {
             $this->_searchObject->addFacetPrefix($_GET['facet_prefix']);
         }
-        $query ='*:*';
-        if (isset($_GET['query_field']) && isset($_GET['query'])) {
-            $query = $_GET['query_field'] . ':' . $_GET['query'];
+        $query = (isset($_GET['query']) && !empty($_GET['query'])) ? $_GET['query'] : '*:*';
+        if (isset($_GET['query_field']) && !empty($_GET['query_field'])) {
+            $query = $_GET['query_field'] . ':' . $query;
         }
         $this->_searchObject->setQueryString($query);
         $result = $this->_searchObject->processSearch();
         $this->_searchObject->close();
-
-        $interface->assign('query', $query);
+        
+        $facets = $result['facet_counts']['facet_fields'][$_GET['facet_field']];
+        $interface->assign('facets', $facets);
         $interface->assign('query_field', $_GET['query_field']);
         $interface->assign('facet_field', $_GET['facet_field']);
-        $interface->assign(
-            'facets', $result['facet_counts']['facet_fields'][$_GET['facet_field']]
-        );
+        $interface->assign('query', $query);
+
         return $interface->fetch($template);
     }
 }
