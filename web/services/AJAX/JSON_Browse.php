@@ -130,7 +130,8 @@ class JSON_Browse extends JSON
         if (isset($_GET['facet_prefix'])) {
             $this->_searchObject->addFacetPrefix($_GET['facet_prefix']);
         }
-        $query = (isset($_GET['query']) && !empty($_GET['query'])) ? $_GET['query'] : '*:*';
+        $query = (isset($_GET['query']) && !empty($_GET['query']))
+            ? $_GET['query'] : '*:*';
         if (isset($_GET['query_field']) && !empty($_GET['query_field'])) {
             $query = $_GET['query_field'] . ':' . $query;
         }
