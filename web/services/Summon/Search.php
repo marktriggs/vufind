@@ -66,11 +66,17 @@ class Search extends Base
 
         // We'll need recommendations no matter how many results we found:
         $interface->assign('qtime', round($this->searchObject->getQuerySpeed(), 2));
-        $interface->assign('spellingSuggestions', $this->searchObject->getSpellingSuggestions());
-        $interface->assign('topRecommendations',
-            $this->searchObject->getRecommendationsTemplates('top'));
-        $interface->assign('sideRecommendations',
-            $this->searchObject->getRecommendationsTemplates('side'));
+        $interface->assign(
+            'spellingSuggestions', $this->searchObject->getSpellingSuggestions()
+        );
+        $interface->assign(
+            'topRecommendations',
+            $this->searchObject->getRecommendationsTemplates('top')
+        );
+        $interface->assign(
+            'sideRecommendations',
+            $this->searchObject->getRecommendationsTemplates('side')
+        );
 
         if ($result['recordCount'] > 0) {
             // If the "jumpto" parameter is set, jump to the specified result index:
@@ -111,14 +117,17 @@ class Search extends Base
             if ($error !== false) {
                 // If it's a parse error or the user specified an invalid field, we
                 // should display an appropriate message:
-                if (stristr($error, 'user.entered.query.is.malformed') ||
-                    stristr($error, 'unknown.field')) {
+                if (stristr($error, 'user.entered.query.is.malformed')
+                    || stristr($error, 'unknown.field')
+                ) {
                     $interface->assign('parseError', true);
-
-                // Unexpected error -- let's treat this as a fatal condition.
                 } else {
-                    PEAR::raiseError(new PEAR_Error('Unable to process query<br />' .
-                        'Summon Returned: ' . $error));
+                    // Unexpected error -- let's treat this as a fatal condition.
+                    PEAR::raiseError(
+                        new PEAR_Error(
+                            'Unable to process query<br />Summon Returned: ' . $error
+                        )
+                    );
                 }
             }
             $interface->setTemplate('list-none.tpl');
@@ -128,8 +137,8 @@ class Search extends Base
         $this->searchObject->close();
         $interface->assign('time', round($this->searchObject->getTotalSpeed(), 2));
         // Show the save/unsave code on screen
-        // The ID won't exist until after the search has been put in the search history
-        //    so this needs to occur after the close() on the searchObject
+        // The ID won't exist until after the search has been put in the search
+        //    history so this needs to occur after the close() on the searchObject
         $interface->assign('showSaved',   true);
         $interface->assign('savedSearch', $this->searchObject->isSavedSearch());
         $interface->assign('searchId',    $this->searchObject->getSearchId());

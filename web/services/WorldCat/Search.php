@@ -58,11 +58,11 @@ class Search extends Base
         $this->searchObject->init();
 
         $interface->setPageTitle('Search Results');
-        
+
         $interface->assign('lookfor', $this->searchObject->displayQuery());
         $interface->assign('searchIndex', $this->searchObject->getSearchIndex());
         $interface->assign('searchType', $this->searchObject->getSearchType());
-        
+
         // Search Worldcat
         $result = $this->searchObject->processSearch(true, true);
         // We'll need recommendations no matter how many results we found:
@@ -70,10 +70,14 @@ class Search extends Base
         $interface->assign(
             'spellingSuggestions', $this->searchObject->getSpellingSuggestions()
         );
-        $interface->assign('topRecommendations',
-            $this->searchObject->getRecommendationsTemplates('top'));
-        $interface->assign('sideRecommendations',
-            $this->searchObject->getRecommendationsTemplates('side'));
+        $interface->assign(
+            'topRecommendations',
+            $this->searchObject->getRecommendationsTemplates('top')
+        );
+        $interface->assign(
+            'sideRecommendations',
+            $this->searchObject->getRecommendationsTemplates('side')
+        );
 
         if ($result['RecordCount'] > 0) {
             // If the "jumpto" parameter is set, jump to the specified result index:
@@ -89,7 +93,7 @@ class Search extends Base
 
             // Define CoINs Identifier
             $coinsID = isset($configArray['OpenURL']['rfr_id']) ?
-                $configArray['OpenURL']['rfr_id'] : 
+                $configArray['OpenURL']['rfr_id'] :
                 $configArray['COinS']['identifier'];
             if (empty($coinsID)) {
                 $coinsID = 'vufind.svn.sourceforge.net';
@@ -112,14 +116,18 @@ class Search extends Base
             // Was the empty result set due to an error?
             $error = $this->searchObject->getIndexError();
             if ($error !== false) {
-                // If it's a parse error or the user specified an invalid field, we 
+                // If it's a parse error or the user specified an invalid field, we
                 // should display an appropriate message:
                 if (false /* TODO: detect parse error */) {
                     $interface->assign('parseError', true);
-                // Unexpected error -- let's treat this as a fatal condition.
                 } else {
-                    PEAR::raiseError(new PEAR_Error('Unable to process query<br />' .
-                        'WorldCat Returned: ' . $error));
+                    // Unexpected error -- let's treat this as a fatal condition.
+                    PEAR::raiseError(
+                        new PEAR_Error(
+                            'Unable to process query<br />WorldCat Returned: ' .
+                            $error
+                        )
+                    );
                 }
             }
             $interface->setTemplate('list-none.tpl');
@@ -134,10 +142,10 @@ class Search extends Base
         $interface->assign('showSaved',   true);
         $interface->assign('savedSearch', $this->searchObject->isSavedSearch());
         $interface->assign('searchId',    $this->searchObject->getSearchId());
-        
+
         // Save the URL of this search to the session so we can return to it easily:
         $_SESSION['lastSearchURL'] = $this->searchObject->renderSearchUrl();
-        
+
         $interface->display('layout.tpl');
     }
 

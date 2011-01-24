@@ -107,17 +107,24 @@ class Reserves extends Action
                 }
                 
                 // Store recommendations (facets, etc.)
-                $interface->assign('topRecommendations',
-                    $searchObject->getRecommendationsTemplates('top'));
-                $interface->assign('sideRecommendations',
-                    $searchObject->getRecommendationsTemplates('side'));
-            // Special case -- empty RSS feed:
+                $interface->assign(
+                    'topRecommendations',
+                    $searchObject->getRecommendationsTemplates('top')
+                );
+                $interface->assign(
+                    'sideRecommendations',
+                    $searchObject->getRecommendationsTemplates('side')
+                );
             } else if ($searchObject->getView() == 'rss') {
+                // Special case -- empty RSS feed...
+
                 // Throw the XML to screen
-                echo $searchObject->buildRSS(array(
-                    'response' => array('numFound' => 0),
-                    'responseHeader' => array('params' => array('rows' => 0)),
-                    ));
+                echo $searchObject->buildRSS(
+                    array(
+                        'response' => array('numFound' => 0),
+                        'responseHeader' => array('params' => array('rows' => 0)),
+                    )
+                );
                 // And we're done
                 exit();
             }

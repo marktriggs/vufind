@@ -112,8 +112,11 @@ class Search extends Base
                     $interface->assign('parseError', true);
                 } else {
                     // Unexpected error -- let's treat this as a fatal condition.
-                    PEAR::raiseError(new PEAR_Error('Unable to process query<br />' .
-                        'Solr Returned: ' . $error));
+                    PEAR::raiseError(
+                        new PEAR_Error(
+                            'Unable to process query<br />Solr Returned: ' . $error
+                        )
+                    );
                 }
             }
             $interface->setTemplate('list-none.tpl');
@@ -123,8 +126,8 @@ class Search extends Base
         $this->searchObject->close();
         $interface->assign('time', round($this->searchObject->getTotalSpeed(), 2));
         // Show the save/unsave code on screen
-        // The ID won't exist until after the search has been put in the search history
-        //    so this needs to occur after the close() on the searchObject
+        // The ID won't exist until after the search has been put in the search
+        //    history so this needs to occur after the close() on the searchObject
         $interface->assign('showSaved',   true);
         $interface->assign('savedSearch', $this->searchObject->isSavedSearch());
         $interface->assign('searchId',    $this->searchObject->getSearchId());
@@ -148,7 +151,8 @@ class Search extends Base
         if (isset($_REQUEST['jumpto']) && is_numeric($_REQUEST['jumpto'])) {
             $i = intval($_REQUEST['jumpto'] - 1);
             if (isset($result['response']['docs'][$i])) {
-                $jumpUrl = 'Record?id=' . urlencode($result['response']['docs'][$i]['id']);
+                $jumpUrl = 'Record?id=' .
+                    urlencode($result['response']['docs'][$i]['id']);
                 header('Location: ' . $jumpUrl);
                 die();
             }

@@ -68,11 +68,12 @@ class SearchEntry extends DB_DataObject
      * @return array   Matching SearchEntry objects.
      * @access public
      */
-    function getSearches($sid, $uid = null)
+    public function getSearches($sid, $uid = null)
     {
         $searches = array();
 
-        $sql = "SELECT * FROM search WHERE session_id = '" . $this->escape($sid) . "'";
+        $sql = "SELECT * FROM search WHERE session_id = '" .
+            $this->escape($sid) . "'";
         if ($uid != null) {
             $sql .= " OR user_id = '" . $this->escape($uid) . "'";
         }
@@ -97,13 +98,13 @@ class SearchEntry extends DB_DataObject
      * @return array       Matching SearchEntry objects.
      * @access public
      */
-    function getExpiredSearches($daysOld = 2)
+    public function getExpiredSearches($daysOld = 2)
     {
         // Determine the expiration date:
-        $expirationDate = date('Y-m-d', time() - $daysOld * 24 * 60 * 60);
+        $expireDate = date('Y-m-d', time() - $daysOld * 24 * 60 * 60);
 
         // Find expired, unsaved searches:
-        $sql = "SELECT * FROM search WHERE saved=0 AND created<\"{$expirationDate}\";";
+        $sql = "SELECT * FROM search WHERE saved=0 AND created<\"{$expireDate}\";";
         $s = new SearchEntry();
         $s->query($sql);
         if ($s->N) {

@@ -73,8 +73,9 @@ class Config extends Action
             case 'searchspecs.yaml':
             case 'searches.ini':
             case 'facets.ini':
-                // Figure out the path to the file based on its extension -- the YAML option is
-                // hard-coded, but the INI files may be renamed by the user.
+                // Figure out the path to the file based on its extension -- the
+                // YAML option is hard-coded, but the INI files may be renamed by
+                // the user.
                 list($filename, $ext) = explode('.', $_GET['file']);
                 if ($ext == 'yaml') {
                     $path = 'conf/' . $_GET['file'];
@@ -370,7 +371,9 @@ class Config extends Action
 
         $configArray['Catalog']['catalog'] = $_POST['ils'];
 
-        $configArray['Database']['database'] = 'mysql://' . $_POST['dbusername'] . ':' . $_POST['dbpassword'] . '@' . $_POST['dbhost'] . '/' . $_POST['dbname'];
+        $configArray['Database']['database'] = 'mysql://' . $_POST['dbusername'] .
+            ':' . $_POST['dbpassword'] . '@' . $_POST['dbhost'] . '/' .
+            $_POST['dbname'];
 
         $configArray['Mail']['host'] = $_POST['mailhost'];
         $configArray['Mail']['port'] = $_POST['mailport'];
@@ -415,7 +418,8 @@ class Config extends Action
      *
      * The format of the supplied DSN is in its fullest form:
      * <code>
-     * phptype(dbsyntax)://username:password@protocol+hostspec/database?option=8&another=true
+     * phptype(dbsyntax)://username:password@protocol+hostspec/database?option=8
+     * &another=true
      * </code>
      *
      * Most variations are allowed:
@@ -560,7 +564,7 @@ class Config extends Action
         }
 
         return $parsed;
-        }
     }
+}
 
 ?>

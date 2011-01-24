@@ -54,7 +54,7 @@ class History extends Action
         // In some contexts, we want to require a login before showing search
         // history:
         if (isset($_REQUEST['require_login']) && !UserAccount::isLoggedIn()) {
-            require_once 'services/MyResearch/Login.php';
+            include_once 'services/MyResearch/Login.php';
             Login::launch();
             exit();
         }
@@ -63,7 +63,9 @@ class History extends Action
 
         // Retrieve search history
         $s = new SearchEntry();
-        $searchHistory = $s->getSearches(session_id(), is_object($user) ? $user->id : null);
+        $searchHistory = $s->getSearches(
+            session_id(), is_object($user) ? $user->id : null
+        );
 
         if (count($searchHistory) > 0) {
             // Build an array of history entries
@@ -97,17 +99,17 @@ class History extends Action
                 // Saved searches
                 if ($search->saved == 1) {
                     $saved[] = $newItem;
-
-                // All the others
                 } else {
+                    // All the others...
+
                     // If this was a purge request we don't need this
                     if (isset($_REQUEST['purge']) && $_REQUEST['purge'] == 'true') {
                         $search->delete();
                         
                         // We don't want to remember the last search after a purge:
                         unset($_SESSION['lastSearchURL']);
-                    // Otherwise add to the list
                     } else {
+                        // Otherwise add to the list
                         $links[] = $newItem;
                     }
                 }
@@ -118,12 +120,12 @@ class History extends Action
                 $interface->assign('links', array_reverse($links));
                 $interface->assign('saved', array_reverse($saved));
                 $interface->assign('noHistory', false);
-            // Nothing left in history
             } else {
+                // Nothing left in history
                 $interface->assign('noHistory', true);
             }
-        // No history
         } else {
+            // No history
             $interface->assign('noHistory', true);
         }
 
