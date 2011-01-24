@@ -44,6 +44,8 @@ class ShibbolethConfigurationParameter
     /**
      * Constructor
      *
+     * @param string $configurationFilePath Optional path to configuration file
+     *
      * @access public
      */
     public function __construct($configurationFilePath = '')

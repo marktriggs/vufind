@@ -145,9 +145,8 @@ class Results extends Action
                     || preg_match('/^undefined field/', $error)
                 ) {
                     $interface->assign('parseError', true);
-
-                // Unexpected error -- let's treat this as a fatal condition.
                 } else {
+                    // Unexpected error -- let's treat this as a fatal condition.
                     PEAR::raiseError(
                         new PEAR_Error(
                             'Unable to process query<br />Solr Returned: ' . $error
