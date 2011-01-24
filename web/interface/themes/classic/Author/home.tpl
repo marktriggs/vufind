@@ -54,3 +54,16 @@
   {* End Recommendations *}
 
 </div>
+{if $showPreviews}
+<script type="text/javascript">
+{if $showGBSPreviews}
+document.write(unescape("%3Cscript src=http://books.google.com/books?jscmd=viewapi&bibkeys=" + doGetExtIds() + "&callback=ProcessGBSBookInfo" + " type='text/javascript'%3E%3C/script%3E"));
+{/if}
+{if $showOLPreviews}
+document.write(unescape("%3Cscript src=http://openlibrary.org/api/books?bibkeys=" + doGetExtIds() + "&callback=ProcessOLBookInfo" + " type='text/javascript'%3E%3C/script%3E"));
+{/if}
+{if $showHTPreviews}
+document.write(unescape("%3Cscript src=http://catalog.hathitrust.org/api/volumes/brief/json/" + doGetHTIds() + "&callback=ProcessHTBookInfo" + " type='text/javascript'%3E%3C/script%3E"));
+{/if}
+</script>
+{/if}
