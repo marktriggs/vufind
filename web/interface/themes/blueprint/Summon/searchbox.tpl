@@ -1,8 +1,8 @@
 <div class="searchform">
-  {if $searchType == 'advanced'}
+  {if $searchType == 'SummonAdvanced'}
     <a href="{$path}/Summon/Advanced?edit={$searchId}" class="small">{translate text="Edit this Advanced Search"}</a> |
     <a href="{$path}/Summon/Advanced" class="small">{translate text="Start a new Advanced Search"}</a> |
-    <a href="{$path}" class="small">{translate text="Start a new Basic Search"}</a>
+    <a href="{$path}/Summon/Home" class="small">{translate text="Start a new Basic Search"}</a>
     <br/>{translate text="Your search terms"} : "<strong>{$lookfor|escape:"html"}</strong>"
   {else}
     <form method="get" action="{$path}/Summon/Search" name="searchForm" id="searchForm" class="search">
