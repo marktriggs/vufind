@@ -53,7 +53,7 @@
                     <input type="text" size="4" maxlength="4" class="yearbox" name="PublicationDatefrom" id="PublicationDatefrom" value="{$dateRangeLimit.0|escape}" />
                     <label for="PublicationDateto" class='yearboxlabel'>{translate text='To'}:</label>
                     <input type="text" size="4" maxlength="4" class="yearbox" name="PublicationDateto" id="PublicationDateto" value="{$dateRangeLimit.1|escape}" />
-                    <div id="PublicationDateSlider" class="yui-h-slider dateSlider" title="Range slider" style="display:none;">
+                    <div id="PublicationDateSlider" class="yui-h-slider dateSlider" title="{translate text='Range slider'}" style="display:none;">
                       <div id="PublicationDateslider_min_thumb" class="yui-slider-thumb"><img src="{$path}/images/yui/left-thumb.png"></div>
                       <div id="PublicationDateslider_max_thumb" class="yui-slider-thumb"><img src="{$path}/images/yui/right-thumb.png"></div>
                     </div>

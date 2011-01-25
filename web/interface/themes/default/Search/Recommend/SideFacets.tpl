@@ -56,7 +56,7 @@
                   {/if}
                 {/if}
               {/foreach}
-              <div id="{$title|escape}Slider" class="yui-h-slider dateSlider" title="Range slider" style="display:none;">
+              <div id="{$title|escape}Slider" class="yui-h-slider dateSlider" title="{translate text='Range slider'}" style="display:none;">
                   <div id="{$title|escape}slider_min_thumb" class="yui-slider-thumb"><img src="{$path}/images/yui/left-thumb.png"></div>
                   <div id="{$title|escape}slider_max_thumb" class="yui-slider-thumb"><img src="{$path}/images/yui/right-thumb.png"></div>
               </div>
