@@ -1,6 +1,6 @@
 <?php
 /**
- * SolrUtils Test Class
+ * VuFindSolrUtils Test Class
  *
  * PHP version 5
  *
@@ -29,7 +29,7 @@ require_once dirname(__FILE__) . '/../prepend.inc.php';
 require_once 'sys/SolrUtils.php';
 
 /**
- * SolrUtils Test Class
+ * VuFindSolrUtils Test Class
  *
  * @category VuFind
  * @package  Tests
@@ -48,6 +48,7 @@ class SolrUtilsTest extends PHPUnit_Framework_TestCase
     public function testCapitalizeBooleans()
     {
         // Set up an array of expected inputs and outputs:
+        // @codingStandardsIgnoreStart
         $tests = array(
             array('this not that', 'this NOT that'),        // capitalize not
             array('this and that', 'this AND that'),        // capitalize and
@@ -64,10 +65,13 @@ class SolrUtilsTest extends PHPUnit_Framework_TestCase
             array('this aNd that', 'this AND that'),        // strange capitalization of AND
             array('this nOt that', 'this NOT that')         // strange capitalization of NOT
         );
+        // @codingStandardsIgnoreEnd
 
         // Test all the operations:
         foreach ($tests as $current) {
-            $this->assertEquals(SolrUtils::capitalizeBooleans($current[0]), $current[1]);
+            $this->assertEquals(
+                VuFindSolrUtils::capitalizeBooleans($current[0]), $current[1]
+            );
         }
     }
 
@@ -80,6 +84,7 @@ class SolrUtilsTest extends PHPUnit_Framework_TestCase
     public function testCapitalizeRanges()
     {
         // Set up an array of expected inputs and outputs:
+        // @codingStandardsIgnoreStart
         $tests = array(
             array('"{a to b}"', '"{a to b}"'),              // don't capitalize inside quotes
             array('"[a to b]"', '"[a to b]"'),
@@ -97,10 +102,13 @@ class SolrUtilsTest extends PHPUnit_Framework_TestCase
             array('{1900 TO 1910}', '{1900 TO 1910}'),
             array('[a      to      b]', '([a TO b] OR [A TO B])')   // handle extra spaces
         );
+        // @codingStandardsIgnoreEnd
 
         // Test all the operations:
         foreach ($tests as $current) {
-            $this->assertEquals(SolrUtils::capitalizeRanges($current[0]), $current[1]);
+            $this->assertEquals(
+                VuFindSolrUtils::capitalizeRanges($current[0]), $current[1]
+            );
         }
     }
 
@@ -113,18 +121,18 @@ class SolrUtilsTest extends PHPUnit_Framework_TestCase
     public function testParseRange()
     {
         // basic range test:
-        $result = SolrUtils::parseRange("[1 TO 100]");
+        $result = VuFindSolrUtils::parseRange("[1 TO 100]");
         $this->assertEquals('1', $result['from']);
         $this->assertEquals('100', $result['to']);
 
         // test whitespace handling:
-        $result = SolrUtils::parseRange("[1      TO     100]");
+        $result = VuFindSolrUtils::parseRange("[1      TO     100]");
         $this->assertEquals('1', $result['from']);
         $this->assertEquals('100', $result['to']);
 
         // test invalid ranges:
-        $this->assertFalse(SolrUtils::parseRange('1 TO 100'));
-        $this->assertFalse(SolrUtils::parseRange('[not a range to me]'));
+        $this->assertFalse(VuFindSolrUtils::parseRange('1 TO 100'));
+        $this->assertFalse(VuFindSolrUtils::parseRange('[not a range to me]'));
     }
 }
 ?>

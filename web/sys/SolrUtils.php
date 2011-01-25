@@ -39,7 +39,7 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/system_classes Wiki
  */
-class SolrUtils
+class VuFindSolrUtils
 {
     // This lookahead detects whether or not we are inside quotes; it
     // may be shared by multiple methods.
@@ -81,9 +81,9 @@ class SolrUtils
         // problems in case-sensitive fields when the reserved words are
         // actually used as search terms.
         $lookahead = self::$_insideQuotes;
-        $regs = array("/(\[)([^\]]+)\s+TO\s+([^\]]+)(\]){$lookahead}/i", 
+        $regs = array("/(\[)([^\]]+)\s+TO\s+([^\]]+)(\]){$lookahead}/i",
             "/(\{)([^}]+)\s+TO\s+([^}]+)(\}){$lookahead}/i");
-        $callback = array('SolrUtils', 'capitalizeRangesCallback');
+        $callback = array('VuFindSolrUtils', 'capitalizeRangesCallback');
         return trim(preg_replace_callback($regs, $callback, $query));
     }
 

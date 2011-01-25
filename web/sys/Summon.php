@@ -234,7 +234,7 @@ class Summon
                     // Force boolean operators to uppercase if we are in a
                     // case-insensitive mode:
                     if (!$this->_caseSensitiveBooleans) {
-                        $lookfor = SolrUtils::capitalizeBooleans($lookfor);
+                        $lookfor = VuFindSolrUtils::capitalizeBooleans($lookfor);
                     }
 
                     // Prepend the index name, unless it's the special "AllFields"
@@ -308,7 +308,7 @@ class Summon
                         // Special case -- support a checkbox for excluding
                         // newspapers:
                         $options['s.fvf'][] = "ContentType,Newspaper Article,true";
-                    } else if ($range = SolrUtils::parseRange($filter['value'])) {
+                    } else if ($range = VuFindSolrUtils::parseRange($filter['value'])) {
                         // Special case -- range query (translate [x TO y] syntax):
                         $from = $this->_escapeParam($range['from']);
                         $to = $this->_escapeParam($range['to']);

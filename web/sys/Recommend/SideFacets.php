@@ -166,7 +166,7 @@ class SideFacets implements RecommendationInterface
             $from = $to = '';
             if (isset($filters[$current])) {
                 foreach ($filters[$current] as $filter) {
-                    if ($range = SolrUtils::parseRange($filter)) {
+                    if ($range = VuFindSolrUtils::parseRange($filter)) {
                         $from = $range['from'] == '*' ? '' : $range['from'];
                         $to = $range['to'] == '*' ? '' : $range['to'];
                         break;

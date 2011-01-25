@@ -626,11 +626,11 @@ class Solr implements IndexEngine
                     // Force boolean operators to uppercase if we are in a
                     // case-insensitive mode:
                     if (!$this->_caseSensitiveBooleans) {
-                        $lookfor = SolrUtils::capitalizeBooleans($lookfor);
+                        $lookfor = VuFindSolrUtils::capitalizeBooleans($lookfor);
                     }
                     // Adjust range operators if we are in a case-insensitive mode:
                     if (!$this->_caseSensitiveRanges) {
-                        $lookfor = SolrUtils::capitalizeRanges($lookfor);
+                        $lookfor = VuFindSolrUtils::capitalizeRanges($lookfor);
                     }
 
                     if (isset($params['field']) && ($params['field'] != '')) {
@@ -791,11 +791,11 @@ class Solr implements IndexEngine
             // Force boolean operators to uppercase if we are in a case-insensitive
             // mode:
             if (!$this->_caseSensitiveBooleans) {
-                $query = SolrUtils::capitalizeBooleans($query);
+                $query = VuFindSolrUtils::capitalizeBooleans($query);
             }
             // Adjust range operators if we are in a case-insensitive mode:
             if (!$this->_caseSensitiveRanges) {
-                $query = SolrUtils::capitalizeRanges($query);
+                $query = VuFindSolrUtils::capitalizeRanges($query);
             }
 
             // Process advanced search -- if a handler was specified, let's see

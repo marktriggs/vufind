@@ -105,7 +105,7 @@ class Advanced extends Base
             $filters = $savedSearch->getFilters();
             if (isset($filters['PublicationDate'])) {
                 foreach ($filters['PublicationDate'] as $current) {
-                    if ($range = SolrUtils::parseRange($current)) {
+                    if ($range = VuFindSolrUtils::parseRange($current)) {
                         $from = $range['from'] == '*' ? '' : $range['from'];
                         $to = $range['to'] == '*' ? '' : $range['to'];
                         $savedSearch->removeFilter('PublicationDate:' . $current);
