@@ -23,7 +23,7 @@
         {* fallback to a fixed set of search groups/fields if JavaScript is turned off *}
         <noscript>
         {if $searchDetails}
-          {assign var=numGroups value=$searchDetails|@count}          
+          {assign var=numGroups value=$searchDetails|@count}
         {/if}
         {if $numGroups < 3}{assign var=numGroups value=3}{/if}
         {section name=groups loop=$numGroups}
@@ -31,7 +31,7 @@
           <div class="group group{$groupIndex%2}" id="group{$groupIndex}">
             <div class="groupSearchDetails">
               <div class="join">
-                <label for="search_bool{$groupIndex}">{translate text="search_match"}:</label> 
+                <label for="search_bool{$groupIndex}">{translate text="search_match"}:</label>
                 <select id="search_bool{$groupIndex}" name="bool{$groupIndex}[]">
                   <option value="AND"{if $searchDetails and $searchDetails.$groupIndex.group.0.bool == 'AND'} selected="selected"{/if}>{translate text="search_AND"}</option>
                   <option value="OR"{if $searchDetails and $searchDetails.$groupIndex.group.0.bool == 'OR'} selected="selected"{/if}>{translate text="search_OR"}</option>
@@ -67,7 +67,7 @@
             {/section}
             </div>
           </div>
-        {/section}  
+        {/section}
         </noscript>
       </div>
 
@@ -76,7 +76,7 @@
       <br/><br/>
 
       <input type="submit" name="submit" value="{translate text="Find"}"/>
-      
+
       {if !empty($checkboxFilters)}
         <h3>{translate text='Limit To'}</h3>
         {foreach from=$checkboxFilters item=current}
@@ -86,8 +86,25 @@
           <label for="{$current.desc|replace:' ':''|escape}">{translate text=$current.desc}</label>
           <br/>
         {/foreach}
-        
         <br/>
+      {/if}
+
+      {if $dateRangeLimit}
+        {* Load the publication date slider UI widget *}
+        {js filename="pubdate_slider.js"}
+        <input type="hidden" name="daterange[]" value="PublicationDate"/>
+        <fieldset class="PublicationDateLimit span-5" id="PublicationDate">
+          <legend>{translate text='adv_search_year'}</legend>
+          <label for="PublicationDatefrom">{translate text='From'}:</label>
+          <input type="text" size="4" maxlength="4" class="yearbox" name="PublicationDatefrom" id="PublicationDatefrom" value="{if $dateRangeLimit.0}{$dateRangeLimit.0|escape}{/if}" />
+          <label for="PublicationDateto">{translate text='To'}:</label>
+          <input type="text" size="4" maxlength="4" class="yearbox" name="PublicationDateto" id="PublicationDateto" value="{if $dateRangeLimit.1}{$dateRangeLimit.1|escape}{/if}" />
+          <div id="PublicationDateSlider" class="dateSlider"></div>
+        </fieldset>
+        <div class="clear"></div>
+      {/if}
+
+      {if !empty($checkboxFilters) || $dateRangeLimit}
         <input type="submit" name="submit" value="{translate text="Find"}">
       {/if}
     </div>
@@ -158,7 +175,7 @@
     addSearch(new_group);
     addSearch(new_group);
   {/if}
-  // show the add group link 
+  // show the add group link
   $("#addGroupLink").removeClass("offscreen");
 //]]>
 </script>

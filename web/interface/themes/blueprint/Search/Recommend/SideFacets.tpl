@@ -24,7 +24,7 @@
     {foreach from=$sideFacetSet item=cluster key=title}
     {if isset($dateFacets.$title)}
       {* Load the publication date slider UI widget *}
-      {js filename="pubdate_slider.js"}              
+      {js filename="pubdate_slider.js"}
       <form action="" name="{$title|escape}Filter" id="{$title|escape}Filter">
         {* keep existing search parameters as hidden inputs *}
         {foreach from=$smarty.get item=paramValue key=paramName}
@@ -35,8 +35,8 @@
               {/if}
             {/foreach}
           {else}
-            {if (strpos($paramName, $title)   !== 0) 
-                && (strpos($paramName, 'module') !== 0) 
+            {if (strpos($paramName, $title)   !== 0)
+                && (strpos($paramName, 'module') !== 0)
                 && (strpos($paramName, 'action') !== 0)
                 && (strpos($paramName, 'page')   !== 0)}
               <input type="hidden" name="{$paramName}" value="{$paramValue|escape}" />
@@ -44,17 +44,17 @@
           {/if}
         {/foreach}
         <input type="hidden" name="daterange[]" value="{$title|escape}"/>
-		<fieldset class="publishDateLimit" id="{$title|escape}">
+        <fieldset class="publishDateLimit" id="{$title|escape}">
           <legend>{translate text=$cluster.label}</legend>
           <label for="{$title|escape}from">{translate text='From'}:</label>
           <input type="text" size="4" maxlength="4" class="yearbox" name="{$title|escape}from" id="{$title|escape}from" value="{if $dateFacets.$title.0}{$dateFacets.$title.0|escape}{/if}" />
           <label for="{$title|escape}to">{translate text='To'}:</label>
           <input type="text" size="4" maxlength="4" class="yearbox" name="{$title|escape}to" id="{$title|escape}to" value="{if $dateFacets.$title.1}{$dateFacets.$title.1|escape}{/if}" />
-          <div id="{$title|escape}Slider"></div>
+          <div id="{$title|escape}Slider" class="dateSlider"></div>
           <input type="submit" value="{translate text='Set'}" id="{$title|escape}goButton"/>
         </fieldset>
       </form>
-    {else}    
+    {else}
       <dl class="narrowList navmenu">
         <dt>{translate text=$cluster.label}</dt>
         {foreach from=$cluster.list item=thisFacet name="narrowLoop"}

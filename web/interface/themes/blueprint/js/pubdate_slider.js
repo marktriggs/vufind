@@ -1,31 +1,35 @@
 $(document).ready(function(){
     // create the slider for the publish date facet
-    makePublishDateSlider();    
+    $('.dateSlider').each(function(i) {
+        var myId = $(this).attr('id');
+        var prefix = myId.substr(0, myId.length - 6);
+        makePublishDateSlider(prefix);
+    });
 });
 
-function makePublishDateSlider() {
+function makePublishDateSlider(prefix) {
     // create the slider widget
-    $('#publishDateSlider').slider({
+    $('#' + prefix + 'Slider').slider({
         range: true,
         slide: function(event, ui) {
-            $('#publishDatefrom').val(ui.values[0]);
-            $('#publishDateto').val(ui.values[1]);
+            $('#' + prefix + 'from').val(ui.values[0]);
+            $('#' + prefix + 'to').val(ui.values[1]);
         }
     });
     // initialize the slider with the original values
     // in the text boxes
-    updatePublishDateSlider();
+    updatePublishDateSlider(prefix);
 
     // when user enters values into the boxes
     // the slider needs to be updated too
-    $('#publishDatefrom, #publishDateto').change(function(){
-        updatePublishDateSlider();
-    });    
+    $('#' + prefix + 'from, #' + prefix + 'to').change(function(){
+        updatePublishDateSlider(prefix);
+    });
 }
 
-function updatePublishDateSlider() {
-    var from = parseInt($('#publishDatefrom').val());
-    var to = parseInt($('#publishDateto').val());
+function updatePublishDateSlider(prefix) {
+    var from = parseInt($('#' + prefix + 'from').val());
+    var to = parseInt($('#' + prefix + 'to').val());
     // assuming our oldest item is published in the 15th century
     var min = 1500;
     if (!from || from < min) {
@@ -41,7 +45,7 @@ function updatePublishDateSlider() {
         to = max;
     }
     // update the slider with the new min/max/values
-    $('#publishDateSlider').slider('option', {
+    $('#' + prefix + 'Slider').slider('option', {
         min: min, max: max, values: [from, to]
     });
 }
