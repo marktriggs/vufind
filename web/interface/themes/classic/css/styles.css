@@ -6,8 +6,15 @@ $configArray = parse_ini_file('../../../../conf/config.ini', true);
 @import "layout.css";
 @import "autocomplete.css";
 
-/* My styles */
+/* YUI Slider Styles
+Copyright (c) 2010, Yahoo! Inc. All rights reserved.
+Code licensed under the BSD License:
+http://developer.yahoo.com/yui/license.html
+version: 2.8.1 (modified for VuFind)
+*/
+.yui-h-slider,.yui-v-slider,.yui-region-slider{position:relative;}.yui-h-slider .yui-slider-thumb,.yui-v-slider .yui-slider-thumb,.yui-region-slider .yui-slider-thumb{position:absolute;cursor:default;}.yui-h-slider{background:url(<?php echo $configArray['Site']['path'];?>/images/yui/bg-h.gif) no-repeat 5px 0;height:28px;width:160px;}.yui-h-slider .yui-slider-thumb{top:4px;}.yui-v-slider{background:url(<?php echo $configArray['Site']['path'];?>/images/yui/bg-v.gif) no-repeat 12px 0;height:228px;width:48px;}.yui-region-slider{height:228px;width:228px;}
 
+/* My styles */
 
 #hd {
     background-color:#fff;

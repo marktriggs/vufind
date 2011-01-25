@@ -33,6 +33,9 @@
       <dl class="narrowList navmenu narrow_begin">
         <dt>{translate text=$cluster.label}</dt>
         {if isset($dateFacets.$title)}
+          {* Load the publication date slider UI widget *}
+          {js filename="yui/slider-min.js"}
+          {js filename="pubdate_slider.js"}
           <dd>
             <form name='{$title|escape}Filter' id='{$title|escape}Filter'>
               <input type="hidden" name="daterange[]" value="{$title|escape}"/>
@@ -53,6 +56,10 @@
                   {/if}
                 {/if}
               {/foreach}
+              <div id="{$title|escape}Slider" class="yui-h-slider dateSlider" title="Range slider" style="display:none;">
+                  <div id="{$title|escape}slider_min_thumb" class="yui-slider-thumb"><img src="{$path}/images/yui/left-thumb.png"></div>
+                  <div id="{$title|escape}slider_max_thumb" class="yui-slider-thumb"><img src="{$path}/images/yui/right-thumb.png"></div>
+              </div>
               <input type="submit" value="{translate text='Set'}" id="{$title|escape}goButton">
             </form>
           </dd>

@@ -64,16 +64,23 @@
               </table>
             {/if}
             {if $dateRangeLimit}
+              {* Load the publication date slider UI widget *}
+              {js filename="yui/slider-min.js"}
+              {js filename="pubdate_slider.js"}
               <br/>
               <table summary="{translate text='adv_search_year'}">
                 <tr>
-                  <th align="right">{translate text="adv_search_year"}:&nbsp;</th>
+                  <th valign="top" align="right">{translate text="adv_search_year"}:&nbsp;</th>
                   <td>
                     <input type="hidden" name="daterange[]" value="publishDate"/>
                     <label for="publishDatefrom" class='yearboxlabel'>{translate text='From'}:</label>
                     <input type="text" size="4" maxlength="4" class="yearbox" name="publishDatefrom" id="publishDatefrom" value="{$dateRangeLimit.0|escape}" />
                     <label for="publishDateto" class='yearboxlabel'>{translate text='To'}:</label>
                     <input type="text" size="4" maxlength="4" class="yearbox" name="publishDateto" id="publishDateto" value="{$dateRangeLimit.1|escape}" />
+                    <div id="publishDateSlider" class="yui-h-slider dateSlider" title="Range slider" style="display:none;">
+                      <div id="publishDateslider_min_thumb" class="yui-slider-thumb"><img src="{$path}/images/yui/left-thumb.png"></div>
+                      <div id="publishDateslider_max_thumb" class="yui-slider-thumb"><img src="{$path}/images/yui/right-thumb.png"></div>
+                    </div>
                   </td>
                 </tr>
               </table>
