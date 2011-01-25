@@ -64,7 +64,7 @@ class MyResearch extends Action
         global $user;
         
         if (!UserAccount::isLoggedIn()) {
-            require_once 'Login.php';
+            include_once 'Login.php';
             Login::launch();
             exit();
         }
@@ -81,8 +81,12 @@ class MyResearch extends Action
         
         // Register Library Catalog Account
         if (isset($_POST['submit']) && !empty($_POST['submit'])) {
-            if ($this->catalog && isset($_POST['cat_username']) && isset($_POST['cat_password'])) {
-                $result = $this->catalog->patronLogin($_POST['cat_username'], $_POST['cat_password']);
+            if ($this->catalog && isset($_POST['cat_username'])
+                && isset($_POST['cat_password'])
+            ) {
+                $result = $this->catalog->patronLogin(
+                    $_POST['cat_username'], $_POST['cat_password']
+                );
                 if ($result && !PEAR::isError($result)) {
                     $user->cat_username = $_POST['cat_username'];
                     $user->cat_password = $_POST['cat_password'];
@@ -127,8 +131,9 @@ class MyResearch extends Action
 
         if ($this->catalog->status) {
             if ($user->cat_username) {
-                $patron = $this->catalog->patronLogin($user->cat_username,
-                    $user->cat_password);
+                $patron = $this->catalog->patronLogin(
+                    $user->cat_username, $user->cat_password
+                );
                 if (empty($patron) || PEAR::isError($patron)) {
                     // Problem logging in -- clear user credentials so they can be
                     // prompted again; perhaps their password has changed in the
