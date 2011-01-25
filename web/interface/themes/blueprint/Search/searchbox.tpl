@@ -1,4 +1,4 @@
-{js filename="autocomplete.js"}
+{if $autocomplete}{js filename="autocomplete.js"}{/if}
 
 <div class="searchform">
   {if $searchType == 'advanced'}
@@ -9,7 +9,7 @@
   {else}
     <form method="get" action="{$path}/Search/Results" name="searchForm" id="searchForm" class="search">
       <label for="searchForm_lookfor" class="offscreen">{translate text="Search Terms"}</label>
-      <input id="searchForm_lookfor" type="text" name="lookfor" size="40" value="{$lookfor|escape}" {if $autocomplete}class="autocomplete typeSelector:searchForm_type"{/if}/>
+      <input id="searchForm_lookfor" type="text" name="lookfor" size="40" value="{$lookfor|escape}" {if $autocomplete}class="autocomplete typeSelector:searchForm_type" autocomplete="off"{/if}/>
       <label for="searchForm_type" class="offscreen">{translate text="Search Type"}</label>
       <select id="searchForm_type" name="type">
       {foreach from=$basicSearchTypes item=searchDesc key=searchVal}
