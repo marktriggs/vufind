@@ -151,6 +151,7 @@ class JSON extends Action
     public function getItemStatuses()
     {
         global $configArray;
+        global $interface;
 
         include_once 'CatalogConnection.php';
 
@@ -165,6 +166,12 @@ class JSON extends Action
         // encounter IDs in the response -- anything left will be problems that
         // need special handling.
         $missingIds = array_flip($_GET['id']);
+
+        // Load messages for response:
+        $messages = array(
+            'available' => $interface->fetch('AJAX/status-available.tpl'),
+            'unavailable' => $interface->fetch('AJAX/status-unavailable.tpl')
+        );
 
         // Loop through all the status information that came back
         $statuses = array();
@@ -210,7 +217,7 @@ class JSON extends Action
                 $statuses[] = array(
                     'id'                   => $record[0]['id'],
                     'availability'         => ($available ? 'true' : 'false'),
-                    'availability_message' => ($available ? translate('Available') : translate('Checked Out')),
+                    'availability_message' => $messages[$available ? 'available' : 'unavailable'],
                     'location'             => $location,
                     'reserve'              => ($record[0]['reserve'] == 'Y' ? 'true' : 'false'),
                     'reserve_message'      => ($record[0]['reserve'] == 'Y' ? translate('on_reserve') : translate('Not On Reserve')),
@@ -224,7 +231,7 @@ class JSON extends Action
             $statuses[] = array(
                 'id'                   => $missingId,
                 'availability'         => 'false',
-                'availability_message' => translate('Checked Out'),
+                'availability_message' => $messages['unavailable'],
                 'location'             => translate('Unknown'),
                 'reserve'              => 'false',
                 'reserve_message'      => translate('Not On Reserve'),

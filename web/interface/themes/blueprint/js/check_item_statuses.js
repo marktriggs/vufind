@@ -17,7 +17,7 @@ function checkItemStatuses() {
                     $.each(response.data, function(i, result) {
                         $('#callnumber' + result.id).empty().append(result.callnumber);
                         $('#location' + result.id).empty().append(result.reserve == 'true' ? result.reserve_message : result.location);
-                        $('#status' + result.id).empty().append(result.availability_message).addClass(result.availability == 'true' ? 'available' : 'checkedout');
+                        $('#status' + result.id).empty().append(result.availability_message);
                     });
                 } else {
                     // display the error message on each of the ajax status place holder
