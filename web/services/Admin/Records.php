@@ -76,7 +76,21 @@ class Records extends Action
         }
     }
 
-    function editRecord($allowChanges = true)
+    /**
+     * Display (and possibly edit) a specified record.
+     *
+     * NOTE: It is not really possible to adequately edit a record based only on
+     * the data within Solr, so this function is dangerous -- it doesn't really do
+     * what it seems to do, and there really isn't any way to make it better.  It
+     * is currently disabled in the templates, but it should probably be removed
+     * entirely at some point.
+     *
+     * @param bool $allowChanges Is editing allowed?
+     *
+     * @return void
+     * @access public
+     */
+    public function editRecord($allowChanges = true)
     {
         global $interface;
 
@@ -126,13 +140,25 @@ class Records extends Action
         $interface->display('layout-admin.tpl');
     }
 
-    function viewRecord()
+    /**
+     * Display (without editing capabilities) a specified record.
+     *
+     * @return void
+     * @access public
+     */
+    public function viewRecord()
     {
         // View is exactly the same as edit, but it doesn't allow changes.
         $this->editRecord(false);
     }
 
-    function deleteRecord()
+    /**
+     * Delete a specified record.
+     *
+     * @return void
+     * @access public
+     */
+    public function deleteRecord()
     {
         global $interface;
 
@@ -149,7 +175,13 @@ class Records extends Action
         $interface->display('layout-admin.tpl');
     }
 
-    function deleteSuppressed()
+    /**
+     * Delete suppressed records.
+     *
+     * @return void
+     * @access public
+     */
+    public function deleteSuppressed()
     {
         global $interface;
         global $configArray;
@@ -186,32 +218,7 @@ class Records extends Action
                     $deletes[] = array('id' => $current);
                 }
 
-                /*
-                // Update Loading Page
-                $message = "Loading Result List";
-                echo '<Script language="JavaScript" type="text/javascript">' .
-                     "if (document.getElementById) document.getElementById('statusLabel').innerHTML = '$message';\n" .
-                     "if (document.all) document.all['statusLabel'].innerHTML = '$message';\n" .
-                     "if (document.layers) document.layers['statusLabel'].innerHTML = '$message';\n" .
-                     '</script>';
-                ob_flush();
-                flush();
-                */
-
                 $this->_db->commit();
-
-                /*
-                // Update Loading Page
-                $message = "Loading Result List";
-                echo '<Script language="JavaScript" type="text/javascript">' .
-                     "if (document.getElementById) document.getElementById('statusLabel').innerHTML = '$message';\n" .
-                     "if (document.all) document.all['statusLabel'].innerHTML = '$message';\n" .
-                     "if (document.layers) document.layers['statusLabel'].innerHTML = '$message';\n" .
-                     '</script>';
-                ob_flush();
-                flush();
-                */
-
                 $this->_db->optimize();
             }
         } else {
