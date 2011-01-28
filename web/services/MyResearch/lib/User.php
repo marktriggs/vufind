@@ -68,16 +68,41 @@ class User extends DB_DataObject
     ###END_AUTOCODE
     // @codingStandardsIgnoreEnd
 
-    function __sleep()
+    /**
+     * Sleep method for serialization.
+     *
+     * @return array
+     * @access public
+     * @todo   Investigate if this is still necessary.
+     */
+    public function __sleep()
     {
-        return array('id', 'username', 'password', 'cat_username', 'cat_password', 'firstname', 'lastname', 'email', 'college', 'major');
+        return array(
+            'id', 'username', 'password', 'cat_username', 'cat_password',
+            'firstname', 'lastname', 'email', 'college', 'major'
+        );
     }
 
-    function __wakeup()
+    /**
+     * Wakeup method for serialization.
+     *
+     * @return void
+     * @access public
+     * @todo   Investigate if this is still necessary.
+     */
+    public function __wakeup()
     {
     }
 
-    function hasResource($resource)
+    /**
+     * Is the specified resource already in the user's account?
+     *
+     * @param object $resource Resource to check.
+     *
+     * @return bool
+     * @access public
+     */
+    public function hasResource($resource)
     {
         $join = new User_resource();
         $join->user_id = $this->id;
@@ -89,7 +114,18 @@ class User extends DB_DataObject
         }
     }
 
-    function addResource($resource, $list, $tagArray, $notes)
+    /**
+     * Add a resource to the user's account.
+     *
+     * @param object $resource The resource to add.
+     * @param object $list     The list to store the resource in.
+     * @param array  $tagArray An array of tags to associate with the resource.
+     * @param string $notes    User notes about the resource.
+     *
+     * @return bool
+     * @access public
+     */
+    public function addResource($resource, $list, $tagArray, $notes)
     {
         $join = new User_resource();
         $join->user_id = $this->id;
@@ -132,9 +168,15 @@ class User extends DB_DataObject
     }
 
     /**
+     * Remove a resource from the user's account.
+     *
+     * @param object $resource The resource to remove.
+     *
+     * @return void
+     * @access public
      * @todo: delete any unused tags
      */
-    function removeResource($resource)
+    public function removeResource($resource)
     {
         // Remove the Saved Resource
         $join = new User_resource();
@@ -206,7 +248,15 @@ class User extends DB_DataObject
         return true;
     }
 
-    function getResources($tags = null)
+    /**
+     * Load information from the resource table associated with this user.
+     *
+     * @param array $tags Array of tags to use as a filter (optional).
+     *
+     * @return array
+     * @access public
+     */
+    public function getResources($tags = null)
     {
         $resourceList = array();
 
@@ -216,10 +266,12 @@ class User extends DB_DataObject
 
         if ($tags) {
             for ($i=0; $i<count($tags); $i++) {
-                $sql .= " AND resource.id IN (SELECT DISTINCT resource_tags.resource_id " .
+                $sql .= " AND resource.id IN " .
+                    "(SELECT DISTINCT resource_tags.resource_id " .
                     "FROM resource_tags, tags " .
                     "WHERE resource_tags.tag_id=tags.id AND tags.tag = '" .
-                    addslashes($tags[$i]) . "' AND resource_tags.user_id = '$this->id')";
+                    addslashes($tags[$i]) .
+                    "' AND resource_tags.user_id = '$this->id')";
             }
         }
 
