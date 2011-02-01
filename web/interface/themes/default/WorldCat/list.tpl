@@ -1,4 +1,4 @@
-<script language="JavaScript" type="text/javascript" src="{$path}/js/ajax_common.js"></script>
+{js filename="ajax_common.js"}
 
 {* Main Listing *}
 <div id="bd">
