@@ -107,9 +107,6 @@ class VuFindMailer
             'Content-Type' => 'text/plain; charset="UTF-8"');
         $result = $mail->send($to, $headers, $body);
 
-        // Restore standard error handling:
-        PEAR::setErrorHandling(PEAR_ERROR_CALLBACK, 'handlePEARError');
-
         return $result;
     }
 }
