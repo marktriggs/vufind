@@ -43,14 +43,32 @@ class ConfigurationReader
     private $_configurationFileContent;
     private $_sectionName;
 
+    /**
+     * Constructor
+     *
+     * @param string $pathToConfigurationFile Configuration file to load.
+     *
+     * @access public
+     */
     public function __construct($pathToConfigurationFile = '')
     {
-        $this->_setPathOfConfigurationFileIfParameterIsEmpty($pathToConfigurationFile);
+        $this->_setPathOfConfigurationFileIfParameterIsEmpty(
+            $pathToConfigurationFile
+        );
         $this->_checkIfConfigurationFileExists();
     }
 
-    private function _setPathOfConfigurationFileIfParameterIsEmpty($pathToConfigurationFile)
-    {
+    /**
+     * Initialize the "path to configuration file" property.
+     *
+     * @param string $pathToConfigurationFile Configuration file to load.
+     *
+     * @return void
+     * @access private
+     */
+    private function _setPathOfConfigurationFileIfParameterIsEmpty(
+        $pathToConfigurationFile
+    ) {
         if (empty($pathToConfigurationFile) || $pathToConfigurationFile == '') {
             $actualPath = dirname(__FILE__);
             // Handle forward and back slashes for Windows/Linux compatibility:
@@ -58,12 +76,17 @@ class ConfigurationReader
                 array("/sys/authn", "\sys\authn"),
                 array("/conf/config.ini", "\conf\config.ini"), $actualPath
             );
-
         } else {
             $this->_pathToConfigurationFile = $pathToConfigurationFile;
         }
     }
 
+    /**
+     * Throw an exception if the requested configuration file is missing.
+     *
+     * @return void
+     * @access private
+     */
     private function _checkIfConfigurationFileExists()
     {
         clearstatcache();
@@ -75,6 +98,14 @@ class ConfigurationReader
         }
     }
 
+    /**
+     * Read a section from the configuration file.
+     *
+     * @param string $sectionName Section to read
+     *
+     * @return array
+     * @access public
+     */
     public function readConfiguration($sectionName)
     {
         $this->_sectionName = $sectionName;
@@ -92,6 +123,12 @@ class ConfigurationReader
         return $this->_configurationFileContent[$this->_sectionName];
     }
 
+    /**
+     * Throw an exception if the configuration file was not successfully parsed.
+     *
+     * @return void
+     * @access private
+     */
     private function _checkIfParsingWasSuccessful()
     {
         if (!is_array($this->_configurationFileContent)) {
@@ -102,11 +139,17 @@ class ConfigurationReader
         }
     }
 
+    /**
+     * Throw an exception if the requested section is missing.
+     *
+     * @return void
+     * @access private
+     */
     private function _checkIfSectionExists()
     {
         if (empty($this->_configurationFileContent[$this->_sectionName])) {
             throw new UnexpectedValueException (
-                'Section ' . $this->_sectionName . ' does not exist! Could not proceed.'
+                "Section {$this->_sectionName} does not exist! Could not proceed."
             );
         }
     }

@@ -41,17 +41,31 @@ require_once 'sys/authn/FileParseException.php';
  */
 class ConfigurationReaderTest extends PHPUnit_Framework_TestCase
 {
-    private $pathToTestConfigurationFile;
+    private $_pathToTestConfigurationFile;
 
+    /**
+     * Constructor
+     *
+     * @access public
+     */
     public function __construct()
     {
-        $this->pathToTestConfigurationFile = dirname(__FILE__) . '/../../conf';
+        $this->_pathToTestConfigurationFile = dirname(__FILE__) . '/../../conf';
     }
 
-    public function test_no_configuration_file_found()
+    /**
+     * Make sure that an exception is thrown when a missing file is requested.
+     *
+     * @return void
+     * @access public
+     */
+    public function testNoConfigurationFileFound()
     {
         try {
-            $configurationReader = new ConfigurationReader($this->pathToTestConfigurationFile . "/authn/shib/this-file-do-not-exist.ini");
+            $configurationReader = new ConfigurationReader(
+                $this->_pathToTestConfigurationFile .
+                "/authn/shib/this-file-do-not-exist.ini"
+            );
         } catch (IOException $expected) {
             return;
         }
@@ -59,10 +73,19 @@ class ConfigurationReaderTest extends PHPUnit_Framework_TestCase
         $this->fail('An expected IOException has not been raised');
     }
 
-    public function test_unknown_section()
+    /**
+     * Make sure that an exception is thrown when a missing section is requested.
+     *
+     * @return void
+     * @access public
+     */
+    public function testUnknownSection()
     {
         try {
-            $configurationReader = new ConfigurationReader($this->pathToTestConfigurationFile . "/authn/shib/no-shibboleth-section-config.ini");
+            $configurationReader = new ConfigurationReader(
+                $this->_pathToTestConfigurationFile .
+                "/authn/shib/no-shibboleth-section-config.ini"
+            );
             $section = $configurationReader->readConfiguration("Shibboleth");
         } catch (UnexpectedValueException $expected) {
             return;
@@ -70,10 +93,19 @@ class ConfigurationReaderTest extends PHPUnit_Framework_TestCase
         $this->fail('An expected UnexpectedValueException has not been raised');
     }
 
-    public function test_empty_section()
+    /**
+     * Make sure that an exception is thrown when a section is completely empty.
+     *
+     * @return void
+     * @access public
+     */
+    public function testEmptySection()
     {
         try {
-            $configurationReader = new ConfigurationReader($this->pathToTestConfigurationFile . "/authn/shib/empty-shibboleth-section-config.ini");
+            $configurationReader = new ConfigurationReader(
+                $this->_pathToTestConfigurationFile .
+                "/authn/shib/empty-shibboleth-section-config.ini"
+            );
             $section = $configurationReader->readConfiguration("Shibboleth");
         } catch (UnexpectedValueException $expected) {
             return;
@@ -81,10 +113,19 @@ class ConfigurationReaderTest extends PHPUnit_Framework_TestCase
         $this->fail('An expected UnexpectedValueException has not been raised');
     }
 
-    public function test_with_attribute_value_but_missing_attributename()
+    /**
+     * Make sure that a parse exception is thrown when an attribute name is missing.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithAttributeValueButMissingAttributename()
     {
        try {
-            $configurationReader = new ConfigurationReader($this->pathToTestConfigurationFile . "/authn/shib/attribute-value-but-missing-attributename-config.ini");
+            $configurationReader = new ConfigurationReader(
+                $this->_pathToTestConfigurationFile .
+                "/authn/shib/attribute-value-but-missing-attributename-config.ini"
+            );
             $section = $configurationReader->readConfiguration("Shibboleth");
         } catch (FileParseException $expected) {
             return;
@@ -92,11 +133,18 @@ class ConfigurationReaderTest extends PHPUnit_Framework_TestCase
         $this->fail('An expected FileParseException has not been raised');
     }
 
-
-    public function test_with_correct_configuration_file()
+    /**
+     * Make sure that a known good configuration file loads correctly.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithCorrectConfigurationFile()
     {
         try {
-            $configurationReader = new ConfigurationReader($this->pathToTestConfigurationFile . "/config.ini");
+            $configurationReader = new ConfigurationReader(
+                $this->_pathToTestConfigurationFile . "/config.ini"
+            );
             $section = $configurationReader->readConfiguration("Extra_Config");
             $this->assertEquals($section['facets'], "facets.ini");
             $this->assertEquals($section['searches'], "searches.ini");
@@ -105,7 +153,13 @@ class ConfigurationReaderTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    public function test_without_commited_configuration_file()
+    /**
+     * Make sure that the default configuration file loads correctly.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithoutCommitedConfigurationFile()
     {
         try {
             $configurationReader = new ConfigurationReader();
