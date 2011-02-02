@@ -46,6 +46,7 @@ require_once 'sys/Logger.php';
 require_once 'sys/User.php';
 require_once 'sys/Translator.php';
 require_once 'sys/SearchObject/Factory.php';
+require_once 'sys/ConnectionManager.php';
 
 /**
  * Autoloader callback function (needed for YAML)
@@ -150,9 +151,7 @@ $translator = new I18N_Translator(
 $interface->setLanguage($language);
 
 // Setup Local Database Connection
-define('DB_DATAOBJECT_NO_OVERLOAD', 0);
-$options =& PEAR::getStaticProperty('DB_DataObject', 'options');
-$options = $configArray['Database'];
+ConnectionManager::connectToDatabase();
 
 // Initiate Session State
 $session_type = $configArray['Session']['type'];

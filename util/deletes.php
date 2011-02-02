@@ -55,6 +55,7 @@ if (!file_exists($filename)) {
  */
 require_once 'util.inc.php';        // set up util environment
 require_once 'sys/Solr.php';
+require_once 'sys/ConnectionManager.php';
 
 // Read Config file
 $configArray = parse_ini_file(dirname(__FILE__) . '/../web/conf/config.ini', true);
@@ -67,9 +68,7 @@ if ($configArray['System']['debug']) {
 }
 
 // Setup Local Database Connection
-define('DB_DATAOBJECT_NO_OVERLOAD', 0);
-$options =& PEAR::getStaticProperty('DB_DataObject', 'options');
-$options = $configArray['Database'];
+ConnectionManager::connectToDatabase();
 
 // Count deleted records:
 $i = 0;

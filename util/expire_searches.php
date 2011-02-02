@@ -32,6 +32,7 @@
 require_once 'util.inc.php';
 require_once 'services/MyResearch/lib/Search.php';
 require_once 'sys/ConfigArray.php';
+require_once 'sys/ConnectionManager.php';
 
 // Use command line value as expiration age, or default to 2.
 $daysOld = isset($argv[1]) ? intval($argv[1]) : 2;
@@ -45,9 +46,7 @@ if ($daysOld < 2) {
 $configArray = readConfig();
 
 // Setup Local Database Connection
-define('DB_DATAOBJECT_NO_OVERLOAD', 0);
-$options =& PEAR::getStaticProperty('DB_DataObject', 'options');
-$options = $configArray['Database'];
+ConnectionManager::connectToDatabase();
 
 // Delete the expired searches -- this cleans up any junk left in the database
 // from old search histories that were not caught by the session garbage collector.

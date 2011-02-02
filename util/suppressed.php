@@ -35,6 +35,7 @@ ini_set('max_execution_time', '3600');
 require_once 'util.inc.php';
 require_once 'sys/Solr.php';
 require_once 'CatalogConnection.php';
+require_once 'sys/ConnectionManager.php';
 
 // Read Config file
 $configArray = parse_ini_file('../web/conf/config.ini', true);
@@ -59,9 +60,7 @@ try {
 }
 
 // Setup Local Database Connection
-define('DB_DATAOBJECT_NO_OVERLOAD', 0);
-$options =& PEAR::getStaticProperty('DB_DataObject', 'options');
-$options = $configArray['Database'];
+ConnectionManager::connectToDatabase();
 
 // Get Suppressed Records and Delete from index
 if ($catalog->status) {

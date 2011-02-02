@@ -33,6 +33,7 @@ require_once $importPath . '/../util/util.inc.php';
 
 require_once 'sys/Proxy_Request.php';
 require_once 'sys/Solr.php';
+require_once 'sys/ConnectionManager.php';
 
 // Read Config file
 $configArray = parse_ini_file($importPath . '/../web/conf/config.ini', true);
@@ -70,9 +71,7 @@ if (!isset($argv[2]) || $switchError) {
 }
 
 // Setup Local Database Connection
-define('DB_DATAOBJECT_NO_OVERLOAD', 0);
-$options =& PEAR::getStaticProperty('DB_DataObject', 'options');
-$options = $configArray['Database'];
+ConnectionManager::connectToDatabase();
 
 // Process the file (or die trying):
 $xml = processXSLT($argv[1], $argv[2]);
