@@ -129,9 +129,6 @@ if (isset($configArray['Proxy']['host'])) {
     stream_context_get_default($proxy);
 }
 
-// Include Search Engine Class
-require_once 'sys/' . $configArray['Index']['engine'] . '.php';
-
 // Setup Translator
 if (isset($_POST['mylang'])) {
     $language = $_POST['mylang'];

@@ -25,7 +25,6 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/tracking_record_changes Wiki
  */
-require_once 'sys/SolrAuth.php';
 require_once 'services/OAI/lib/OAIServer.php';
 
 /**
@@ -65,16 +64,13 @@ class OAIServer_Auth extends OAIServer
     protected function initializeIndex()
     {
         global $configArray;
-        
-        $this->index = new SolrAuth($configArray['Index']['url']);
-        if ($configArray['System']['debug']) {
-            $this->index->debug = true;
-        }
+
+        $this->index = ConnectionManager::connectToIndex('SolrAuth');
     }
 
     /**
-     * Load data from the OAI section of config.ini.  (This is called by the 
-     * constructor and is only a separate method to allow easy override by child 
+     * Load data from the OAI section of config.ini.  (This is called by the
+     * constructor and is only a separate method to allow easy override by child
      * classes).
      *
      * @return void

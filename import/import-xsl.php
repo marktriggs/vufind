@@ -32,7 +32,6 @@ $importPath = dirname(__FILE__);
 require_once $importPath . '/../util/util.inc.php';
 
 require_once 'sys/Proxy_Request.php';
-require_once 'sys/Solr.php';
 require_once 'sys/ConnectionManager.php';
 
 // Read Config file
@@ -81,7 +80,7 @@ if (!$xml) {
 
 // Save the results (or just display them, if in test mode):
 if (!$testMode) {
-    $solr = new Solr($configArray['Index']['url']);
+    $solr = ConnectionManager::connectToIndex('Solr');
     $result = $solr->saveRecord($xml);
     if (!PEAR::isError($result)) {
         echo "Successfully imported {$argv[1]}...\n";

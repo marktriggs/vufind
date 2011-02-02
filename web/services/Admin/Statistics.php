@@ -27,7 +27,6 @@
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
 require_once 'Action.php';
-require_once 'sys/SolrStats.php';
 
 /**
  * Statistics action for Admin module
@@ -53,10 +52,7 @@ class Statistics extends Action
         global $interface;
 
         // Load SOLR Statistics
-        $solr = new SolrStats($configArray['Statistics']['solr']);
-        if ($configArray['System']['debug']) {
-            $solr->debug = true;
-        }
+        $solr = ConnectionManager::connectToIndex('SolrStats');
 
         // All Statistics
         $result = $solr->search(

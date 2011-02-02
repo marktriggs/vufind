@@ -25,7 +25,7 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_search_object Wiki
  */
-require_once "sys/SolrAuth.php";
+require_once 'sys/Proxy_Request.php';   // needed for constant definitions
 require_once 'sys/SearchObject/Base.php';
 require_once 'RecordDrivers/Factory.php';
 
@@ -80,7 +80,7 @@ class SearchObject_SolrAuth extends SearchObject_Base
         global $configArray;
 
         // Initialise the index
-        $this->_indexEngine = new SolrAuth($configArray['Index']['url']);
+        $this->_indexEngine = ConnectionManager::connectToIndex('SolrAuth');
 
         // Set up appropriate results action:
         $this->resultsModule = 'Authority';
@@ -121,13 +121,6 @@ class SearchObject_SolrAuth extends SearchObject_Base
 
         // Load Spelling preferences
         $this->spellcheck    = false;
-
-        // Debugging
-        if ($configArray['System']['debug']) {
-            $this->_indexEngine->debug = true;
-        } else {
-            $this->_indexEngine->debug = false;
-        }
     }
 
     /**

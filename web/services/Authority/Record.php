@@ -49,18 +49,12 @@ class Record extends Base
      */
     public function __construct()
     {
-        global $configArray;
         global $interface;
 
         $interface->assign('id', $_GET['id']);
 
         // Setup Search Engine Connection
-        $class = 'SolrAuth';
-        $url = $configArray['Index']['url'];
-        $this->db = new $class($url);
-        if ($configArray['System']['debug']) {
-            $this->db->debug = true;
-        }
+        $this->db = ConnectionManager::connectToIndex('SolrAuth');
 
         parent::__construct();
     }

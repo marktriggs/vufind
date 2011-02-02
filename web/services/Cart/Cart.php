@@ -78,16 +78,10 @@ class Cart extends Action
      */
     public function getCartAsHTML()
     {
-        global $configArray;
         global $interface;
 
         // Setup Search Engine Connection
-        $class = $configArray['Index']['engine'];
-        $url = $configArray['Index']['url'];
-        $db = new $class($url);
-        if ($configArray['System']['debug']) {
-            $db->debug = true;
-        }
+        $db = ConnectionManager::connectToIndex();
 
         // fetch records from search engine
         // FIXME: currently only work with VuFind records

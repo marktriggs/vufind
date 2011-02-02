@@ -50,7 +50,6 @@ class Records extends Action
      */
     public function launch()
     {
-        global $configArray;
         global $interface;
 
         // Run the specified method if it exists...  but don't run the launch
@@ -59,12 +58,7 @@ class Records extends Action
             && method_exists($this, $_GET['util'])
         ) {
             // Setup Search Engine Connection
-            $class = $configArray['Index']['engine'];
-            $url = $configArray['Index']['url'];
-            $this->_db = new $class($url);
-            if ($configArray['System']['debug']) {
-                $this->_db->debug = true;
-            }
+            $this->_db = ConnectionManager::connectToIndex();
 
             $this->$_GET['util']();
         } else {
@@ -182,7 +176,6 @@ class Records extends Action
     public function deleteSuppressed()
     {
         global $interface;
-        global $configArray;
 
         ini_set('memory_limit', '50M');
         ini_set('max_execution_time', '3600');

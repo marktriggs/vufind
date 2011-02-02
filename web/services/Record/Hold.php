@@ -79,7 +79,6 @@ class Hold extends Action
     private function _placeHold()
     {
         global $interface;
-        global $configArray;
 
         $interface->assign('id', $_GET['id']);
         $holding = $this->_catalog->getHolding($_GET['id']);
@@ -99,8 +98,7 @@ class Hold extends Action
             }
         }
 
-        $class = $configArray['Index']['engine'];
-        $db = new $class($configArray['Index']['url']);
+        $db = ConnectionManager::connectToIndex();
         $record = $db->getRecord($_GET['id']);
         if ($record) {
             $interface->assign('record', $record);

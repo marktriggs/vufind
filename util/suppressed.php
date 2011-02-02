@@ -33,18 +33,13 @@ ini_set('max_execution_time', '3600');
  * Set up util environment
  */
 require_once 'util.inc.php';
-require_once 'sys/Solr.php';
 require_once 'sys/ConnectionManager.php';
 
 // Read Config file
 $configArray = parse_ini_file('../web/conf/config.ini', true);
 
 // Setup Solr Connection
-$url = $configArray['Index']['url'];
-$solr = new Solr($url);
-if ($configArray['System']['debug']) {
-    $solr->debug = true;
-}
+$solr = ConnectionManager::connectToIndex('Solr');
 
 // Make ILS Connection
 $catalog = ConnectionManager::connectToCatalog();

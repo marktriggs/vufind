@@ -28,8 +28,6 @@
  */
 require_once 'Action.php';
 
-require_once 'sys/SolrStats.php';
-
 /**
  * Home action for Record module
  *

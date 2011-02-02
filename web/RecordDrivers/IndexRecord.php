@@ -1232,16 +1232,9 @@ class IndexRecord implements RecordInterface
      */
     protected function getIndexEngine()
     {
-        global $configArray;
-
         // Build the index engine if we don't already have one:
         if (!$this->index) {
-            $class = $configArray['Index']['engine'];
-            $url = $configArray['Index']['url'];
-            $this->index = new $class($url);
-            if ($configArray['System']['debug']) {
-                $this->index->debug = true;
-            }
+            $this->index = ConnectionManager::connectToIndex();
         }
 
         return $this->index;

@@ -68,11 +68,7 @@ class MyResearch extends Action
         }
 
         // Setup Search Engine Connection
-        $class = $configArray['Index']['engine'];
-        $this->db = new $class($configArray['Index']['url']);
-        if ($configArray['System']['debug']) {
-            $this->db->debug = true;
-        }
+        $this->db = ConnectionManager::connectToIndex();
 
         // Connect to Database
         $this->catalog = ConnectionManager::connectToCatalog();

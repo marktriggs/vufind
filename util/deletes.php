@@ -54,18 +54,13 @@ if (!file_exists($filename)) {
  * Set up util environment
  */
 require_once 'util.inc.php';        // set up util environment
-require_once 'sys/Solr.php';
 require_once 'sys/ConnectionManager.php';
 
 // Read Config file
 $configArray = parse_ini_file(dirname(__FILE__) . '/../web/conf/config.ini', true);
 
 // Setup Solr Connection
-$url = $configArray['Index']['url'];
-$solr = new Solr($url);
-if ($configArray['System']['debug']) {
-    $solr->debug = true;
-}
+$solr = ConnectionManager::connectToIndex('Solr');
 
 // Setup Local Database Connection
 ConnectionManager::connectToDatabase();

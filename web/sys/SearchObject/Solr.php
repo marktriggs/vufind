@@ -25,7 +25,7 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_search_object Wiki
  */
-require_once 'sys/Solr.php';
+require_once 'sys/Proxy_Request.php';   // needed for constant definitions
 require_once 'sys/SearchObject/Base.php';
 require_once 'RecordDrivers/Factory.php';
 
@@ -89,11 +89,9 @@ class SearchObject_Solr extends SearchObject_Base
         parent::__construct();
 
         global $configArray;
-        // Include our solr index
-        $class = $configArray['Index']['engine'];
-        include_once "sys/$class.php";
+
         // Initialise the index
-        $this->indexEngine = new $class($configArray['Index']['url']);
+        $this->indexEngine = ConnectionManager::connectToIndex();
 
         // Get default facet settings
         $this->allFacetSettings = getExtraConfigArray('facets');
@@ -148,13 +146,6 @@ class SearchObject_Solr extends SearchObject_Base
         $this->spellSimple   = $configArray['Spelling']['simple'];
         $this->spellSkipNumeric = isset($configArray['Spelling']['skip_numeric']) ?
             $configArray['Spelling']['skip_numeric'] : true;
-
-        // Debugging
-        if ($configArray['System']['debug']) {
-            $this->indexEngine->debug = true;
-        } else {
-            $this->indexEngine->debug = false;
-        }
     }
 
     /**

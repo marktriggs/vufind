@@ -74,12 +74,7 @@ class Record extends Action
         $interface->assign('id', $_REQUEST['id']);
 
         // Setup Search Engine Connection
-        $class = $configArray['Index']['engine'];
-        $url = $configArray['Index']['url'];
-        $this->db = new $class($url);
-        if ($configArray['System']['debug']) {
-            $this->db->debug = true;
-        }
+        $this->db = ConnectionManager::connectToIndex();
 
         // Retrieve the record from the index
         if (!($record = $this->db->getRecord($_REQUEST['id']))) {
@@ -194,10 +189,7 @@ class Record extends Action
 
         if ($configArray['Statistics']['enabled']) {
             // Setup Statistics Index Connection
-            $solrStats = new SolrStats($configArray['Statistics']['solr']);
-            if ($configArray['System']['debug']) {
-                $solrStats->debug = true;
-            }
+            $solrStats = ConnectionManager::connectToIndex('SolrStats');
 
             // Save Record View
             $solrStats->saveRecordView($this->recordDriver->getUniqueID());

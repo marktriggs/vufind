@@ -105,14 +105,8 @@ class Demo implements DriverInterface
      */
     private function _prepSolr()
     {
-        global $configArray;
-
         // Create or solr connection
-        $class = $configArray['Index']['engine'];
-        $this->_db = new $class($configArray['Index']['url']);
-        if ($configArray['System']['debug']) {
-            $this->_db->debug = true;
-        }
+        $this->_db = ConnectionManager::connectToIndex();
 
         // Get the total # of records in the system
         $result = $this->_db->search('*:*');

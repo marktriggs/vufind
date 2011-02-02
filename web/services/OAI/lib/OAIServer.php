@@ -261,13 +261,7 @@ class OAIServer
      */
     protected function initializeIndex()
     {
-        global $configArray;
-
-        $class = $configArray['Index']['engine'];
-        $this->index = new $class($configArray['Index']['url']);
-        if ($configArray['System']['debug']) {
-            $this->index->debug = true;
-        }
+        $this->index = ConnectionManager::connectToIndex();
     }
 
     /**

@@ -26,7 +26,6 @@
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
 require_once 'Action.php';
-require_once 'sys/SolrAuth.php';
 
 /**
  * Base Class for Authority module

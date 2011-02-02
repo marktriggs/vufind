@@ -102,11 +102,7 @@ class Save extends Action
         }
 
         // Setup Search Engine Connection
-        $class = $configArray['Index']['engine'];
-        $db = new $class($configArray['Index']['url']);
-        if ($configArray['System']['debug']) {
-            $db->debug = true;
-        }
+        $db = ConnectionManager::connectToIndex();
 
         // Get Record Information
         $details = $db->getRecord($_GET['id']);

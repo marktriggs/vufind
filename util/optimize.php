@@ -32,17 +32,13 @@ ini_set('max_execution_time', '3600');
  * Set up util environment
  */
 require_once 'util.inc.php';
-require_once 'sys/Solr.php';
+require_once 'sys/ConnectionManager.php';
 
 // Read Config file
 $configArray = parse_ini_file(dirname(__FILE__) . '/../web/conf/config.ini', true);
 
 // Setup Solr Connection -- Allow core to be specified as first command line param.
-$url = $configArray['Index']['url'];
-$solr = new Solr($url, isset($argv[1]) ? $argv[1] : '');
-if ($configArray['System']['debug']) {
-    $solr->debug = true;
-}
+$solr = ConnectionManager::connectToIndex('Solr', isset($argv[1]) ? $argv[1] : '');
 
 // Commit and Optimize the Solr Index
 $solr->commit();

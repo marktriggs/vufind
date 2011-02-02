@@ -50,8 +50,7 @@ class Results extends Home
         global $configArray;
 
         // Connect to Solr:
-        $class = $configArray['Index']['engine'];
-        $db = new $class($configArray['Index']['url']);
+        $db = ConnectionManager::connectToIndex();
 
         // Process incoming parameters:
         $source = isset($_GET['source']) ? $_GET['source'] : false;

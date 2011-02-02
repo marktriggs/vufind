@@ -83,14 +83,8 @@ class OpenSearch extends Action
     /* Unused, incomplete method -- commented out 10/9/09 to prevent confusion:
     private function _search()
     {
-        global $configArray;
-
         // Setup Search Engine Connection
-        $class = $configArray['Index']['engine'];
-        $db = new $class($configArray['Index']['url']);
-        if ($configArray['System']['debug']) {
-            $db->debug = true;
-        }
+        $db = ConnectionManager::connectToIndex();
 
         $search = array();
         $search[] = array('lookfor' => $_GET['lookfor'],

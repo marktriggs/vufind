@@ -85,5 +85,47 @@ class ConnectionManager
         $options =& PEAR::getStaticProperty('DB_DataObject', 'options');
         $options = $configArray['Database'];
     }
+
+    /**
+     * Connect to the index.
+     *
+     * @param string $type Index type to connect to (null for config.ini default).
+     * @param string $core Index core to use (null for default).
+     * @param string $url  Connection URL for index (null for config.ini default).
+     *
+     * @return object
+     * @access public
+     */
+    public static function connectToIndex($type = null, $core = null, $url = null)
+    {
+        global $configArray;
+
+        // Load config.ini settings for missing parameters:
+        if ($type == null) {
+            $type = $configArray['Index']['engine'];
+        }
+        if ($url == null) {
+            // Load appropriate default server URL based on index type:
+            $url = ($type == 'SolrStats')
+                ? $configArray['Statistics']['solr'] : $configArray['Index']['url'];
+        }
+
+        // Load the index connection code:
+        include_once 'sys/' . $type . '.php';
+
+        // Construct the object appropriately based on the $core setting:
+        if (empty($core)) {
+            $index = new $type($url);
+        } else {
+            $index = new $type($url, $core);
+        }
+
+        // Turn on debug mode if necessary:
+        if ($configArray['System']['debug']) {
+            $index->debug = true;
+        }
+
+        return $index;
+    }
 }
 ?>

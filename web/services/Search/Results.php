@@ -30,7 +30,6 @@ require_once 'Action.php';
 require_once 'services/MyResearch/lib/User.php';
 require_once 'services/MyResearch/lib/Search.php';
 
-require_once 'sys/SolrStats.php';
 require_once 'sys/Pager.php';
 require_once 'sys/ResultScroller.php';
 
@@ -93,10 +92,7 @@ class Results extends Action
         // TODO : Stats, move inside the search object
         // Setup Statistics Index Connection
         if ($configArray['Statistics']['enabled']) {
-            $this->_solrStats = new SolrStats($configArray['Statistics']['solr']);
-            if ($configArray['System']['debug']) {
-                $this->_solrStats->debug = true;
-            }
+            $this->_solrStats = ConnectionManager::connectToIndex('SolrStats');
         }
 
         // Set Interface Variables
