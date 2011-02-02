@@ -28,8 +28,6 @@
  */
 require_once 'Action.php';
 
-require_once 'CatalogConnection.php';
-
 require_once 'sys/Pager.php';
 
 /**
@@ -55,8 +53,8 @@ class Reserves extends Action
         global $interface;
         global $configArray;
 
-        $catalog = new CatalogConnection($configArray['Catalog']['driver']);
-        if (!$catalog->status) {
+        $catalog = ConnectionManager::connectToCatalog();
+        if (!$catalog || !$catalog->status) {
             PEAR::raiseError(new PEAR_Error('Cannot Load Catalog Driver'));
         }
 

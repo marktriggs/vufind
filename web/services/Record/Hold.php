@@ -26,8 +26,6 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-require_once 'CatalogConnection.php';
-
 require_once 'Action.php';
 
 /**
@@ -52,20 +50,7 @@ class Hold extends Action
      */
     public function launch()
     {
-        global $configArray;
-
-        try {
-            $this->_catalog = new CatalogConnection(
-                $configArray['Catalog']['driver']
-            );
-        } catch (PDOException $e) {
-            // What should we do with this error?
-            if ($configArray['System']['debug']) {
-                echo '<pre>';
-                echo 'DEBUG: ' . $e->getMessage();
-                echo '</pre>';
-            }
-        }
+        $this->_catalog = ConnectionManager::connectToCatalog();
 
         // Check How to Process Hold
         if (method_exists($this->_catalog->driver, 'placeHold')) {

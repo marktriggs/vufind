@@ -26,8 +26,6 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-require_once 'CatalogConnection.php';
-
 require_once 'Record.php';
 
 require_once 'sys/Mailer.php';
@@ -120,9 +118,8 @@ class SMS extends Record
         global $interface;
 
         // Get Holdings
-        try {
-            $catalog = new CatalogConnection($configArray['Catalog']['driver']);
-        } catch (PDOException $e) {
+        $catalog = ConnectionManager::connectToCatalog();
+        if (!$catalog || !$catalog->status) {
             return new PEAR_Error('Cannot connect to ILS');
         }
         $holdings = $catalog->getStatus($_GET['id']);

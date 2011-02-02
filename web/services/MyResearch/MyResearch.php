@@ -28,8 +28,6 @@
  */
 require_once 'Action.php';
 
-require_once 'CatalogConnection.php';
-
 require_once 'services/MyResearch/lib/User.php';
 require_once 'services/MyResearch/lib/Resource.php';
 
@@ -62,13 +60,13 @@ class MyResearch extends Action
         global $interface;
         global $configArray;
         global $user;
-        
+
         if (!UserAccount::isLoggedIn()) {
             include_once 'Login.php';
             Login::launch();
             exit();
         }
-        
+
         // Setup Search Engine Connection
         $class = $configArray['Index']['engine'];
         $this->db = new $class($configArray['Index']['url']);
@@ -77,8 +75,8 @@ class MyResearch extends Action
         }
 
         // Connect to Database
-        $this->catalog = new CatalogConnection($configArray['Catalog']['driver']);
-        
+        $this->catalog = ConnectionManager::connectToCatalog();
+
         // Register Library Catalog Account
         if (isset($_POST['submit']) && !empty($_POST['submit'])) {
             if ($this->catalog && isset($_POST['cat_username'])
@@ -118,7 +116,7 @@ class MyResearch extends Action
     }
 
     /**
-     * Log the current user into the catalog using stored credentials; if this 
+     * Log the current user into the catalog using stored credentials; if this
      * fails, clear the user's stored credentials so they can enter new, corrected
      * ones.
      *
@@ -145,7 +143,7 @@ class MyResearch extends Action
                 }
             }
         }
-        
+
         return false;
     }
 }

@@ -28,8 +28,6 @@
  */
 require_once 'Action.php';
 
-require_once 'CatalogConnection.php';
-
 /**
  * Records action for Admin module
  *
@@ -190,16 +188,7 @@ class Records extends Action
         ini_set('max_execution_time', '3600');
 
         // Make ILS Connection
-        try {
-            $catalog = new CatalogConnection($configArray['Catalog']['driver']);
-        } catch (PDOException $e) {
-            // What should we do with this error?
-            if ($configArray['System']['debug']) {
-                echo '<pre>';
-                echo 'DEBUG: ' . $e->getMessage();
-                echo '</pre>';
-            }
-        }
+        $catalog = ConnectionManager::connectToCatalog();
 
         /*
         // Display Progress Page
@@ -210,7 +199,7 @@ class Records extends Action
 
         // Get Suppressed Records and Delete from index
         $deletes = array();
-        if ($catalog->status) {
+        if ($catalog && $catalog->status) {
             $result = $catalog->getSuppressedRecords();
             if (!PEAR::isError($result)) {
                 $status = $this->_db->deleteRecords($result);

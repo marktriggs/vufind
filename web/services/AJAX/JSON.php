@@ -153,9 +153,10 @@ class JSON extends Action
         global $configArray;
         global $interface;
 
-        include_once 'CatalogConnection.php';
-
-        $catalog = new CatalogConnection($configArray['Catalog']['driver']);
+        $catalog = ConnectionManager::connectToCatalog();
+        if (!$catalog || !$catalog->status) {
+            $this->output(translate('An error has occurred'), JSON::STATUS_ERROR);
+        }
         $results = $catalog->getStatuses($_GET['id']);
         if (PEAR::isError($results)) {
             $this->output($results->getMessage(), JSON::STATUS_ERROR);

@@ -26,7 +26,6 @@
  * @link     http://vufind.org/wiki/building_an_authentication_handler Wiki
  */
 require_once 'Authentication.php';
-require_once 'CatalogConnection.php';
 
 /**
  * ILS authentication module.
@@ -56,9 +55,9 @@ class ILSAuthentication implements Authentication
             $user = new PEAR_Error('authentication_error_blank');
         } else {
             // Connect to catalog:
-            $catalog = new CatalogConnection($configArray['Catalog']['driver']);
+            $catalog = ConnectionManager::connectToCatalog();
 
-            if ($catalog->status) {
+            if ($catalog && $catalog->status) {
                 $patron = $catalog->patronLogin($username, $password);
                 if ($patron && !PEAR::isError($patron)) {
                     $user = $this->_processILSUser($patron);

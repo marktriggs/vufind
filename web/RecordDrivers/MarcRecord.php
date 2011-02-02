@@ -42,7 +42,6 @@ require_once 'RecordDrivers/IndexRecord.php';
 class MarcRecord extends IndexRecord
 {
     protected $marcRecord;
-    protected $catalog = null;
 
     /**
      * Constructor.  We build the object using all the data retrieved 
@@ -422,34 +421,6 @@ class MarcRecord extends IndexRecord
     }
 
     /**
-     * Gain access to the ILS driver.  Returns false if driver unavailable.
-     *
-     * @return object
-     * @access protected
-     */
-    protected function getCatalogConnection()
-    {
-        global $configArray;
-
-        if (is_null($this->catalog)) {
-            try {
-                $this->catalog = new CatalogConnection(
-                    $configArray['Catalog']['driver']
-                );
-            } catch (PDOException $e) {
-                // What should we do with this error?
-                if ($configArray['System']['debug']) {
-                    echo '<pre>';
-                    echo 'DEBUG: ' . $e->getMessage();
-                    echo '</pre>';
-                }
-                $this->catalog = false;
-            }
-        }
-        return $this->catalog;
-    }
-
-    /**
      * Get the main corporate author (if any) for the record.
      *
      * @return string
@@ -603,7 +574,7 @@ class MarcRecord extends IndexRecord
     {
         // Get Acquisitions Data
         $id = $this->getUniqueID();
-        $catalog = $this->getCatalogConnection();
+        $catalog = ConnectionManager::connectToCatalog();
         if ($catalog && $catalog->status) {
             $result = $catalog->getPurchaseHistory($id);
             if (PEAR::isError($result)) {
@@ -625,7 +596,7 @@ class MarcRecord extends IndexRecord
     {
         // Get Holdings Data
         $id = $this->getUniqueID();
-        $catalog = $this->getCatalogConnection();
+        $catalog = ConnectionManager::connectToCatalog();
         if ($catalog && $catalog->status) {
             $result = $catalog->getHolding($id);
             if (PEAR::isError($result)) {

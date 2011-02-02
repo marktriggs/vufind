@@ -38,6 +38,38 @@
 class ConnectionManager
 {
     /**
+     * Connect to the catalog.
+     *
+     * @return mixed CatalogConnection object on success, boolean false on error
+     * @access public
+     */
+    public static function connectToCatalog()
+    {
+        global $configArray;
+
+        // Use a static variable for the connection -- we never want more than one
+        // connection open at a time, so if we have previously connected, we will
+        // remember the old connection and return that instead of starting over.
+        static $catalog = false;
+        if ($catalog === false) {
+            include_once 'CatalogConnection.php';
+
+            try {
+                $catalog = new CatalogConnection($configArray['Catalog']['driver']);
+            } catch (PDOException $e) {
+                // What should we do with this error?
+                if ($configArray['System']['debug']) {
+                    echo '<pre>';
+                    echo 'DEBUG: ' . $e->getMessage();
+                    echo '</pre>';
+                }
+            }
+        }
+
+        return $catalog;
+    }
+
+    /**
      * Connect to the database.
      *
      * @return void

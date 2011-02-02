@@ -28,8 +28,6 @@
  */
 require_once 'Action.php';
 
-require_once 'CatalogConnection.php';
-
 require_once 'sys/Pager.php';
 require_once 'sys/ConfigArray.php';
 
@@ -56,8 +54,8 @@ class NewItem extends Action
         global $configArray;
         global $interface;
 
-        $catalog = new CatalogConnection($configArray['Catalog']['driver']);
-        if (!$catalog->status) {
+        $catalog = ConnectionManager::connectToCatalog();
+        if (!$catalog || !$catalog->status) {
             PEAR::raiseError(new PEAR_Error('Cannot Load Catalog Driver'));
         }
 

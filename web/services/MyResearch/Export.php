@@ -28,7 +28,6 @@
 
 require_once 'Action.php';
 require_once 'sys/Language.php';
-require_once 'CatalogConnection.php';
 require_once 'services/MyResearch/MyResearch.php';
 require_once 'RecordDrivers/Factory.php';
 

@@ -26,8 +26,6 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-require_once 'CatalogConnection.php';
-
 require_once 'Record.php';
 
 /**
