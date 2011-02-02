@@ -26,8 +26,8 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/system_classes#index_interface Wiki
  */
-require_once 'sys/IndexEngine.php';
 require_once 'sys/Proxy_Request.php';
+require_once 'sys/IndexEngine.php';
 require_once 'sys/ConfigArray.php';
 require_once 'sys/SolrUtils.php';
 
