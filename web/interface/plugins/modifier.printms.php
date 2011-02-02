@@ -58,18 +58,23 @@ function smarty_modifier_printms($ms)
             $days = ($days % 365);
 
             if ($years) {
-                return sprintf("%dyears %ddays %dhours %dminutes %dseconds",
-                               $years, $days, $hours, $minutes, $seconds);
+                return sprintf(
+                    "%d years %d days %d hours %d minutes %d seconds",
+                    $years, $days, $hours, $minutes, $seconds
+                );
             } else {
-                return sprintf("%ddays %dhours %dminutes %dseconds",
-                               $days, $hours, $minutes, $seconds);
+                return sprintf(
+                    "%d days %d hours %d minutes %d seconds",
+                    $days, $hours, $minutes, $seconds
+                );
             }
         } else {
-            return sprintf("%dhours %dminutes %dseconds",
-                           $hours, $minutes, $seconds);
+            return sprintf(
+                "%d hours %d minutes %d seconds", $hours, $minutes, $seconds
+            );
         }
     } else {
-        return sprintf("%dminutes %dseconds", $minutes, $seconds);
+        return sprintf("%d minutes %d seconds", $minutes, $seconds);
     }
 }
 ?>
