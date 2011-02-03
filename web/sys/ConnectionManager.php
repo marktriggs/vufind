@@ -83,7 +83,40 @@ class ConnectionManager
             define('DB_DATAOBJECT_NO_OVERLOAD', 0);
         }
         $options =& PEAR::getStaticProperty('DB_DataObject', 'options');
+
+        // If we're using PostgreSQL, we need to set up some extra configuration
+        // settings so that unique ID sequences are properly registered:
+        if (substr($configArray['Database']['database'], 0, 5) == 'pgsql') {
+            $tables = array(
+                'comments', 'oai_resumption', 'resource', 'resource_tags', 'search',
+                'session', 'tags', 'user', 'user_list', 'user_resource'
+            );
+            foreach ($tables as $table) {
+                $configArray['Database']['sequence_' . $table] = $table . '_id_seq';
+            }
+        }
+
         $options = $configArray['Database'];
+
+        if (substr($configArray['Database']['database'], 0, 5) == 'mysql') {
+            // If we're using MySQL, we need to make certain adjustments (ANSI
+            // quotes, pipes as concatenation operator) for proper compatibility
+            // with code built for other database systems like PostgreSQL or Oracle.
+            $obj = new DB_DataObject();
+            $conn = $obj->getDatabaseConnection();
+            $conn->query("SET @@SESSION.sql_mode='ANSI_QUOTES,PIPES_AS_CONCAT'");
+        } else if (substr($configArray['Database']['database'], 0, 4) == 'oci8') {
+            // If we are using Oracle, set some portability values:
+            $temp_db = new DB_DataObject();
+            $db = &$temp_db->getDatabaseConnection();
+            $db->setOption(
+                'portability', DB_PORTABILITY_NUMROWS | DB_PORTABILITY_NULL_TO_EMPTY
+            );
+            // Update the date format to fix issues with Oracle being evil
+            $db->query(
+                "ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'"
+            );
+        }
     }
 
     /**

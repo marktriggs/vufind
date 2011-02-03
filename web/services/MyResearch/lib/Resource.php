@@ -67,14 +67,15 @@ class Resource extends DB_DataObject
     {
         $tagList = array();
 
-        $query = "SELECT MIN(tags.id), tags.tag, COUNT(*) as cnt " .
-                 "FROM tags, resource_tags, resource " .
-                 "WHERE tags.id = resource_tags.tag_id " .
-                 "AND resource.id = resource_tags.resource_id " .
-                 "AND resource.record_id = '" . $this->escape($this->record_id) . "' " .
-                 "AND resource.source = '" . $this->escape($this->source) . "' " .
-                 "GROUP BY tags.tag " .
-                 "ORDER BY cnt DESC, tags.tag";
+        $query = 'SELECT MIN("tags"."id"), "tags"."tag", COUNT(*) as cnt ' .
+            'FROM "tags", "resource_tags", "resource" ' .
+            'WHERE "tags"."id" = "resource_tags"."tag_id" ' .
+            'AND "resource"."id" = "resource_tags"."resource_id" ' .
+            'AND "resource"."record_id" = ' .
+            "'" . $this->escape($this->record_id) . "' " .
+            'AND "resource"."source" = ' .
+            "'" . $this->escape($this->source) . "' " .
+            'GROUP BY "tags"."tag" ORDER BY cnt DESC, "tags"."tag"';
         $tag = new Tags();
         $tag->query($query);
         if ($tag->N) {
@@ -159,9 +160,13 @@ class Resource extends DB_DataObject
     {
         include_once 'services/MyResearch/lib/Comments.php';
 
-        $sql = "SELECT comments.*, concat(user.firstname, ' ', user.lastname) as fullname " .
-               "FROM comments RIGHT OUTER JOIN user on comments.user_id = user.id " .
-               "WHERE comments.resource_id = '$this->id' ORDER BY comments.created";
+        $sql = 'SELECT "comments".*, "user"."firstname" || ' .
+            "' ' || " . '"user"."lastname" as fullname ' .
+            'FROM "comments" RIGHT OUTER JOIN "user" ' .
+            'ON "comments"."user_id" = "user"."id" ' .
+            'WHERE "comments"."resource_id" = ' .
+            "'" . $this->escape($this->id) . "' " .
+            'ORDER BY "comments"."created"';
 
         $commentList = array();
 

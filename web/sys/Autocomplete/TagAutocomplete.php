@@ -71,8 +71,8 @@ class TagAutocomplete implements AutocompleteInterface
         $tagList = array();
         $tag = new Tags();
         $query = $tag->escape($query);
-        $tag->whereadd("tag LIKE '{$query}%'");
-        $tag->whereadd("id IN (SELECT DISTINCT tag_id FROM resource_tags)");
+        $tag->whereadd("lower(\"tag\") LIKE lower('{$query}%')");
+        $tag->whereadd('"id" IN (SELECT DISTINCT "tag_id" FROM "resource_tags")');
         $tag->find();
         if ($tag->N) {
             while ($tag->fetch()) {

@@ -67,7 +67,8 @@ class Tag extends Browse
                     // Note -- this does not need to be escaped because 
                     // $_GET['letter'] has already been validated against
                     // the _getAlphabetList() method below!
-                    $clause = " AND tags.tag LIKE '{$_GET['letter']}%'";
+                    $clause = ' AND lower("tags"."tag") LIKE ' .
+                        "lower('{$_GET['letter']}%')";
                     $interface->assign('tagList', $this->_getTagList($clause));
                 }
             } else {
@@ -107,18 +108,20 @@ class Tag extends Browse
     {
         $tagList = array();
         $tag = new Tags();
-        $sql = "SELECT tags.tag, COUNT(resource_tags.id) as cnt " .
-            "FROM tags, resource_tags " .
-            "WHERE tags.id = resource_tags.tag_id{$extra_where} GROUP BY tags.tag";
+        $sql = 'SELECT "tags"."tag", COUNT("resource_tags"."id") AS cnt ' .
+            'FROM "tags", "resource_tags" ' .
+            'WHERE "tags"."id" = "resource_tags"."tag_id"' . $extra_where .
+            ' GROUP BY "tags"."tag"';
         switch ($_GET['findby']) {
         case 'alphabetical':
-            $sql .= " ORDER BY tags.tag, cnt DESC";
+            $sql .= ' ORDER BY "tags"."tag", cnt DESC';
             break;
         case 'popularity':
-            $sql .= " ORDER BY cnt DESC, tags.tag";
+            $sql .= ' ORDER BY cnt DESC, "tags"."tag"';
             break;
         case 'recent':
-            $sql .= " ORDER BY resource_tags.posted DESC, cnt DESC, tags.tag";
+            $sql .= ' ORDER BY max("resource_tags"."posted") DESC, cnt DESC, ' .
+                '"tags"."tag"';
             break;
         }
         // Limit the size of our results based on the ini browse limit setting

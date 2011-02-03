@@ -507,8 +507,8 @@ class OAIServer
     {
         $tracker = new Change_tracker();
         $tracker->core = $this->core;
-        $tracker->whereAdd("deleted >= '" . date('Y-m-d H:i:s', $from) . "'");
-        $tracker->whereAdd("deleted <= '" . date('Y-m-d H:i:s', $until) . "'");
+        $tracker->whereAdd("\"deleted\" >= '" . date('Y-m-d H:i:s', $from) . "'");
+        $tracker->whereAdd("\"deleted\" <= '" . date('Y-m-d H:i:s', $until) . "'");
         $tracker->orderBy('deleted');
         return $tracker;
     }

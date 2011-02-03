@@ -64,7 +64,7 @@ class Oai_resumption extends DB_DataObject
     {
         $cleaner = new Oai_resumption();
         $now = date('Y-m-d H:i:s');
-        $cleaner->whereAdd("expires <= '$now'");
+        $cleaner->whereAdd("\"expires\" <= '$now'");
         $cleaner->delete(true);
     }
 

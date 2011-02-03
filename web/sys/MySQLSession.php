@@ -126,7 +126,9 @@ class MySQLSession extends SessionInterface
     static public function gc($sess_maxlifetime)
     {
         $s = new Session();
-        $s->whereAdd('last_used + ' . $sess_maxlifetime . ' < ' . time());
+        $s->whereAdd(
+            '"last_used" + ' . $s->escape($sess_maxlifetime) . ' < ' . time()
+        );
         $s->delete(true);
     }
 }

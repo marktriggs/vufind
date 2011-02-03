@@ -63,9 +63,10 @@ class Tags extends DB_DataObject
     {
         $resList = array();
 
-        $sql = "SELECT resource.* FROM resource_tags, resource " .
-               "WHERE resource.id = resource_tags.resource_id " .
-               "AND resource_tags.tag_id = '$this->id'";
+        $sql = 'SELECT "resource".* FROM "resource_tags", "resource" ' .
+            'WHERE "resource"."id" = "resource_tags"."resource_id" ' .
+            'AND "resource_tags"."tag_id" = ' . 
+            "'" . $this->escape($this->id) . "'";
         $res = new Resource();
         $res->query($sql);
         if ($res->N) {

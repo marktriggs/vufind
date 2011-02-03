@@ -69,21 +69,24 @@ class User_list extends DB_DataObject
     {
         $resourceList = array();
 
-        $sql = "SELECT DISTINCT resource.* FROM resource, user_resource " .
-               "WHERE resource.id = user_resource.resource_id " .
-               "AND user_resource.user_id = '" . $this->escape($this->user_id) .
-               "' AND user_resource.list_id = '" . $this->escape($this->id) . "'";
+        $sql = 'SELECT DISTINCT "resource".* FROM "resource", "user_resource" ' .
+            'WHERE "resource"."id" = "user_resource"."resource_id" ' .
+            'AND "user_resource"."user_id" = ' .
+            "'" . $this->escape($this->user_id) . "' " .
+            'AND "user_resource"."list_id" = ' .
+            "'" . $this->escape($this->id) . "'";
 
         if ($tags) {
             for ($i=0; $i<count($tags); $i++) {
-                $sql .= " AND resource.id IN " .
-                    "(SELECT DISTINCT resource_tags.resource_id " .
-                    "FROM resource_tags, tags " .
-                    "WHERE resource_tags.tag_id=tags.id AND tags.tag = '" .
-                    $this->escape($tags[$i]) . "' AND resource_tags.user_id = '" .
-                    $this->escape($this->user_id) . "' " .
-                    "AND resource_tags.list_id = '" . $this->escape($this->id) .
-                    "')";
+                $sql .= ' AND "resource"."id" IN ' .
+                    '(SELECT DISTINCT "resource_tags"."resource_id" ' .
+                    'FROM "resource_tags", "tags" ' .
+                    'WHERE "resource_tags"."tag_id"="tags"."id" ' .
+                    'AND "tags"."tag" = ' . "'" . $this->escape($tags[$i]) . "' " .
+                    'AND "resource_tags"."user_id" = ' .
+                    "'" . $this->escape($this->user_id) . "' " .
+                    'AND "resource_tags"."list_id" = ' .
+                    "'" . $this->escape($this->id) . "')";
             }
         }
 
@@ -108,12 +111,13 @@ class User_list extends DB_DataObject
     {
         $tagList = array();
 
-        $sql = "SELECT resource_tags.*, tags.*, COUNT(resource_tags.id) AS cnt " .
-            "FROM resource_tags, tags WHERE resource_tags.user_id = '" .
-            $this->escape($this->user_id) . "' " .
-            "AND resource_tags.list_id = '" . $this->escape($this->id) . "' " .
-            "AND tags.id = resource_tags.tag_id " .
-            "GROUP by tags.tag ORDER BY tag";
+        $sql = 'SELECT "tags"."tag", COUNT("resource_tags"."id") AS cnt ' .
+            'FROM "resource_tags", "tags" WHERE "resource_tags"."user_id" = ' .
+            "'" . $this->escape($this->user_id) . "' " .
+            'AND "resource_tags"."list_id" = ' .
+            "'" . $this->escape($this->id) . "' " .
+            'AND "tags"."id" = "resource_tags"."tag_id" ' .
+            'GROUP BY "tags"."tag" ORDER BY "tag"';
 
         $resource = new Resource();
         $resource->query($sql);
@@ -199,9 +203,9 @@ class User_list extends DB_DataObject
         }
 
         // Get Resource Ids
-        $sql = "SELECT id from resource " .
-               "WHERE (record_id = ".implode($sqlIDS, " OR record_id = ").") " .
-               "AND source='" . $this->escape($source) . "'";
+        $sql = 'SELECT "id" FROM "resource" WHERE ("record_id" = ' .
+            implode($sqlIDS, ' OR "record_id" = ') . ") " .
+            'AND "source" = ' . "'" . $this->escape($source) . "'";
 
         $resources = new Resource();
         $resources->query($sql);
@@ -213,19 +217,21 @@ class User_list extends DB_DataObject
         }
 
         // Remove Resource
-        $sql = "DELETE from user_resource " .
-               "WHERE user_id = '" . $this->escape($this->user_id) . "' " .
-               "AND list_id = '" . $this->escape($this->id) . "' " .
-               "AND (resource_id =".implode($resourceList, " OR resource_id =").")";
+        $sql = 'DELETE FROM "user_resource" ' .
+            "WHERE \"user_id\" = '" . $this->escape($this->user_id) . "' " .
+            "AND \"list_id\" = '" . $this->escape($this->id) . "' " .
+            'AND ("resource_id" =' .
+            implode($resourceList, ' OR "resource_id" =') . ")";
 
         $removeResource = new User_resource();
         $removeResource->query($sql);
 
         // Remove Resource Tags
-        $sql = "DELETE from resource_tags " .
-               "WHERE user_id = '" . $this->escape($this->user_id) ."' " .
-               "AND list_id = '" . $this->escape($this->id) . "' " .
-               "AND (resource_id =".implode($resourceList, " OR resource_id =").")";
+        $sql = 'DELETE FROM "resource_tags" ' .
+            "WHERE \"user_id\" = '" . $this->escape($this->user_id) ."' " .
+            "AND \"list_id\" = '" . $this->escape($this->id) . "' " .
+            'AND ("resource_id" =' .
+            implode($resourceList, ' OR "resource_id" =') . ")";
 
         $removeTags = new Resource_tags();
         $removeTags->query($sql);
@@ -243,17 +249,17 @@ class User_list extends DB_DataObject
     public function emptyList()
     {
         // Remove Resources
-        $sql = "DELETE from user_resource " .
-               "WHERE user_id = '" . $this->escape($this->user_id) . "' " .
-               "AND list_id = '" . $this->escape($this->id) . "'";
+        $sql = 'DELETE FROM "user_resource" ' .
+            "WHERE \"user_id\" = '" . $this->escape($this->user_id) . "' " .
+            "AND \"list_id\" = '" . $this->escape($this->id) . "'";
 
         $removeResource = new User_resource();
         $removeResource->query($sql);
 
         // Remove Resource Tags
-        $sql = "DELETE from resource_tags " .
-               "WHERE user_id = '" . $this->escape($this->user_id) . "' " .
-               "AND list_id = '" . $this->escape($this->id) . "'";
+        $sql = 'DELETE FROM "resource_tags" ' .
+            "WHERE \"user_id\" = '" . $this->escape($this->user_id) . "' " .
+            "AND \"list_id\" = '" . $this->escape($this->id) . "'";
 
         $removeTags = new Resource_tags();
         $removeTags->query($sql);
@@ -284,7 +290,6 @@ class User_list extends DB_DataObject
 
         // If we got this far, there were no fatal DB errors so report success
         return true;
-
     }
 }
 

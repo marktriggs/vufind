@@ -215,9 +215,9 @@ class User extends DB_DataObject
         }
 
         // Get Resource Ids
-        $sql = "SELECT id from resource " .
-               "WHERE (record_id = ".implode($sqlIDS, " OR record_id = ").") " .
-               "AND source='" . $this->escape($source) . "'";
+        $sql = 'SELECT "id" from "resource" ' .
+            'WHERE ("record_id" = '.implode($sqlIDS, ' OR "record_id" = ').") " .
+            "AND \"source\"='" . $this->escape($source) . "'";
 
         $resources = new Resource();
         $resources->query($sql);
@@ -229,17 +229,19 @@ class User extends DB_DataObject
         }
 
         // Remove Resource
-        $sql = "DELETE from user_resource " .
-               "WHERE user_id = '" . $this->escape($this->id) . "' " .
-               "AND (resource_id =".implode($resourceList, " OR resource_id =").")";
+        $sql = 'DELETE FROM "user_resource" ' .
+            "WHERE \"user_id\" = '" . $this->escape($this->id) . "' " .
+            'AND ("resource_id" =' .
+            implode($resourceList, ' OR "resource_id" =') . ")";
 
         $removeResource = new User_resource();
         $removeResource->query($sql);
 
         // Remove Resource Tags
-        $sql = "DELETE from resource_tags " .
-               "WHERE user_id = '" . $this->escape($this->id) . "' " .
-               "AND (resource_id =".implode($resourceList, " OR resource_id =").")";
+        $sql = 'DELETE FROM "resource_tags" ' .
+            "WHERE \"user_id\" = '" . $this->escape($this->id) . "' " .
+            'AND ("resource_id" =' .
+            implode($resourceList, ' OR "resource_id" =') . ")";
 
         $removeTags = new Resource_tags();
         $removeTags->query($sql);
@@ -260,18 +262,20 @@ class User extends DB_DataObject
     {
         $resourceList = array();
 
-        $sql = "SELECT DISTINCT resource.* FROM resource, user_resource " .
-               "WHERE resource.id = user_resource.resource_id " .
-               "AND user_resource.user_id = '$this->id'";
+        $sql = 'SELECT DISTINCT "resource".* FROM "resource", "user_resource" ' .
+            'WHERE "resource"."id" = "user_resource"."resource_id" ' .
+            'AND "user_resource"."user_id" = ' .
+            "'" . $this->escape($this->id) . "'";
 
         if ($tags) {
             for ($i=0; $i<count($tags); $i++) {
-                $sql .= " AND resource.id IN " .
-                    "(SELECT DISTINCT resource_tags.resource_id " .
-                    "FROM resource_tags, tags " .
-                    "WHERE resource_tags.tag_id=tags.id AND tags.tag = '" .
-                    addslashes($tags[$i]) .
-                    "' AND resource_tags.user_id = '$this->id')";
+                $sql .= ' AND "resource"."id" IN ' .
+                    '(SELECT DISTINCT "resource_tags"."resource_id" ' .
+                    'FROM "resource_tags", "tags" WHERE ' .
+                    '"resource_tags"."tag_id"="tags"."id" AND "tags"."tag" = ' .
+                    "'" . $this->escape($tags[$i]) . "'" .
+                    ' AND "resource_tags"."user_id" = ' .
+                    "'" . $this->escape($this->id) . "')";
             }
         }
 
@@ -300,15 +304,18 @@ class User extends DB_DataObject
     {
         $savedList = array();
 
-        $sql = "SELECT user_resource.*, user_list.title as list_title, " .
-            "user_list.id as list_id " .
-            "FROM user_resource, resource, user_list " .
-            "WHERE resource.id = user_resource.resource_id " .
-            "AND user_resource.list_id = user_list.id " .
-            "AND user_resource.user_id = '$this->id' " .
-            "AND resource.record_id = '$resourceId'";
+        $sql = 'SELECT "user_resource".*, "user_list"."title" as list_title, ' .
+            '"user_list"."id" as list_id ' .
+            'FROM "user_resource", "resource", "user_list" ' .
+            'WHERE "resource"."id" = "user_resource"."resource_id" ' .
+            'AND "user_resource"."list_id" = "user_list"."id" ' .
+            'AND "user_resource"."user_id" = ' .
+            "'" . $this->escape($this->id) . "' " .
+            'AND "resource"."record_id" = ' .
+            "'" . $this->escape($resourceId) . "'";
         if (!is_null($listId)) {
-            $sql .= " AND user_resource.list_id='$listId'";
+            $sql .= ' AND "user_resource"."list_id"=' .
+                "'" . $this->escape($listId) . "'";
         }
         $saved = new User_resource();
         $saved->query($sql);
@@ -339,21 +346,26 @@ class User extends DB_DataObject
     {
         $tagList = array();
 
-        $sql = "SELECT MIN(tags.id), tags.tag, COUNT(resource_tags.id) AS cnt " .
-               "FROM tags, resource_tags, user_resource, resource " .
-               "WHERE tags.id = resource_tags.tag_id " .
-               "AND user_resource.user_id = '$this->id' " .
-               "AND user_resource.resource_id = resource.id " .
-               "AND resource_tags.user_id = '$this->id' " .
-               "AND resource.id = resource_tags.resource_id " .
-               "AND user_resource.list_id = resource_tags.list_id ";
+        $sql = 'SELECT MIN("tags"."id"), "tags"."tag", ' .
+            'COUNT("resource_tags"."id") AS cnt ' .
+            'FROM "tags", "resource_tags", "user_resource", "resource" ' .
+            'WHERE "tags"."id" = "resource_tags"."tag_id" ' .
+            'AND "user_resource"."user_id" = ' .
+            "'" . $this->escape($this->id) . "' " .
+            'AND "user_resource"."resource_id" = "resource"."id" ' .
+            'AND "resource_tags"."user_id" = ' .
+            "'" . $this->escape($this->id) . "' " .
+            'AND "resource"."id" = "resource_tags"."resource_id" ' .
+            'AND "user_resource"."list_id" = "resource_tags"."list_id" ';
         if (!is_null($resourceId)) {
-            $sql .= "AND resource.record_id = '$resourceId' ";
+            $sql .= 'AND "resource"."record_id" = ' .
+                "'" . $this->escape($resourceId) . "' ";
         }
         if (!is_null($listId)) {
-            $sql .= "AND resource_tags.list_id = '$listId' ";
+            $sql .= 'AND "resource_tags"."list_id" = ' .
+                "'" . $this->escape($listId) . "' ";
         }
-        $sql .= "GROUP BY tags.tag ORDER BY tag";
+        $sql .= 'GROUP BY "tags"."tag" ORDER BY "tag"';
         $tag = new Tags();
         $tag->query($sql);
         if ($tag->N) {
@@ -375,12 +387,15 @@ class User extends DB_DataObject
     {
         $lists = array();
 
-        $sql = "SELECT user_list.*, COUNT(user_resource.id) AS cnt FROM user_list " .
-               "LEFT JOIN user_resource ON user_list.id = user_resource.list_id " .
-               "WHERE user_list.user_id = '$this->id' " .
-               "GROUP BY user_list.id, user_list.user_id, user_list.title, " .
-               "user_list.description, user_list.created, user_list.public " .
-               "ORDER BY user_list.title";
+        $sql = 'SELECT "user_list".*, COUNT("user_resource"."id") AS cnt ' .
+            'FROM "user_list" LEFT JOIN "user_resource" ' .
+            'ON "user_list"."id" = "user_resource"."list_id" ' .
+            'WHERE "user_list"."user_id" = ' .
+            "'" . $this->escape($this->id) . "' " .
+            'GROUP BY "user_list"."id", "user_list"."user_id", ' .
+            '"user_list"."title", "user_list"."description", ' .
+            '"user_list"."created", "user_list"."public" ' .
+            'ORDER BY "user_list"."title"';
         $list = new User_list();
         $list->query($sql);
         if ($list->N) {
@@ -391,6 +406,4 @@ class User extends DB_DataObject
 
         return $lists;
     }
-
-
 }

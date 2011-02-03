@@ -79,14 +79,12 @@ class TagCloud extends Action
         // no of different tags to display
         $RecLimit = 50;
 
-        // Query to retrive tags and their
-        // count
-        $query = "SELECT tags.tag, COUNT(tag) as cnt " .
-                 "FROM tags, resource_tags" . " " .
-                 "WHERE tags.id = resource_tags.tag_id " .
-                 "GROUP BY tags.tag " .
-                 "ORDER BY cnt DESC, tag " .
-                 "LIMIT $RecLimit";
+        // Query to retrieve tags and their counts
+        $query = 'SELECT "tags"."tag", COUNT("tag") as cnt ' .
+            'FROM "tags", "resource_tags" ' .
+            'WHERE "tags"."id" = "resource_tags"."tag_id" ' .
+            'GROUP BY "tags"."tag" ORDER BY cnt DESC, "tag" ' .
+            "LIMIT {$RecLimit}";
 
         $tags->query($query);
         $actualRecs = $tags->N;
