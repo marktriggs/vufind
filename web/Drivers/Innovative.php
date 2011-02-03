@@ -208,8 +208,8 @@ class Innovative implements DriverInterface
         $items = array();
         $count = 0;
         foreach ($ids as $id) {
-           $items[$count] = $this->getStatus($id);
-           $count++;
+            $items[$count] = $this->getStatus($id);
+            $count++;
         }
         return $items;
     }
@@ -320,7 +320,7 @@ class Innovative implements DriverInterface
             $result = $req->getResponseBody();
 
             // search for successful response of "RETCOD=0"
-            if (stripos($result,"RETCOD=0") == -1) {
+            if (stripos($result, "RETCOD=0") == -1) {
                 // pin did not match, can look up specific error to return
                 // more usefull info.
                 return null;
@@ -373,7 +373,8 @@ class Innovative implements DriverInterface
             $ret['address1'] = str_replace("$", ", ", $api_data['ADDRESS']);
             $ret['address2'] = str_replace("$", ", ", $api_data['ADDRESS2']);
             preg_match(
-                "/([0-9]{5}|[0-9]{5}-[0-9]{4})[ ]*$/",$api_data['ADDRESS'], $zipmatch
+                "/([0-9]{5}|[0-9]{5}-[0-9]{4})[ ]*$/", $api_data['ADDRESS'],
+                $zipmatch
             );
             $ret['zip'] = $zipmatch[1]; //retrieve from address
             $ret['phone'] = $api_data['TELEPHONE'];

@@ -121,7 +121,7 @@ class ConfigurationReaderTest extends PHPUnit_Framework_TestCase
      */
     public function testWithAttributeValueButMissingAttributename()
     {
-       try {
+        try {
             $configurationReader = new ConfigurationReader(
                 $this->_pathToTestConfigurationFile .
                 "/authn/shib/attribute-value-but-missing-attributename-config.ini"
