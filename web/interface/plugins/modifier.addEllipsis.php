@@ -40,9 +40,9 @@
  * @param mixed  $fullString  Full, non-highlighted text
  *
  * @return string             Highlighted string with ellipsis added
- */
+ */ // @codingStandardsIgnoreStart
 function smarty_modifier_addEllipsis($highlighted, $fullString)
-{
+{   // @codingStandardsIgnoreEnd
     // Remove highlighting markers from the string so we can perform a clean
     // comparison:
     $dehighlighted = str_replace(

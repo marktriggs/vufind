@@ -37,9 +37,9 @@
  * @param float $ms Number of milliseconds
  *
  * @return string   Human-readable representation
- */
+ */ // @codingStandardsIgnoreStart
 function smarty_modifier_printms($ms)
-{
+{   // @codingStandardsIgnoreEnd
     $seconds = floor($ms/1000);
     $ms = ($ms % 1000);
 

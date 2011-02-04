@@ -44,9 +44,9 @@
  * @param object &$smarty Smarty object
  *
  * @return string        <link> tag for including CSS
- */
+ */ // @codingStandardsIgnoreStart
 function smarty_function_css($params, &$smarty)
-{
+{   // @codingStandardsIgnoreEnd
     // Extract details from the config file, Smarty interface and parameters
     // so we can find CSS files:
     global $configArray;

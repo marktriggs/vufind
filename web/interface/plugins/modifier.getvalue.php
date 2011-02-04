@@ -38,9 +38,9 @@
  * @param string     $subfield  Subfield to extract
  *
  * @return string               Extracted subfield data
- */
+ */ // @codingStandardsIgnoreStart
 function smarty_modifier_getvalue($marcField, $subfield)
-{
+{   // @codingStandardsIgnoreEnd
     if ($marcField) {
         $subfield = $marcField->getSubfield($subfield);
         if ($subfield) {

@@ -37,9 +37,9 @@
  * @param string $format Format string provided by Summon API
  *
  * @return string        Format string suitable for VuFind display
- */
+ */ // @codingStandardsIgnoreStart
 function smarty_modifier_getSummonFormatClass($format)
-{
+{   // @codingStandardsIgnoreEnd
     switch ($format) {
     case 'Audio Recording':
         return 'audio';

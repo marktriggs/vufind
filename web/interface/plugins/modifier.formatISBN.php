@@ -38,9 +38,9 @@ require_once 'sys/ISBN.php';
  * @param string $isbn Raw ISBN number
  *
  * @return string      Normalized ISBN, 10-digit if possible, 13-digit if necessary.
- */
+ */ // @codingStandardsIgnoreStart
 function smarty_modifier_formatISBN($isbn)
-{
+{   // @codingStandardsIgnoreEnd
     // Normalize ISBN to an array if it is not already.
     $isbns = is_array($isbn) ? $isbn : array($isbn);
 

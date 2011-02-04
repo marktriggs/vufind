@@ -38,9 +38,9 @@
  * @param string $params_to_add URL-formatted string of parameters to add
  *
  * @return string               URL with new parameters appended
- */
+ */ // @codingStandardsIgnoreStart
 function smarty_modifier_addURLParams($url, $params_to_add)
-{
+{   // @codingStandardsIgnoreEnd
     // Break the base URL from the parameters:
     list($base, $params) = explode('?', $url);
     

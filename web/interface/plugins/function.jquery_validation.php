@@ -40,9 +40,9 @@
  * @param object &$smarty Smarty object
  *
  * @return string        jquery-formatted string
- */
+ */ // @codingStandardsIgnoreStart
 function smarty_function_jquery_validation($params, &$smarty)
-{
+{   // @codingStandardsIgnoreEnd
     // jquery validation rules that this plugin currently supports
     $supported_rules = array('required', 'email', 'digits', 'equalTo', 
         'phoneUS', 'mobileUK');

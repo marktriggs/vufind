@@ -41,9 +41,9 @@
  * @param string $suffix Text to append to final string.
  *
  * @return string        Truncated valid HTML.
- */
+ */ // @codingStandardsIgnoreStart
 function smarty_modifier_truncate_html($text, $len, $suffix = '')
-{
+{   // @codingStandardsIgnoreEnd
     if ((strlen($text) > $len)) {
         $whitespaceposition = strpos($text, " ", $len) - 1;
 

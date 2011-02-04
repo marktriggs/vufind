@@ -42,9 +42,9 @@
  * @param object &$smarty Smarty object
  *
  * @return string        <script> tag for including Javascript
- */
+ */ // @codingStandardsIgnoreStart
 function smarty_function_js($params, &$smarty)
-{
+{   // @codingStandardsIgnoreEnd
     // Extract details from the config file, Smarty interface and parameters
     // so we can find CSS files:
     global $configArray;

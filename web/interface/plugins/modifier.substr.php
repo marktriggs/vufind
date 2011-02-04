@@ -39,9 +39,9 @@
  * @param int    $length Length of substring to extract
  *
  * @return string        Extracted substring
- */
+ */ // @codingStandardsIgnoreStart
 function smarty_modifier_substr($str, $start, $length = null)
-{
+{   // @codingStandardsIgnoreEnd
     return substr($str, $start, $length);
 }
 ?>

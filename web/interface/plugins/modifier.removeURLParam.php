@@ -38,9 +38,9 @@
  * @param string $param_to_remove Parameter name to remove
  *
  * @return string                 URL with parameter removed
- */
+ */ // @codingStandardsIgnoreStart
 function smarty_modifier_removeURLParam($url, $param_to_remove)
-{
+{   // @codingStandardsIgnoreEnd
     // Break the base URL from the parameters:
     list($base, $params) = explode('?', $url);
     
