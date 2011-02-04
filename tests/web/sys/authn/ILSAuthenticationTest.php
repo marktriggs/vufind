@@ -30,6 +30,7 @@ require_once 'PEAR.php';
 require_once 'sys/authn/ILSAuthentication.php';
 require_once 'sys/authn/IOException.php';
 require_once 'sys/authn/ConfigurationReader.php';
+require_once 'sys/ConnectionManager.php';
 
 /**
  * ILS authentication test class
@@ -42,8 +43,8 @@ require_once 'sys/authn/ConfigurationReader.php';
  */
 class ILSAuthenticationTest extends PHPUnit_Framework_TestCase
 {
-    private $username = 'testuser';       // a valid username
-    private $password = 'testpass';       // a valid password
+    private $_username = 'testuser';       // a valid username
+    private $_password = 'testpass';       // a valid password
 
     /**
      * Standard setup method.
@@ -55,14 +56,22 @@ class ILSAuthenticationTest extends PHPUnit_Framework_TestCase
     {
         // Set up the global config array required by the ILS driver:
         global $configArray;
-        $configArray = parse_ini_file(dirname(__FILE__) . '/../../conf/config.ini', true);
+        $configArray = parse_ini_file(
+            dirname(__FILE__) . '/../../conf/config.ini', true
+        );
     }
 
-    public function test_with_empty_username()
+    /**
+     * Make sure authentication fails with no username.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithEmptyUsername()
     {
         try {
             $_POST['username'] = '';
-            $_POST['password'] = $this->password;
+            $_POST['password'] = $this->_password;
             $authN = new ILSAuthentication();
             $this->assertTrue(PEAR::isError($authN->authenticate()));
         } catch (InvalidArgumentException $unexpected) {
@@ -70,10 +79,16 @@ class ILSAuthenticationTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    public function test_with_empty_password()
+    /**
+     * Make sure authentication fails with no password.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithEmptyPassword()
     {
         try {
-            $_POST['username'] = $this->username;
+            $_POST['username'] = $this->_username;
             $_POST['password'] = '';
             $authN = new ILSAuthentication();
             $this->assertTrue(PEAR::isError($authN->authenticate()));
@@ -82,11 +97,17 @@ class ILSAuthenticationTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    public function test_with_wrong_credentials()
+    /**
+     * Make sure authentication fails with wrong password.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithWrongCredentials()
     {
         try {
-            $_POST['username'] = $this->username;
-            $_POST['password'] = $this->password . 'test';
+            $_POST['username'] = $this->_username;
+            $_POST['password'] = $this->_password . 'test';
             $authN = new ILSAuthentication();
             $this->assertTrue(PEAR::isError($authN->authenticate()));
         } catch (IOException $unexpected) {
@@ -96,10 +117,10 @@ class ILSAuthenticationTest extends PHPUnit_Framework_TestCase
 
     /* TODO -- figure out a way to make this test work cleanly in our continuous
                integration environment.
-    public function test_with_working_credentials()
+    public function testWithWorkingCredentials()
     {
-        $_POST['username'] = $this->username;
-        $_POST['password'] = $this->password;
+        $_POST['username'] = $this->_username;
+        $_POST['password'] = $this->_password;
         $authN = new ILSAuthentication();
         $this->assertTrue($authN->authenticate() instanceof User);
     }
