@@ -42,9 +42,9 @@ require_once 'sys/mobileesp/mdetect.php';
  * Function to detect if a mobile device is being used.
  *
  * @return bool
- */
+ */ // @codingStandardsIgnoreStart
 function mobile_device_detect()
-{
+{   // @codingStandardsIgnoreEnd
     // Do the most exhaustive device detection possible; other method calls
     // may be used instead of DetectMobileLong if you want to target a narrower
     // class of devices.

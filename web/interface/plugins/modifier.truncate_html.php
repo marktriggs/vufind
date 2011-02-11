@@ -69,8 +69,9 @@ function smarty_modifier_truncate_html($text, $len, $suffix = '')
                 preg_match_all("|</([a-zA-Z]+)>|", $text, $aBuffer2);
                 if (count($openers) != count($aBuffer2[1])) {
                     foreach ($openers as $index => $tag) {
-                        if (empty($aBuffer2[1][$index]) ||
-                            $aBuffer2[1][$index] != $tag) {
+                        if (empty($aBuffer2[1][$index])
+                            || $aBuffer2[1][$index] != $tag
+                        ) {
                             $text .= '</'.$tag.'>';
                         }
                     }
