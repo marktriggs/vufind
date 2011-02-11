@@ -1010,7 +1010,8 @@ class SearchObject_Solr extends SearchObject_Base
         $this->stopQueryTimer();
 
         // How many results were there?
-        $this->resultsTotal = $this->indexResult['response']['numFound'];
+        $this->resultsTotal = isset($this->indexResult['response']['numFound'])
+            ? $this->indexResult['response']['numFound'] : 0;
 
         // Process spelling suggestions if no index error resulted from the query
         if ($this->spellcheck && !isset($this->indexResult['error'])) {
@@ -1227,7 +1228,9 @@ class SearchObject_Solr extends SearchObject_Base
         $list = array();
 
         // If we have no facets to process, give up now
-        if (!is_array($this->indexResult['facet_counts']['facet_fields'])) {
+        if (!isset($this->indexResult['facet_counts']['facet_fields'])
+            || !is_array($this->indexResult['facet_counts']['facet_fields'])
+        ) {
             return $list;
         }
 
