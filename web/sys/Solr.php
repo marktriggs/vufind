@@ -117,6 +117,7 @@ class Solr implements IndexEngine
      * Selected shard settings.
      */
     private $_solrShards = array();
+    private $_solrShardsFieldsToStrip = array();
 
     /**
      * Should we collect highlighting data?
@@ -182,6 +183,13 @@ class Solr implements IndexEngine
             ? false : $searchSettings['General']['snippets'];
         if ($highlight || $snippet) {
             $this->_highlight = true;
+        }
+
+        // Deal with field-stripping shard settings:
+        if (isset($searchSettings['StripFields'])
+            && is_array($searchSettings['StripFields'])
+        ) {
+            $this->_solrShardsFieldsToStrip = $searchSettings['StripFields'];
         }
 
         // Deal with session-based shard settings:
@@ -401,13 +409,13 @@ class Solr implements IndexEngine
                 }
                 // push it onto the stack of clauses
                 $clauses[] = $sstring;
-            } else {
+            } else if (!$this->_isStripped($field)) {
                 // Otherwise, we've got a (list of) [munge, weight] pairs to deal
                 // with
                 foreach ($clausearray as $spec) {
                     // build a string like title:("one two")
                     $sstring = $field . ':(' . $values[$spec[0]] . ')';
-                    // Add the weight it we have one. Yes, I know, it's redundant
+                    // Add the weight if we have one. Yes, I know, it's redundant
                     // code.
                     $weight = $spec[1];
                     if (!is_null($weight) && $weight && $weight > 0) {
@@ -421,6 +429,54 @@ class Solr implements IndexEngine
 
         // Join it all together
         return implode(' ' . $joiner . ' ', $clauses);
+    }
+
+    /**
+     * _getStrippedFields -- internal method to read the fields that should get
+     * stripped for the used shards from config file
+     *
+     * @return array An array containing any field that should be stripped from query
+     * @access private
+     */
+    private function _getStrippedFields() {
+        // Store stripped fields as a static variable so that we only need to
+        // process the configuration settings once:
+        static $strippedFields = false;
+        if ($strippedFields === false) {
+            $strippedFields = array();
+            foreach ($this->_solrShards as $index => $address) {
+                if (array_key_exists($index, $this->_solrShardsFieldsToStrip)) {
+                    $parts = explode(',', $this->_solrShardsFieldsToStrip[$index]);
+                    foreach($parts as $part) {
+                        $strippedFields[] = trim($part);
+                    }
+                }
+            }
+            $strippedFields = array_unique($strippedFields);
+        }
+
+        return $strippedFields;
+    }
+
+    /**
+     * _isStripped -- internal method to check if a field is stripped from query
+     *
+     * @param string $field The name of the field that should be checked for
+     * stripping
+     *
+     * @return bool         A boolean value indicating whether the field should be
+     * stripped (true) or not (false)
+     * @access private
+     */
+    private function _isStripped($field) {
+        // Never strip fields if shards are disabled.
+        // Return true if the current field needs to be stripped.
+        if (isset($this->_solrShards)
+            && in_array($field, $this->_getStrippedFields())
+        ) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -851,7 +907,7 @@ class Solr implements IndexEngine
                 $options['spellcheck.dictionary'] = $dictionary;
             }
         }
-        
+
         // Enable highlighting
         if ($this->_highlight) {
             $options['hl'] = 'true';
@@ -1045,7 +1101,7 @@ class Solr implements IndexEngine
 
     /**
      * Set the shards for distributed search
-     * 
+     *
      * @param array $shards Name => URL array of shards
      *
      * @return void
