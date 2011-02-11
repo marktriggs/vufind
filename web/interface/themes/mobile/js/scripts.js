@@ -83,7 +83,7 @@ function ProcessBookInfo(booksInfo, provider) {
                 var elements = getElementsByClassName(document, classNameConcat), n = elements.length;
                 for (var i = 0; i < n; i++) {
                     var e = elements[i];
-                    if(e.style.display = 'none') {
+                    if(e.style.display == 'none') {
                         // set the link
                         e.href = bookInfo.preview_url;
 
@@ -109,11 +109,13 @@ function ProcessHTBookInfo(booksInfo) {
         var bookInfo = booksInfo[a];
         var itemsArray = bookInfo.items;
         var e = document.getElementById(a);
-        for (var i = 0; i < itemsArray.length; i++) {
-            if (e.style.display = 'none') {
-                if (bookInfo.items[i].rightsCode == "pd" || bookInfo.items[i].rightsCode == "world") {
-                    e.href = bookInfo.items[i].itemURL;
-                    e.style.display = '';
+        if (e != null && e != undefined) {
+            for (var i = 0; i < itemsArray.length; i++) {
+                if (e.style.display == 'none') {
+                    if (bookInfo.items[i].rightsCode == "pd" || bookInfo.items[i].rightsCode == "world") {
+                        e.href = bookInfo.items[i].itemURL;
+                        e.style.display = '';
+                    }
                 }
             }
         }
