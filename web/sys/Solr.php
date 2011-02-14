@@ -438,7 +438,8 @@ class Solr implements IndexEngine
      * @return array An array containing any field that should be stripped from query
      * @access private
      */
-    private function _getStrippedFields() {
+    private function _getStrippedFields()
+    {
         // Store stripped fields as a static variable so that we only need to
         // process the configuration settings once:
         static $strippedFields = false;
@@ -447,7 +448,7 @@ class Solr implements IndexEngine
             foreach ($this->_solrShards as $index => $address) {
                 if (array_key_exists($index, $this->_solrShardsFieldsToStrip)) {
                     $parts = explode(',', $this->_solrShardsFieldsToStrip[$index]);
-                    foreach($parts as $part) {
+                    foreach ($parts as $part) {
                         $strippedFields[] = trim($part);
                     }
                 }
@@ -468,7 +469,8 @@ class Solr implements IndexEngine
      * stripped (true) or not (false)
      * @access private
      */
-    private function _isStripped($field) {
+    private function _isStripped($field)
+    {
         // Never strip fields if shards are disabled.
         // Return true if the current field needs to be stripped.
         if (isset($this->_solrShards)
