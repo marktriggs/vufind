@@ -150,7 +150,6 @@ class JSON extends Action
      */
     public function getItemStatuses()
     {
-        global $configArray;
         global $interface;
 
         $catalog = ConnectionManager::connectToCatalog();
@@ -181,53 +180,13 @@ class JSON extends Action
         // Loop through all the status information that came back
         $statuses = array();
         foreach ($results as $record) {
-            // If we encountered errors, skip those problem records.
-            if (PEAR::isError($record)) {
-                continue;
-            }
-            $callNumbers = array();
-            $locations = array();
-            $available = false;
-
-            if (count($record)) {
-                foreach ($record as $info) {
-                    // Find an available copy
-                    if ($info['availability']) {
-                        $available = true;
-                    }
-                    // Store call number/location info:
-                    $callNumbers[] = $info['callnumber'];
-                    $locations[] = $info['location'];
-                }
+            // Skip errors and empty records:
+            if (!PEAR::isError($record) && count($record)) {
+                $current = $this->_getItemStatus($record, $messages);
+                $statuses[] = $current;
 
                 // The current ID is not missing -- remove it from the missing list.
-                unset($missingIds[$record[0]['id']]);
-
-                // Determine call number string based on findings:
-                $callNumber = $this->_pickValue(
-                    $callNumbers,
-                    isset($configArray['Item_Status']['multiple_call_nos'])
-                    ? $configArray['Item_Status']['multiple_call_nos'] : 'msg',
-                    'Multiple Call Numbers'
-                );
-
-                // Determine location string based on findings:
-                $location = $this->_pickValue(
-                    $locations,
-                    isset($configArray['Item_Status']['multiple_locations'])
-                    ? $configArray['Item_Status']['multiple_locations'] : 'msg',
-                    'Multiple Locations'
-                );
-
-                $statuses[] = array(
-                    'id'                   => $record[0]['id'],
-                    'availability'         => ($available ? 'true' : 'false'),
-                    'availability_message' => $messages[$available ? 'available' : 'unavailable'],
-                    'location'             => $location,
-                    'reserve'              => ($record[0]['reserve'] == 'Y' ? 'true' : 'false'),
-                    'reserve_message'      => ($record[0]['reserve'] == 'Y' ? translate('on_reserve') : translate('Not On Reserve')),
-                    'callnumber'           => $callNumber
-                );
+                unset($missingIds[$current['id']]);
             }
         }
 
@@ -541,7 +500,7 @@ class JSON extends Action
     public function exportFavorites()
     {
         $_SESSION['exportIDS'] =  $_POST['ids'];
-        $_SESSION['exportFormat'] = $_POST['format'];   
+        $_SESSION['exportFormat'] = $_POST['format'];
 
         $this->output(array('result'=>translate('Done')), JSON::STATUS_OK);
     }
@@ -557,7 +516,7 @@ class JSON extends Action
         include_once 'services/MyResearch/Delete.php';
         $ids = $_POST['ids'];
         if (is_array($ids)) {
-            $listID = isset($_POST['listID'])?$_POST['listID']:false; 
+            $listID = isset($_POST['listID'])?$_POST['listID']:false;
             $deleteFavorites = new Delete();
             $result = $deleteFavorites->deleteFavorites($ids, $listID);
             if (!PEAR::isError($result) && !empty($result['deleteDetails'])) {
@@ -736,6 +695,63 @@ class JSON extends Action
             // appropriate language.
             return translate($msg);
         }
+    }
+
+    /**
+     * Support method for getItemStatuses() -- process a single bibliographic record.
+     *
+     * @param array $record   Information on items linked to a single bib record
+     * @param array $messages Custom status HTML (keys = available/unavailable)
+     *
+     * @return array          Summarized availability information
+     * @access private
+     */
+    private function _getItemStatus($record, $messages)
+    {
+        global $configArray;
+
+        // Summarize call number, location and availability info across all items:
+        $callNumbers = $locations = array();
+        $available = false;
+        foreach ($record as $info) {
+            // Find an available copy
+            if ($info['availability']) {
+                $available = true;
+            }
+            // Store call number/location info:
+            $callNumbers[] = $info['callnumber'];
+            $locations[] = $info['location'];
+        }
+
+        // Determine call number string based on findings:
+        $callNumber = $this->_pickValue(
+            $callNumbers,
+            isset($configArray['Item_Status']['multiple_call_nos'])
+            ? $configArray['Item_Status']['multiple_call_nos'] : 'msg',
+            'Multiple Call Numbers'
+        );
+
+        // Determine location string based on findings:
+        $location = $this->_pickValue(
+            $locations,
+            isset($configArray['Item_Status']['multiple_locations'])
+            ? $configArray['Item_Status']['multiple_locations'] : 'msg',
+            'Multiple Locations'
+        );
+
+        // Send back the collected details:
+        return array(
+            'id' => $record[0]['id'],
+            'availability' => ($available ? 'true' : 'false'),
+            'availability_message' =>
+                $messages[$available ? 'available' : 'unavailable'],
+            'location' => $location,
+            'reserve' =>
+                ($record[0]['reserve'] == 'Y' ? 'true' : 'false'),
+            'reserve_message' => $record[0]['reserve'] == 'Y'
+                ? translate('on_reserve') : translate('Not On Reserve'),
+            'callnumber' => $callNumber
+        );
     }
 
     /**
