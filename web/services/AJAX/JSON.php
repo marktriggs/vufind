@@ -160,6 +160,10 @@ class JSON extends Action
         $results = $catalog->getStatuses($_GET['id']);
         if (PEAR::isError($results)) {
             $this->output($results->getMessage(), JSON::STATUS_ERROR);
+        } else if (!is_array($results)) {
+            // If getStatuses returned garbage, let's turn it into an empty array
+            // to avoid triggering a notice in the foreach loop below.
+            $results = array();
         }
 
         // In order to detect IDs missing from the status response, create an
