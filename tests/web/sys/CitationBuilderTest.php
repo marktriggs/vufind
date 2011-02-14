@@ -29,6 +29,7 @@ require_once dirname(__FILE__) . '/../prepend.inc.php';
 require_once 'sys/SearchObject/Factory.php';
 require_once 'sys/CitationBuilder.php';
 require_once 'sys/Interface.php';
+require_once 'sys/ConnectionManager.php';
 
 /**
  * CitationBuilder Test Class
@@ -211,7 +212,22 @@ class CitationBuilderTest extends PHPUnit_Framework_TestCase
             // Normalize whitespace:
             $mla = trim(preg_replace("/\s+/", " ", $interface->fetch($tpl)));
             $this->assertEquals($current['mla'], $mla);
+
+            // Repeat tests using newer getCitation method:
+            $tpl = $cb->getCitation('APA');
+            // Normalize whitespace:
+            $apa = trim(preg_replace("/\s+/", " ", $interface->fetch($tpl)));
+            $this->assertEquals($current['apa'], $apa);
+            $tpl = $cb->getCitation('MLA');
+            // Normalize whitespace:
+            $mla = trim(preg_replace("/\s+/", " ", $interface->fetch($tpl)));
+            $this->assertEquals($current['mla'], $mla);
         }
+
+        // Test a couple of illegal citation formats:
+        $this->assertEquals('', $cb->getCitation('Citation'));
+        $this->assertEquals('', $cb->getCitation('SupportedCitationFormats'));
+        $this->assertEquals('', $cb->getCitation('badgarbage'));
     }
 
     /**
