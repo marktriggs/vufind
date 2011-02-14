@@ -152,8 +152,6 @@ class IndexRecord implements RecordInterface
      */
     public function getCitation($format)
     {
-        include_once 'sys/CitationBuilder.php';
-
         // Build author list:
         $authors = array();
         $primary = $this->getPrimaryAuthor();
@@ -180,24 +178,23 @@ class IndexRecord implements RecordInterface
 
         // Build the citation:
         $citation = new CitationBuilder($details);
-        switch($format) {
-        case 'APA':
-            return $citation->getAPA();
-        case 'MLA':
-            return $citation->getMLA();
+        if (in_array($format, $citation->getSupportedCitationFormats())) {
+            return $citation->getCitation($format);
+        } else {
+            return '';
         }
     }
 
     /**
      * Get an array of strings representing citation formats supported
-     * by this record's data (empty if none).  Legal values: "APA", "MLA".
+     * by this record's data (empty if none).
      *
      * @return array Strings representing citation formats.
      * @access public
      */
     public function getCitationFormats()
     {
-        return array('APA', 'MLA');
+        return CitationBuilder::getSupportedCitationFormats();
     }
 
     /**

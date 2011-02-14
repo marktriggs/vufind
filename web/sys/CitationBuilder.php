@@ -68,6 +68,45 @@ class CitationBuilder
     }
 
     /**
+     * Get supported citations
+     * 
+     * Returns the citations supported by this builder
+     * 
+     * @return array List of supported citation formats
+     * @access public
+     */
+    public static function getSupportedCitationFormats()
+    {
+        return array('APA', 'MLA');
+    }
+    
+    /**
+     * Retrieve a citation in a particular format
+     * 
+     * Returns the citation in the format specified
+     * 
+     * @param string $format Citation format from getSupportedCitationFormats()
+     *
+     * @return string        Path to a Smarty template to display the citation
+     * @access public
+     */
+    public function getCitation($format)
+    {
+        // Construct method name for requested format:
+        $method = 'get' . $format;
+
+        // Avoid calls to inappropriate/missing methods:
+        if ($format != 'Citation' && $format != 'SupportedCitationFormats'
+            && method_exists($this, $method)
+        ) {
+            return $this->$method();
+        }
+
+        // Return blank string if no valid method found:
+        return '';
+    }
+
+    /**
      * Get APA citation.
      *
      * This function assigns all the necessary variables and then returns a template
