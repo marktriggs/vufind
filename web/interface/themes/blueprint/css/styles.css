@@ -149,6 +149,70 @@ ul.cartContent {
     padding:0;
 }
 
+/** Alphabetic browse **/
+.alphaBrowseResult {
+    padding: 0 0.5em 0.5em 0.5em;
+}
+
+.alphaBrowseEntry {
+    padding: 0.25em 0.5em;
+    background-color: #eee;
+    zoom: 1;
+}
+
+.alphaBrowseEntry.alt, .alphaBrowseEntry.alt * {
+    background-color: #fff;
+}
+
+.alphaBrowseForm {
+    zoom: 1;
+}
+
+.alphaBrowseHeading {
+    float: left;
+    width: 650px;
+    line-height: 1.31em;
+}
+
+.alphaBrowseCount {
+    float: right;
+}
+
+.alphaBrowseHeader {
+    text-align: right;
+    clear: both;
+    font-weight: bold;
+    zoom: 1;
+}
+
+.alphaBrowsePageLinks {
+    margin: 1em;
+    font-weight: bold;
+    background-color: #fff;
+}
+
+.alphaBrowsePrevLink {
+    float: left;
+}
+
+.alphaBrowseNextLink {
+    float: right;
+}
+
+.alphaBrowseRelatedHeading {
+    clear: left;
+}
+
+.alphaBrowseRelatedHeading .title {
+    font-weight: bold;
+    font-size: 90%;
+    margin-left: 2em;
+}
+
+.alphaBrowseRelatedHeading li {
+    margin-left: 4em;
+}
+
 /** Autocomplete */
 .ui-autocomplete { 
     max-width: 500px; 
