@@ -82,8 +82,7 @@ spl_autoload_register('vuFindAutoloader');
 // Load local overrides file (if it exists) to pick up local class overrides.
 // This can be used to override autoloaded classes, allowing local customizations
 // of some features without the need to modify core VuFind code.
-if (file_exists(dirname(__FILE__).'/local_overrides.php'))
-{
+if (file_exists(dirname(__FILE__).'/local_overrides.php')) {
     include_once dirname(__FILE__).'/local_overrides.php';
 }
 
