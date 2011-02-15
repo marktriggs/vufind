@@ -51,66 +51,113 @@ class LDAPConfigurationParameterTest extends PHPUnit_Framework_TestCase
         $this->pathToTestConfigurationFiles = dirname(__FILE__) . '/../../conf';
     }
 
-    public function test_with_missing_host()
+    /**
+     * Verify that missing host causes failure.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithMissingHost()
     {
         try {
             $ldapConfigurationParameter = new LDAPConfigurationParameter(
-            $this->pathToTestConfigurationFiles . "/authn/ldap/without-ldap-host-config.ini");
+                $this->pathToTestConfigurationFiles .
+                "/authn/ldap/without-ldap-host-config.ini"
+            );
             $parameters = $ldapConfigurationParameter->getParameter();
         } catch (InvalidArgumentException $expected) {
             return;
         }
-        $this->fail('An expected UnexpectedValueException has not been raised');
+        $this->fail('An expected InvalidArgumentException has not been raised');
     }
 
-    public function test_with_missing_port()
+    /**
+     * Verify that missing port causes failure.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithMissingPort()
     {
         try {
             $ldapConfigurationParameter = new LDAPConfigurationParameter(
-            $this->pathToTestConfigurationFiles . "/authn/ldap/without-ldap-port-config.ini");
+                $this->pathToTestConfigurationFiles .
+                "/authn/ldap/without-ldap-port-config.ini"
+            );
             $parameters = $ldapConfigurationParameter->getParameter();
         } catch (InvalidArgumentException $expected) {
             return;
         }
-        $this->fail('An expected UnexpectedValueException has not been raised');
+        $this->fail('An expected InvalidArgumentException has not been raised');
     }
 
-    public function test_with_missing_baseDN()
+    /**
+     * Verify that missing baseDN causes failure.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithMissingBaseDN()
     {
         try {
-            $ldapConfigurationParameter = new LDAPConfigurationParameter($this->pathToTestConfigurationFiles .
-                                                                         "/authn/ldap/without-ldap-basedn-config.ini");
+            $ldapConfigurationParameter = new LDAPConfigurationParameter(
+                $this->pathToTestConfigurationFiles .
+                "/authn/ldap/without-ldap-basedn-config.ini"
+            );
             $parameters = $ldapConfigurationParameter->getParameter();
         } catch (InvalidArgumentException $expected) {
             return;
         }
-        $this->fail('An expected UnexpectedValueException has not been raised');
+        $this->fail('An expected InvalidArgumentException has not been raised');
     }
 
-    public function test_with_missing_uid()
+    /**
+     * Verify that missing UID causes failure.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithMissingUid()
     {
         try {
-            $ldapConfigurationParameter = new LDAPConfigurationParameter($this->pathToTestConfigurationFiles .
-                                                                         "/authn/ldap/without-ldap-uid-config.ini");
+            $ldapConfigurationParameter = new LDAPConfigurationParameter(
+                $this->pathToTestConfigurationFiles .
+                "/authn/ldap/without-ldap-uid-config.ini"
+            );
             $parameters = $ldapConfigurationParameter->getParameter();
         } catch (InvalidArgumentException $expected) {
             return;
         }
-        $this->fail('An expected UnexpectedValueException has not been raised');
+        $this->fail('An expected InvalidArgumentException has not been raised');
     }
 
-    public function test_with_working_parameters()
+    /**
+     * Verify that good parameters parse correctly.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithWorkingParameters()
     {
         try {
             $ldapConfigurationParameter = new LDAPConfigurationParameter();
             $parameters = $ldapConfigurationParameter->getParameter();
             $this->assertTrue(is_array($parameters));
         } catch (InvalidArgumentException $unexpected) {
-             $this->fail("An unexpected UnexpectedValueException has not been raised: {$unexpected}");
+            $this->fail(
+                "An unexpected InvalidArgumentException has been raised: " .
+                $unexpected
+            );
         }
     }
 
-    public function test_if_parameter_are_converted_to_lowercase()
+    /**
+     * Verify lowercasing of parameter values.
+     *
+     * @return void
+     * @access public
+     */
+    public function testIfParametersAreConvertedToLowercase()
     {
         try {
             $ldapConfigurationParameter = new LDAPConfigurationParameter(
@@ -118,7 +165,7 @@ class LDAPConfigurationParameterTest extends PHPUnit_Framework_TestCase
                 "/authn/ldap/unconverted-parameter-values-config.ini"
             );
             $parameters = $ldapConfigurationParameter->getParameter();
-            foreach ($parameters as $index => $value){
+            foreach ($parameters as $index => $value) {
                 if ($index == "username") {
                     $this->assertTrue($value == "uid");
                 }
@@ -128,7 +175,10 @@ class LDAPConfigurationParameterTest extends PHPUnit_Framework_TestCase
                 }
             }
         } catch (InvalidArgumentException $unexpected) {
-            $this->fail("An unexpected UnexpectedValueException has not been raised: {$unexpected}");
+            $this->fail(
+                "An unexpected InvalidArgumentException has been raised: " .
+                $unexpected
+            );
         }
     }
 

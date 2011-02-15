@@ -41,8 +41,8 @@ require_once 'sys/authn/IOException.php';
  */
 class LDAPAuthenticationTest extends PHPUnit_Framework_TestCase
 {
-    private $username = "testuser";     // valid LDAP username
-    private $password = "testpass";     // valid LDAP password
+    private $_username = "testuser";     // valid LDAP username
+    private $_password = "testpass";     // valid LDAP password
 
     /**
      * Standard setup method.
@@ -61,11 +61,17 @@ class LDAPAuthenticationTest extends PHPUnit_Framework_TestCase
         $options = $configurationReader->readConfiguration('Database');
     }
 
-    public function test_with_empty_username()
+    /**
+     * Verify that missing username causes failure.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithEmptyUsername()
     {
         try {
             $_POST['username'] = '';
-            $_POST['password'] = $this->password;
+            $_POST['password'] = $this->_password;
             $authN = new LDAPAuthentication();
             $this->assertTrue(PEAR::isError($authN->authenticate()));
         } catch (InvalidArgumentException $unexpected) {
@@ -73,10 +79,16 @@ class LDAPAuthenticationTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    public function test_with_empty_password()
+    /**
+     * Verify that missing password causes failure.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithEmptyPassword()
     {
         try {
-            $_POST['username'] = $this->username;
+            $_POST['username'] = $this->_username;
             $_POST['password'] = '';
             $authN = new LDAPAuthentication();
             $this->assertTrue(PEAR::isError($authN->authenticate()));
@@ -85,11 +97,17 @@ class LDAPAuthenticationTest extends PHPUnit_Framework_TestCase
         }
     }
 
-    public function test_with_wrong_credentials()
+    /**
+     * Verify that bad credentials cause failure.
+     *
+     * @return void
+     * @access public
+     */
+    public function testWithWrongCredentials()
     {
         try {
-            $_POST['username'] = $this->username;
-            $_POST['password'] = $this->password . 'badpass';
+            $_POST['username'] = $this->_username;
+            $_POST['password'] = $this->_password . 'badpass';
             $authN = new LDAPAuthentication();
             $this->assertTrue(PEAR::isError($authN->authenticate()));
         } catch (IOException $unexpected) {
@@ -99,10 +117,10 @@ class LDAPAuthenticationTest extends PHPUnit_Framework_TestCase
 
     /* TODO -- figure out a way to make this test work cleanly in our continuous
                integration environment.
-    public function test_with_working_credentials()
+    public function testWithWorkingCredentials()
     {
-        $_POST['username'] = $this->username;
-        $_POST['password'] = $this->password;
+        $_POST['username'] = $this->_username;
+        $_POST['password'] = $this->_password;
         $authN = new LDAPAuthentication();
         $this->assertTrue($authN->authenticate() instanceof User);
     }

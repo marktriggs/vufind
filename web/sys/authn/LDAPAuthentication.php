@@ -75,12 +75,24 @@ class LDAPAuthentication implements Authentication
         return $this->_bindUser();
     }
 
+    /**
+     * Trim the credentials stored in the object.
+     *
+     * @return void
+     * @access private
+     */
     private function _trimCredentials()
     {
         $this->_username = trim($this->_username);
         $this->_password = trim($this->_password);
     }
 
+    /**
+     * Communicate with LDAP and obtain user details.
+     *
+     * @return object User object if successful, PEAR_Error otherwise.
+     * @access private
+     */
     private function _bindUser()
     {
         $ldapConnectionParameter
@@ -147,6 +159,15 @@ class LDAPAuthentication implements Authentication
         return new PEAR_ERROR('authentication_error_invalid');
     }
 
+    /**
+     * Build a User object from details obtained via LDAP.
+     *
+     * @param array $data                    Details from ldap_get_entries call.
+     * @param array $ldapConnectionParameter LDAP settings from config.ini.
+     *
+     * @return User
+     * @access private
+     */
     private function _processLDAPUser($data, $ldapConnectionParameter)
     {
         $user = new User();
@@ -197,17 +218,38 @@ class LDAPAuthentication implements Authentication
                 }
             }
         }
-        $this->_synchronizeVufindDatabaseWithLDAPEntries($userIsInVufindDatabase, $user);
+        $this->_synchronizeVufindDatabaseWithLDAPEntries(
+            $userIsInVufindDatabase, $user
+        );
         return $user;
     }
 
+    /**
+     * Is the specified user already in VuFind's local database?
+     *
+     * @param User $user User to check
+     *
+     * @return bool
+     * @access private
+     */
     private function _isUserInVufindDatabase($user)
     {
         return $user->find(true);
     }
 
-    private function _synchronizeVufindDatabaseWithLDAPEntries($userIsInVufindDatabase, $user)
-    {
+    /**
+     * Update VuFind's local database with details obtained via LDAP.
+     *
+     * @param bool $userIsInVufindDatabase Is this a new user (false) or an existing
+     * one (true)?
+     * @param User $user                   User object to store.
+     *
+     * @return void
+     * @access private
+     */
+    private function _synchronizeVufindDatabaseWithLDAPEntries(
+        $userIsInVufindDatabase, $user
+    ) {
         if ($userIsInVufindDatabase) {
             $user->update();
         } else {

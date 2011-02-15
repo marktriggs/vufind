@@ -38,44 +38,80 @@ require_once 'ConfigurationReader.php';
  */
 class LDAPConfigurationParameter
 {
-    private $ldapParameter;
+    private $_configurationFilePath;
+    private $_ldapParameter;
 
+    /**
+     * Constructor
+     *
+     * @param string $configurationFilePath Configuration file to load (defaults to
+     * standard config.ini).
+     *
+     * @access public
+     */
     public function __construct($configurationFilePath = '')
     {
-        $this->configurationFilePath = $configurationFilePath;
+        $this->_configurationFilePath = $configurationFilePath;
     }
 
+    /**
+     * Load normalized LDAP configuration settings.
+     *
+     * @return array
+     * @access public
+     */
     public function getParameter()
     {
-        $this->getFullSectionParameters();
-        $this->checkIfMandatoryParametersAreSet();
-        $this->convertParameterValuesToLowercase();
-        return $this->ldapParameter;
+        $this->_getFullSectionParameters();
+        $this->_checkIfMandatoryParametersAreSet();
+        $this->_convertParameterValuesToLowercase();
+        return $this->_ldapParameter;
     }
 
-    private function getFullSectionParameters()
+    /**
+     * Load LDAP parameters from configuration file.
+     *
+     * @return void
+     * @access private
+     */
+    private function _getFullSectionParameters()
     {
-        $configurationReader = new ConfigurationReader($this->configurationFilePath);
-        $this->ldapParameter = $configurationReader->readConfiguration("LDAP");
+        $configurationReader
+            = new ConfigurationReader($this->_configurationFilePath);
+        $this->_ldapParameter = $configurationReader->readConfiguration("LDAP");
     }
 
-    private function checkIfMandatoryParametersAreSet()
+    /**
+     * Throw exception if required parameters are missing.
+     *
+     * @return void
+     * @access private
+     */
+    private function _checkIfMandatoryParametersAreSet()
     {
-        if (empty($this->ldapParameter['host'])
-            || empty($this->ldapParameter['port'])
-            || empty($this->ldapParameter['basedn'])
-            || empty($this->ldapParameter['username'])
+        if (empty($this->_ldapParameter['host'])
+            || empty($this->_ldapParameter['port'])
+            || empty($this->_ldapParameter['basedn'])
+            || empty($this->_ldapParameter['username'])
         ) {
-            throw new InvalidArgumentException("One or more LDAP parameter are missing. Check your config.ini!");
+            throw new InvalidArgumentException(
+                "One or more LDAP parameter are missing. Check your config.ini!"
+            );
         }
     }
 
-    private function convertParameterValuesToLowercase()
+    /**
+     * Normalize parameter values to lowercase.
+     *
+     * @return void
+     * @access private
+     */
+    private function _convertParameterValuesToLowercase()
     {
-        foreach ($this->ldapParameter as $index => $value) {
+        foreach ($this->_ldapParameter as $index => $value) {
             // Don't lowercase the bind credentials -- they may be case sensitive!
             if ($index != 'bind_username' && $index != 'bind_password') {
-                $this->ldapParameter[$index] = strtolower($value);
+                $this->_ldapParameter[$index] = strtolower($value);
             }
         }
     }
