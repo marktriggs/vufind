@@ -37,8 +37,8 @@ require_once 'sys/authn/LDAPConfigurationParameter.php';
 /**
  * ILS Driver for VuFind to get information from PICA
  *
- * Holding information is got by DAIA, so its not necessary to implement those functions here
- * Just needs to extend DAIA driver
+ * Holding information is obtained by DAIA, so it's not necessary to implement those
+ * functions here; we just need to extend the DAIA driver.
  *
  * @category VuFind
  * @package  ILS_Drivers
@@ -48,8 +48,8 @@ require_once 'sys/authn/LDAPConfigurationParameter.php';
  */
 class PICA extends DAIA
 {
-    private $username;
-    private $password;
+    private $_username;
+    private $_password;
     private $_ldapConfigurationParameter;
 
     /**
@@ -93,8 +93,8 @@ class PICA extends DAIA
         if ($barcode == '' || $password == '') {
             return new PEAR_Error('Invalid Login, Please try again.');
         }
-        $this->username = $barcode;
-        $this->password = $password;
+        $this->_username = $barcode;
+        $this->_password = $password;
 
         // first look into local database
         $loginUser = new User();
@@ -218,10 +218,10 @@ class PICA extends DAIA
                 $renewals[] = $this->_getRenewals($completeValue);
             }
             $holds = $holdsByIframe;
-        }
-        else {
+        } else {
             // no iframes in PICA catalog, use checkboxes instead
-            // Warning: reserved items have no checkbox in OPC! They wont appear in this list
+            // Warning: reserved items have no checkbox in OPC! They wont appear
+            // in this list
             $position = strpos($postit, 'input type="checkbox" name="VB"');
             for ($i = 0; $i < $holds; $i++) {
                 $pos = strpos($postit, 'value=', $position);
@@ -249,10 +249,9 @@ class PICA extends DAIA
                     'reservations' => $reservations[$i],
                     'vb'      => $barcode[$i]
                 );
-            }
-            else {
-                // There is a problem: no PPN found for this item...
-                // lets take id 0 to avoid serious error (that will just return an empty title)
+            } else {
+                // There is a problem: no PPN found for this item... lets take id 0
+                // to avoid serious error (that will just return an empty title)
                 $transList[] = array(
                     'id'      => 0,
                     'duedate' => $expiration[$i],
@@ -279,16 +278,14 @@ class PICA extends DAIA
     {
         if ($offset === 0) {
             $haystack_reverse = strrev($haystack);
-        }
-        else {
+        } else {
             $haystack_reverse = strrev(substr($haystack, 0, $offset));
         }
         $needle_reverse = strrev($needle);
         $position_brutto = strpos($haystack_reverse, $needle_reverse);
         if ($offset === 0) {
             $position_netto = strlen($haystack)-$position_brutto-strlen($needle);
-        }
-        else {
+        } else {
             $position_netto = $offset-$position_brutto-strlen($needle);
         }
         return $position_netto;
@@ -299,7 +296,8 @@ class PICA extends DAIA
      *
      * @param string $barcode Barcode of the medium
      *
-     * @return int number of renewals, if renewals script has not been set, return false
+     * @return int number of renewals, if renewals script has not been set, return
+     * false
      * @access private
      */
     private function _getRenewals($barcode)
@@ -340,8 +338,7 @@ class PICA extends DAIA
             foreach ($recordId as $rid) {
                 array_push($POST['VB'], $recordId);
             }
-        }
-        else {
+        } else {
             $POST['VB'] = $recordId;
         }
         $postit = $this->_postit($URL, $POST);
@@ -406,11 +403,13 @@ class PICA extends DAIA
             $fineList[] = array(
                 "amount"   => $fine[$i],
                 "checkout" => "",
-                "fine"     => $fineDate[$i] . ': ' . utf8_encode(html_entity_decode($description[$i])),
+                "fine"     => $fineDate[$i] . ': ' .
+                    utf8_encode(html_entity_decode($description[$i])),
                 "duedate"  => ""
             );
-            // id should be the ppn of the book resulting the fine
-            // but theres currently no way to find out the PPN (we have neither barcode nor signature...)
+            // id should be the ppn of the book resulting the fine but there's
+            // currently no way to find out the PPN (we have neither barcode nor
+            // signature...)
         }
         return $fineList;
     }
@@ -448,12 +447,14 @@ class PICA extends DAIA
             $position = $pos + 1;
             $position_create = $position;
             for ($n = 0; $n<3; $n++) {
-                $position_create = strpos($postit, '<td class="value-small">', $position_create+1);
+                $position_create = strpos(
+                    $postit, '<td class="value-small">', $position_create+1
+                );
             }
             $creation[] = substr($postit, $position_create+24, 10);
         }
-        /* items, which are ordered and have no signature yet, are not included in the for-loop
-         * getthem by checkbox PPN
+        /* items, which are ordered and have no signature yet, are not included in
+         * the for-loop getthem by checkbox PPN
          */
         $moreholds = substr_count($postit, 'input type="checkbox" name="PPN"');
         $position = strpos($postit, 'input type="checkbox" name="PPN"');
@@ -480,13 +481,16 @@ class PICA extends DAIA
             $position = $pos + 1;
             $position_create = $position;
             for ($n = 0; $n<3; $n++) {
-                $position_create = strpos($postit, '<td class="value-small">', $position_create+1);
+                $position_create = strpos(
+                    $postit, '<td class="value-small">', $position_create+1
+                );
             }
             $creation[] = substr($postit, $position_create+24, 10);
         }
 
-        /* media ordered from closed stack is not visible on the UI_LOR page requested above...
-         * we need to do another request and filter the UI_LOL-page for requests
+        /* media ordered from closed stack is not visible on the UI_LOR page
+         * requested above... we need to do another request and filter the
+         * UI_LOL-page for requests
          */
         $POST_LOL = array(
             "ACT" => "UI_LOL",
@@ -495,10 +499,14 @@ class PICA extends DAIA
         );
         $postit_lol = $this->_postit($URL, $POST_LOL);
 
-        $requests = substr_count($postit_lol, '<td class="value-small">bestellt</td>');
+        $requests = substr_count(
+            $postit_lol, '<td class="value-small">bestellt</td>'
+        );
         $position = 0;
         for ($i = 0; $i < $requests; $i++) {
-            $position = strpos($postit_lol, '<td class="value-small">bestellt</td>', $position+1);
+            $position = strpos(
+                $postit_lol, '<td class="value-small">bestellt</td>', $position+1
+            );
             $pos = strpos($postit_lol, '<td class="value-small">', ($position-100));
             $nextClosingTd = strpos($postit_lol, '</td>', $pos);
             $value = substr($postit_lol, $pos+27, ($nextClosingTd-$pos-27));
@@ -570,7 +578,8 @@ class PICA extends DAIA
         // Parameter verarbeiten
         //print_r($data_to_send); # Zum Debuggen
         foreach ($data_to_send as $key => $dat) {
-            $data_to_send[$key] = "$key=".rawurlencode(utf8_encode(stripslashes($dat)));
+            $data_to_send[$key]
+                = "$key=".rawurlencode(utf8_encode(stripslashes($dat)));
         }
         $postData = implode("&", $data_to_send);
 
@@ -583,7 +592,9 @@ class PICA extends DAIA
         $out .= "Connection: Close\r\n";
         $out .= "\r\n";
         $out .= $postData;
-        if (!$conex = @fsockopen($this->catalogHost, "80", $errno, $errstr, 10)) return 0;
+        if (!$conex = @fsockopen($this->catalogHost, "80", $errno, $errstr, 10)) {
+            return 0;
+        }
         fwrite($conex, $out);
         $data = '';
         while (!feof($conex)) {
@@ -612,8 +623,7 @@ class PICA extends DAIA
         $itemlist = $doc->getElementsByTagName('SHORTTITLE');
         if (count($itemlist->item(0)->attributes) > 0) {
             $ppn = $itemlist->item(0)->attributes->getNamedItem('PPN')->nodeValue;
-        }
-        else {
+        } else {
             return false;
         }
         return $ppn;
@@ -660,8 +670,9 @@ class PICA extends DAIA
         // will successfully return a resource from ldap_connect even if the server
         // is unavailable -- we need to check for bad return values again at search
         // time!
-        $ldapConnection = @ldap_connect($ldapConnectionParameter['host'],
-            $ldapConnectionParameter['port']);
+        $ldapConnection = @ldap_connect(
+            $ldapConnectionParameter['host'], $ldapConnectionParameter['port']
+        );
         if (!$ldapConnection) {
             return new PEAR_ERROR('Unable to connect to LDAP server.');
         }
@@ -689,7 +700,7 @@ class PICA extends DAIA
         }
 
         // Search for username
-        $ldapFilter = $ldapConnectionParameter['username'] . '=' . $this->username;
+        $ldapFilter = $ldapConnectionParameter['username'] . '=' . $this->_username;
         $ldapSearch = @ldap_search(
             $ldapConnection, $ldapConnectionParameter['basedn'], $ldapFilter
         );
@@ -700,7 +711,7 @@ class PICA extends DAIA
         $info = ldap_get_entries($ldapConnection, $ldapSearch);
         if ($info['count']) {
             // Validate the user credentials by attempting to bind to LDAP:
-            $ldapBind = @ldap_bind($ldapConnection, $info[0]['dn'], $this->password);
+            $ldapBind = @ldap_bind($ldapConnection, $info[0]['dn'], $this->_password);
             if ($ldapBind) {
                 // If the bind was successful, we can look up the full user info:
                 $ldapSearch = ldap_search(
@@ -727,7 +738,7 @@ class PICA extends DAIA
     private function _processLDAPUser($data, $ldapConnectionParameter)
     {
         $user = array();
-        $user['username'] = $this->username;
+        $user['username'] = $this->_username;
         for ($i=0; $i<$data["count"];$i++) {
             for ($j=0;$j<$data[$i]["count"];$j++) {
 
@@ -758,8 +769,8 @@ class PICA extends DAIA
         }
         // do not store cat_password into database, but assign it to Session user
         $sessionuser = new User();
-        $sessionuser->username = $this->username;
-        $sessionuser->cat_password = $this->password;
+        $sessionuser->username = $this->_username;
+        $sessionuser->cat_password = $this->_password;
         $_SESSION['picauser'] = $sessionuser;
         return $user;
     }
@@ -776,7 +787,7 @@ class PICA extends DAIA
     private function _getUserdata($data, $ldapConnectionParameter)
     {
         $user = new User();
-        $user->username = $this->username;
+        $user->username = $this->_username;
         for ($i=0; $i<$data["count"];$i++) {
             for ($j=0;$j<$data[$i]["count"];$j++) {
 
@@ -872,7 +883,7 @@ class PICA extends DAIA
         }
 
         // Search for username
-        $ldapFilter = $ldapConnectionParameter['username'] . '=' . $this->username;
+        $ldapFilter = $ldapConnectionParameter['username'] . '=' . $this->_username;
         $ldapSearch = @ldap_search(
             $ldapConnection, $ldapConnectionParameter['basedn'], $ldapFilter
         );
@@ -883,7 +894,7 @@ class PICA extends DAIA
         $info = ldap_get_entries($ldapConnection, $ldapSearch);
         if ($info['count']) {
             // Validate the user credentials by attempting to bind to LDAP:
-            $ldapBind = @ldap_bind($ldapConnection, $info[0]['dn'], $this->password);
+            $ldapBind = @ldap_bind($ldapConnection, $info[0]['dn'], $this->_password);
             if ($ldapBind) {
                 // If the bind was successful, we can look up the full user info:
                 $ldapSearch = ldap_search(
