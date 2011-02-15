@@ -23,6 +23,7 @@
  * @package  Support_Classes
  * @author   Tuan Nguyen <tuan@yorku.ca>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/system_classes Wiki
  */
 
 /**
@@ -34,11 +35,12 @@
  * @package  Support_Classes
  * @author   Tuan Nguyen <tuan@yorku.ca>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/system_classes Wiki
  */
 class Cart_Model
 {
-    private static $singleton;
-    private $items;
+    private static $_singleton;
+    private $_items;
 
     const CART_COOKIE =  'vufind_cart';
     const CART_COOKIE_DELIM = "\t";
@@ -50,7 +52,7 @@ class Cart_Model
      */
     private function __construct()
     {
-        $this->items = array();
+        $this->_items = array();
     }
 
     /**
@@ -62,12 +64,12 @@ class Cart_Model
      */
     static function getInstance()
     {
-        if (!Cart_Model::$singleton) {
+        if (!Cart_Model::$_singleton) {
             $cart = new Cart_Model();
-            $cart->init();
-            Cart_Model::$singleton = $cart;
+            $cart->_init();
+            Cart_Model::$_singleton = $cart;
         }
-        return Cart_Model::$singleton;
+        return Cart_Model::$_singleton;
     }
 
     /**
@@ -78,7 +80,7 @@ class Cart_Model
      */
     public function getItems()
     {
-        return $this->items;
+        return $this->_items;
     }
 
     /**
@@ -89,12 +91,14 @@ class Cart_Model
      */
     public function emptyCart()
     {
-        $this->items = array();
-        $this->save();
+        $this->_items = array();
+        $this->_save();
     }
 
     /**
      * Add an item to the cart.
+     *
+     * @param string $item ID of item to remove
      *
      * @return void
      * @access public
@@ -107,18 +111,22 @@ class Cart_Model
     /**
      * Add an array of items to the cart.
      *
+     * @param array $items IDs of items to add
+     *
      * @return void
      * @access public
      */
     public function addItems($items)
     {
-        $results = array_unique(array_merge($this->items, $items));
-        $this->items = $results;
-        $this->save();
+        $results = array_unique(array_merge($this->_items, $items));
+        $this->_items = $results;
+        $this->_save();
     }
 
     /**
      * Remove an item from the cart.
+     *
+     * @param string $item ID of item to remove
      *
      * @return void
      * @access public
@@ -126,13 +134,13 @@ class Cart_Model
     public function removeItem($item)
     {
         $results = array();
-        foreach ($this->items as $id) {
+        foreach ($this->_items as $id) {
             if ($id != $item) {
                 $results[] = $id;
             }
         }
-        $this->items = $results;
-        $this->save();
+        $this->_items = $results;
+        $this->_save();
     }
 
     /**
@@ -143,7 +151,7 @@ class Cart_Model
      */
     public function isEmpty()
     {
-        return empty($this->items);
+        return empty($this->_items);
     }
 
     /**
@@ -152,14 +160,14 @@ class Cart_Model
      * @return array   contents of the cart
      * @access private
      */
-    private function init()
+    private function _init()
     {
         $items = null;
         if (isset($_COOKIE[Cart_Model::CART_COOKIE])) {
             $cookie = $_COOKIE[Cart_Model::CART_COOKIE];
             $items = explode(Cart_Model::CART_COOKIE_DELIM, $cookie);
         }
-        $this->items = $items ? $items : array();
+        $this->_items = $items ? $items : array();
     }
 
     /**
@@ -169,9 +177,9 @@ class Cart_Model
      * @return void
      * @access private
      */
-    private function save()
+    private function _save()
     {
-        $cookie = implode(Cart_Model::CART_COOKIE_DELIM, $this->items);
+        $cookie = implode(Cart_Model::CART_COOKIE_DELIM, $this->_items);
         setcookie(Cart_Model::CART_COOKIE, $cookie, 0, '/');
     }
 }
