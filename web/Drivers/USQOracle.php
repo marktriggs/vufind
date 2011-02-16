@@ -36,13 +36,13 @@
 class oracle_connection
 {
     // Database Handle
-    private $db_handle;
+    private $_dbHandle;
 
     // Error information
-    private $last_error;
-    private $last_error_type;
-    private $last_error_fields;
-    private $last_sql;
+    private $_lastError;
+    private $_lastErrorType;
+    private $_lastErrorFields;
+    private $_lastSql;
 
     /**
      * Constructor -- connect to database.
@@ -55,56 +55,96 @@ class oracle_connection
      */
     public function __construct($username, $password, $tns)
     {
-        $this->clear_error();
+        $this->_clearError();
         $tmp = error_reporting(1);
-        if ($this->db_handle = @oci_connect($username, $password, $tns)) {
+        if ($this->_dbHandle = @oci_connect($username, $password, $tns)) {
             error_reporting($tmp);
             $this->audit_id = 0;
             $this->detail_id = 0;
         } else {
             error_reporting($tmp);
-            $this->handle_error('connect', oci_error());
+            $this->_handleError('connect', oci_error());
             return false;
-        }
-    }
-
-    public function get_handle()
-    {
-        return $this->db_handle;
-    }
-
-    public function __destruct()
-    {
-        // Close the OCI connection unless we failed to establish it:
-        if ($this->db_handle !== false) {
-            oci_close($this->db_handle);
         }
     }
 
     /**
-     *   Basic SQL functions
+     * Get access to the Oracle handle.
+     *
+     * @return resource
+     * @access public
+     */
+    public function getHandle()
+    {
+        return $this->_dbHandle;
+    }
+
+    /**
+     * Destructor
+     *
+     * @return void
+     * @access public
+     */
+    public function __destruct()
+    {
+        // Close the OCI connection unless we failed to establish it:
+        if ($this->_dbHandle !== false) {
+            oci_close($this->_dbHandle);
+        }
+    }
+
+    /**
+     * Wrapper around oci_parse.
+     *
+     * @param string $sql SQL statement to prepare.
+     *
+     * @return mixed      SQL resource on success, boolean false otherwise.
+     * @access public
      */
     public function prepare($sql)
     {
-        if ($parsed = @oci_parse($this->db_handle, $sql)) {
+        if ($parsed = @oci_parse($this->_dbHandle, $sql)) {
             return $parsed;
         } else {
-            $this->handle_error('parsing', oci_error($this->db_handle), $sql);
+            $this->_handleError('parsing', oci_error($this->_dbHandle), $sql);
             return false;
         }
     }
 
-    public function prep_row_id()
+    /**
+     * Wrapper around oci_new_descriptor.
+     *
+     * @return mixed New descriptor on success, boolean false otherwise.
+     * @access public
+     */
+    public function prepRowId()
     {
-        if ($new_id = @oci_new_descriptor($this->db_handle, OCI_D_ROWID)) {
+        if ($new_id = @oci_new_descriptor($this->_dbHandle, OCI_D_ROWID)) {
             return $new_id;
         } else {
-            $this->handle_error('new_descriptor', oci_error($this->db_handle));
+            $this->_handleError('new_descriptor', oci_error($this->_dbHandle));
             return false;
         }
     }
 
-    public function bind_param($parsed, $place_holder, $data, $data_type = 'string', $length = -1)
+    /**
+     * Wrapper around oci_bind_by_name.
+     *
+     * @param resource $parsed       Result returned by prepare() method.
+     * @param string   $place_holder The colon-prefixed bind variable placeholder
+     * used in the statement.
+     * @param string   $data         The PHP variable to be associatd with
+     * $place_holder
+     * @param string   $data_type    The type of $data (string, integer, float,
+     * long, date, row_id, clob, or blob)
+     * @param int      $length       Sets the maximum length for the data. If you
+     * set it to -1, this function will use the current length of variable to set
+     * the maximum length.
+     *
+     * @return bool
+     * @access public
+     */
+    public function bindParam($parsed, $place_holder, $data, $data_type = 'string', $length = -1)
     {
         switch ($data_type) {
         case 'string':
@@ -141,15 +181,32 @@ class oracle_connection
         if (@oci_bind_by_name($parsed, $place_holder, $data, $length, $oracle_data_type)) {
             return true;
         } else {
-            $this->handle_error('binding', oci_error());
+            $this->_handleError('binding', oci_error());
             return false;
         }
     }
 
-    // Same as above, but variable is parsed by reference to allow for correct functioning
-    //  of the 'RETURNING' sql statement. Annoying, but putting it in two seperate functions
-    //  allows the user to pass string literals into bind_param without a fatal error.
-    public function return_param($parsed, $place_holder, &$data, $data_type = 'string', $length = -1)
+    /**
+     * Same as bindParam(), but variable is parsed by reference to allow for correct
+     * functioning of the 'RETURNING' sql statement. Annoying, but putting it in two
+     * separate functions allows the user to pass string literals into bindParam
+     * without a fatal error.
+     *
+     * @param resource $parsed       Result returned by prepare() method.
+     * @param string   $place_holder The colon-prefixed bind variable placeholder
+     * used in the statement.
+     * @param string   $data         The PHP variable to be associatd with
+     * $place_holder
+     * @param string   $data_type    The type of $data (string, integer, float,
+     * long, date, row_id, clob, or blob)
+     * @param int      $length       Sets the maximum length for the data. If you
+     * set it to -1, this function will use the current length of variable to set
+     * the maximum length.
+     *
+     * @return bool
+     * @access public
+     */
+    public function returnParam($parsed, $place_holder, &$data, $data_type = 'string', $length = -1)
     {
         switch ($data_type) {
         case 'string':
@@ -186,62 +243,95 @@ class oracle_connection
         if (@oci_bind_by_name($parsed, $place_holder, $data, $length, $oracle_data_type)) {
             return true;
         } else {
-            $this->handle_error('binding', oci_error());
+            $this->_handleError('binding', oci_error());
             return false;
         }
     }
 
+    /**
+     * Wrapper around oci_execute.
+     *
+     * @param resource $parsed Result returned by prepare() method.
+     *
+     * @return bool
+     * @access public
+     */
     public function exec($parsed)
     {
         // OCI_DEFAULT == DO NOT COMMIT!!!
         if (@oci_execute($parsed, OCI_DEFAULT)) {
             return true;
         } else {
-            $this->handle_error('executing', oci_error($parsed));
-            return false;
-        }
-    }
-
-    public function commit()
-    {
-        if (@oci_commit($this->db_handle)) {
-            return true;
-        } else {
-            $this->handle_error('commit', oci_error($this->db_handle));
-            return false;
-        }
-    }
-
-    public function rollback()
-    {
-        if (@oci_rollback($this->db_handle)) {
-            return true;
-        } else {
-            $this->handle_error('rollback', oci_error($this->db_handle));
-            return false;
-        }
-    }
-
-    public function free($parsed)
-    {
-        if (@oci_free_statement($parsed)) {
-            return true;
-        } else {
-            $this->handle_error('free', oci_error($this->db_handle));
+            $this->_handleError('executing', oci_error($parsed));
             return false;
         }
     }
 
     /**
-     *   Template function
-     *   - common functions we require
+     * Wrapper around oci_commit.
+     *
+     * @return bool
+     * @access public
      */
-    public function simple_select($sql, $fields = array())
+    public function commit()
+    {
+        if (@oci_commit($this->_dbHandle)) {
+            return true;
+        } else {
+            $this->_handleError('commit', oci_error($this->_dbHandle));
+            return false;
+        }
+    }
+
+    /**
+     * Wrapper around oci_rollback.
+     *
+     * @return bool
+     * @access public
+     */
+    public function rollback()
+    {
+        if (@oci_rollback($this->_dbHandle)) {
+            return true;
+        } else {
+            $this->_handleError('rollback', oci_error($this->_dbHandle));
+            return false;
+        }
+    }
+
+    /**
+     * Wrapper around oci_free_statement.
+     *
+     * @param resource $parsed Result returned by prepare() method.
+     *
+     * @return bool
+     * @access public
+     */
+    public function free($parsed)
+    {
+        if (@oci_free_statement($parsed)) {
+            return true;
+        } else {
+            $this->_handleError('free', oci_error($this->_dbHandle));
+            return false;
+        }
+    }
+
+    /**
+     * Execute a SQL statement and return the results.
+     *
+     * @param string $sql    SQL to execute
+     * @param array  $fields Bind parameters (optional)
+     *
+     * @return array|bool    Results on success, false on error.
+     * @access public
+     */
+    public function simpleSelect($sql, $fields = array())
     {
         $stmt = $this->prepare($sql);
         foreach ($fields as $field => $datum) {
             list($column, $type) = split(":", $field);
-            $this->bind_param($stmt, ":".$column, $datum, $type);
+            $this->bindParam($stmt, ":".$column, $datum, $type);
         }
 
         if ($this->exec($stmt)) {
@@ -249,13 +339,22 @@ class oracle_connection
             $this->free($stmt);
             return $return_array;
         } else {
-            $this->last_error_fields = $fields;
+            $this->_lastErrorFields = $fields;
             $this->free($stmt);
             return false;
         }
     }
 
-    public function simple_delete($table, $fields = array())
+    /**
+     * Delete row(s) from a table.
+     *
+     * @param string $table  Table to update.
+     * @param array  $fields Fields to use to match rows to delete.
+     *
+     * @return bool
+     * @access public
+     */
+    public function simpleDelete($table, $fields = array())
     {
         $types   = array();
         $data    = array();
@@ -275,7 +374,7 @@ class oracle_connection
 
         // Bind Variables
         foreach (array_keys($data) as $column) {
-            $this->bind_param($delete, ":".$column, $data[$column], $types[$column]);
+            $this->bindParam($delete, ":".$column, $data[$column], $types[$column]);
         }
 
         // Execute
@@ -284,13 +383,22 @@ class oracle_connection
             $this->free($delete);
             return true;
         } else {
-            $this->last_error_fields = $fields;
+            $this->_lastErrorFields = $fields;
             $this->free($delete);
             return false;
         }
     }
 
-    public function simple_insert($table, $fields = array())
+    /**
+     * Insert a row into a table.
+     *
+     * @param string $table  Table to append to.
+     * @param array  $fields Data to write to table.
+     *
+     * @return bool
+     * @access public
+     */
+    public function simpleInsert($table, $fields = array())
     {
         $types   = array();
         $data    = array();
@@ -321,7 +429,7 @@ class oracle_connection
 
         // Bind Variables
         foreach (array_keys($data) as $column) {
-            $this->bind_param($insert, ":".$column, $data[$column], $types[$column]);
+            $this->bindParam($insert, ":".$column, $data[$column], $types[$column]);
         }
 
         // Execute
@@ -330,98 +438,139 @@ class oracle_connection
             $this->free($insert);
             return true;
         } else {
-            $this->last_error_fields = $fields;
+            $this->_lastErrorFields = $fields;
             $this->free($insert);
             return false;
         }
     }
 
-    public function simple_sql($sql, $fields = array())
+    /**
+     * Execute a simple SQL statement.
+     *
+     * @param string $sql    SQL to execute
+     * @param array  $fields Bind parameters (optional)
+     *
+     * @return bool
+     * @access public
+     */
+    public function simpleSql($sql, $fields = array())
     {
         $stmt = $this->prepare($sql);
         foreach ($fields as $field => $datum) {
             list($column, $type) = split(":", $field);
-            $this->bind_param($stmt, ":".$column, $datum, $type);
+            $this->bindParam($stmt, ":".$column, $datum, $type);
         }
         if ($this->exec($stmt)) {
             $this->commit();
             $this->free($stmt);
             return true;
         } else {
-            $this->last_error_fields = $fields;
+            $this->_lastErrorFields = $fields;
             $this->free($stmt);
             return false;
         }
     }
 
     /**
-     *   Error Handling
+     * Clear out internal error tracking details.
+     *
+     * @return void
+     * @access private
      */
-    private function clear_error()
+    private function _clearError()
     {
-        $this->last_error        = null;
-        $this->last_error_type   = null;
-        $this->last_error_fields = null;
-        $this->last_sql          = null;
-    }
-
-    private function handle_error($type, $error, $sql = '')
-    {
-        // All we are doing at the moment is storing it
-        $this->last_error        = $error;
-        $this->last_error_type   = $type;
-        $this->last_sql          = $sql;
+        $this->_lastError       = null;
+        $this->_lastErrorType   = null;
+        $this->_lastErrorFields = null;
+        $this->_lastSql         = null;
     }
 
     /**
-     *   Error Retrieval
+     * Store information about an error.
+     *
+     * @param string $type  Type of error
+     * @param string $error Detailed error message
+     * @param string $sql   SQL statement that caused error
+     *
+     * @return void
+     * @access private
      */
-    // User can retrieve the raw error data
-    public function get_last_error()
+    private function _handleError($type, $error, $sql = '')
     {
-        return $this->last_error;
+        // All we are doing at the moment is storing it
+        $this->_lastError       = $error;
+        $this->_lastErrorType   = $type;
+        $this->_lastSql         = $sql;
     }
 
-    public function get_last_error_type()
+    /**
+     * Error Retrieval -- last error message.
+     *
+     * @return string
+     * @access public
+     */
+    public function getLastError()
     {
-        return $this->last_error_type;
+        return $this->_lastError;
     }
 
-    public function get_last_sql()
+    /**
+     * Error Retrieval -- last error type.
+     *
+     * @return string
+     * @access public
+     */
+    public function getLastErrorType()
     {
-        return $this->last_sql;
+        return $this->_lastErrorType;
     }
 
-    // Or request it formatted as html output
-    public function get_html_error()
+    /**
+     * Error Retrieval -- SQL that triggered last error.
+     *
+     * @return string
+     * @access public
+     */
+    public function getLastSql()
     {
-        if ($this->last_error == null) {
+        return $this->_lastSql;
+    }
+
+    /**
+     * Error Retrieval -- full details formatted as HTML.
+     *
+     * @return string
+     * @access public
+     */
+    public function getHtmlError()
+    {
+        if ($this->_lastError == null) {
             return "No error found!";
         }
 
         // Generic stuff
         $output  = "<b>ORACLE ERROR</b><br/>\n";
-        $output .= "Oracle '".$this->last_error_type."' Error<br />\n";
+        $output .= "Oracle '".$this->_lastErrorType."' Error<br />\n";
         $output .= "=============<br />\n";
-        foreach ($this->last_error as $key => $value) {
+        foreach ($this->_lastError as $key => $value) {
             $output .= "($key) => $value<br />\n";
         }
 
         // Anything special for this error type?
-        switch ($this->last_error_type) {
+        switch ($this->_lastErrorType) {
         case 'parsing':
             $output .= "=============<br />\n";
             $output .= "Offset into SQL:<br />\n";
-            $output .= substr($this->last_error['sqltext'], $this->last_error['offset'])."\n";
+            $output .= substr($this->_lastError['sqltext'], $this->_lastError['offset'])."\n";
             break;
         case 'executing':
             $output .= "=============<br />\n";
             $output .= "Offset into SQL:<br />\n";
-            $output .= substr($this->last_error['sqltext'], $this->last_error['offset'])."<br />\n";
-            if (count($this->last_error_fields) > 0) {
+            $output .= substr($this->_lastError['sqltext'], $this->_lastError['offset'])."<br />\n";
+            if (count($this->_lastErrorFields) > 0) {
                 $output .= "=============<br />\n";
                 $output .= "Bind Variables:<br />\n";
-                foreach ($this->last_error_fields as $k => $l) {
+                foreach ($this->_lastErrorFields as $k => $l) {
                     if (is_array($l)) {
                         $output .= "$k => (".join(", ", $l).")<br />\n";
                     } else {
@@ -432,7 +581,7 @@ class oracle_connection
             break;
         }
 
-        $this->clear_error();
+        $this->_clearError();
         return $output;
     }
 }

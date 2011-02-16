@@ -135,14 +135,14 @@ class Virtua implements DriverInterface
 
         // Bind our bib_id and execute
         $fields = array("bib_id:string" => $db_id);
-        $result = $this->_db->simple_select($sql, $fields);
+        $result = $this->_db->simpleSelect($sql, $fields);
 
         // If there are no results, lets try again because it has no items
         if (count($result) == 0) {
             $sql = "SELECT b.call_number " .
                    "FROM dbadmin.bibliographic_fields b " .
                    "WHERE b.bib_id = :bib_id";
-            $result = $this->_db->simple_select($sql, $fields);
+            $result = $this->_db->simpleSelect($sql, $fields);
 
             if (count($result) > 0) {
                 $new_holding = array(
@@ -192,7 +192,7 @@ class Virtua implements DriverInterface
                         "FROM dbadmin.holdlink h, location l " .
                         "WHERE h.location = l.location_id " .
                         "AND h.bibid = :bib_id";
-                    $result = $this->_db->simple_select($sql, $fields);
+                    $result = $this->_db->simpleSelect($sql, $fields);
 
                     if (count($result) > 0) {
                         foreach ($result as $r) {
@@ -385,9 +385,9 @@ class Virtua implements DriverInterface
             "ORDER BY l.location_id, d.units_sort_form desc, d.copyno";
         //print "<div style='display:none;'>$sql</div>";
 
-        $result = $this->_db->simple_select($sql, $fields);
+        $result = $this->_db->simpleSelect($sql, $fields);
         if ($result === false) {
-            return new PEAR_Error($this->_db->get_html_error());
+            return new PEAR_Error($this->_db->getHtmlError());
         }
 
         // Build Holdings Array
@@ -478,7 +478,7 @@ class Virtua implements DriverInterface
             "WHERE  b.patron_id = p.patron_id " .
             "AND    b.barcode   = :patron";
         $fields = array("patron:string" => $patron_id);
-        $result = $this->_db->simple_select($sql, $fields);
+        $result = $this->_db->simpleSelect($sql, $fields);
 
         // We should have 1 row and only 1 row.
         if (count($result) != 1) {
@@ -1022,7 +1022,7 @@ class Virtua implements DriverInterface
             "AND h.masked    = 0 " .
             "AND h.location  = l.location_id";
 
-        $result = $this->_db->simple_select($sql, $fields);
+        $result = $this->_db->simpleSelect($sql, $fields);
 
         // Results indicate serial holdings
         if (count($result) == 0) {
@@ -1039,7 +1039,7 @@ class Virtua implements DriverInterface
         $data = array();
         foreach ($result as $row) {
             $fields = array("hid:string" => $row['HOLDINGSID']);
-            $hresult = $this->_db->simple_select($sql, $fields);
+            $hresult = $this->_db->simpleSelect($sql, $fields);
             $data[$row['NAME']] = $this->_renderSerialHoldings($hresult);
         }
 
@@ -1060,7 +1060,7 @@ class Virtua implements DriverInterface
             "WHERE i.idtype = 104 " .
             "AND i.field_tag in ('853') " .
             "ORDER BY i.field_sequence, i.subfield_sequence";
-        $hresult = $this->_db->simple_select($sql);
+        $hresult = $this->_db->simpleSelect($sql);
         if (count($hresult) == 0) {
             return null;
         }
@@ -1111,7 +1111,7 @@ class Virtua implements DriverInterface
             ")";
 
         $fields = array("barcode:string" => $barcode);
-        $result = $this->_db->simple_select($sql, $fields);
+        $result = $this->_db->simpleSelect($sql, $fields);
 
         if (count($result) > 0) {
             // Valid Password
@@ -1167,7 +1167,7 @@ class Virtua implements DriverInterface
             "AND   p.patron_id      = :patron_id";
 
         $fields = array("patron_id:string" => $patron['id']);
-        $result = $this->_db->simple_select($sql, $fields);
+        $result = $this->_db->simpleSelect($sql, $fields);
 
         if (count($result) > 0) {
             $split      = strpos($result[0]['NAME'], ',');
@@ -1227,7 +1227,7 @@ class Virtua implements DriverInterface
             "AND   a.patron_id    = :patron_id";
 
         $fields = array("patron_id:string" => $patron['id']);
-        $result = $this->_db->simple_select($sql, $fields);
+        $result = $this->_db->simpleSelect($sql, $fields);
 
         if (count($result) > 0) {
             foreach ($result as $row) {
@@ -1265,7 +1265,7 @@ class Virtua implements DriverInterface
             "AND   h.patron_id       = :patron_id";
 
         $fields = array("patron_id:string" => $patron['id']);
-        $result = $this->_db->simple_select($sql, $fields);
+        $result = $this->_db->simpleSelect($sql, $fields);
 
         if (count($result) > 0) {
             foreach ($result as $row) {
@@ -1316,7 +1316,7 @@ class Virtua implements DriverInterface
             "ORDER BY c.due_date";
 
         $fields = array("patron_id:string" => $patron['id']);
-        $result = $this->_db->simple_select($sql, $fields);
+        $result = $this->_db->simpleSelect($sql, $fields);
 
         if (count($result) > 0) {
             foreach ($result as $row) {
@@ -1352,7 +1352,7 @@ class Virtua implements DriverInterface
             "WHERE l.Reserve_list_id = i.Reserve_list_id " .
             "AND SYSDATE BETWEEN i.Begin_date AND i.End_date " .
             "ORDER BY l.course_id";
-        $result = $this->_db->simple_select($sql);
+        $result = $this->_db->simpleSelect($sql);
 
         if (count($result) > 0) {
             foreach ($result as $row) {
@@ -1389,7 +1389,7 @@ class Virtua implements DriverInterface
             "AND i.Item_id = d.itemid " .
             "AND l.Course_id = :course";
         $fields = array("course:string" => $course);
-        $result = $this->_db->simple_select($sql, $fields);
+        $result = $this->_db->simpleSelect($sql, $fields);
 
         if (count($result) > 0) {
             foreach ($result as $row) {
@@ -1422,7 +1422,7 @@ class Virtua implements DriverInterface
         $time_format = "H:i:s";
 
         // Fix Date Handling
-        $this->_db->simple_sql(
+        $this->_db->simpleSql(
             "ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MM-YY HH24:MI:SS'"
         );
 
@@ -1431,7 +1431,7 @@ class Virtua implements DriverInterface
             "FROM usq_sr_open_normal n " .
             "WHERE UPPER(dayofweek) = UPPER(:dow)";
         $fields = array("dow:string" => date("l", $time));
-        $result = $this->_db->simple_select($sql, $fields);
+        $result = $this->_db->simpleSelect($sql, $fields);
         if (count($result) == 0) {
             return array();
         }
@@ -1465,7 +1465,7 @@ class Virtua implements DriverInterface
             "AND   to_date(:today,'dd/mm/yyyy') BETWEEN e.except_date_from AND e.except_date_to " .
             "AND   app_$day = 1";
         $fields = array("today:string" => date("d/m/Y", $time));
-        $exceptions = $this->_db->simple_select($sql, $fields);
+        $exceptions = $this->_db->simpleSelect($sql, $fields);
 
         foreach ($exceptions as $row) {
             $times[$row['CAMPUS']] = array(
