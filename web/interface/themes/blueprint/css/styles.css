@@ -34,6 +34,10 @@ fieldset, #IE8#HACK { padding-top:0.4em; }
     padding: .8em;
 }
 
+.clearer {
+    clear: both;
+}
+
 #logo {
     background:url("../images/vufind_logo.jpg") no-repeat scroll left center transparent;
     float:left;
@@ -1148,4 +1152,25 @@ div.unavailable, div.fatalError {
 }
 div.debug code {
     font-size: x-small;
+}
+
+/** Open Library Subjects **/
+.olSubjectImage {
+    width:36px; 
+    border: 1px solid black
+}
+
+.olSubjectCover {
+    float:left; 
+    margin-right: 10px;
+}
+
+.olSubjectAuthor {
+    color:black;
+    display:block;
+}
+
+.olSubjectMore {
+    text-align:right;
+    text-decoration:none;
 }

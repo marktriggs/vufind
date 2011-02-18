@@ -329,3 +329,29 @@ function getResolverLinks(openURL, id, strings)
     YAHOO.util.Connect.asyncRequest('GET', url, callback, null);
 }
 
+/* Load the contents of a URL (url) into a DOM element (identified by domId).
+ * Fill the DOM element with errorString if AJAX fails.
+ */
+function URLtoDOM(url, domId, errorString)
+{
+    var callback =
+    {
+        success: function(transaction) {
+            var o = document.getElementById(domId);
+            if (o) {
+                if (transaction.responseText) {
+                    o.innerHTML = transaction.responseText;
+                } else {
+                    o.innerHTML = errorString;
+                }
+            }
+        },
+        failure: function(transaction) {
+            var o = document.getElementById(domId);
+            if (o) {
+                o.innerHTML = errorString;
+            }
+        }
+    };
+    var transaction = YAHOO.util.Connect.asyncRequest('GET', url, callback, null);
+}

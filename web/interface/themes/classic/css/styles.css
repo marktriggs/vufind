@@ -1207,3 +1207,24 @@ legend {
 .highlight {
     font-weight: bold;
 }
+
+/* Open Library Subjects */
+.olSubjectImage {
+    width:36px; 
+    border: 1px solid black
+}
+
+.olSubjectCover {
+    float:left; 
+    margin-right: 10px;
+}
+
+.olSubjectAuthor {
+    color:black;
+    display:block;
+}
+
+.olSubjectMore {
+    text-align:right;
+    text-decoration:none;
+}
