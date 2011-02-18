@@ -67,7 +67,9 @@ class Aleph implements DriverInterface
     public function __construct()
     {
         // Load Configuration for this Module
-        $configArray = parse_ini_file('conf/Aleph.ini', true);
+        $configArray = parse_ini_file(
+            dirname(__FILE__) . '/../conf/Aleph.ini', true
+        );
 
         $this->host = $configArray['Catalog']['host'];
         $this->bib = $configArray['Catalog']['bib'];
