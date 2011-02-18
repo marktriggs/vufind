@@ -358,7 +358,9 @@ class XCNCIP implements DriverInterface
     {
         $request = $this->_getLoginRequest($username, $password);
         $response = $this->_sendRequest($request);
-        $id = $response->xpath('AuthenticateUserResponse/UniqueUserId/UserIdentifierValue');
+        $id = $response->xpath(
+            'AuthenticateUserResponse/UniqueUserId/UserIdentifierValue'
+        );
         if (!empty($id)) {
             // Fill in basic patron details:
             $patron = array(
@@ -387,13 +389,14 @@ class XCNCIP implements DriverInterface
      * and $otherElements parameters may be used to get specific types of additional
      * information -- see the XC NCIP Toolkit User Documentation for details.
      *
-     * @access  private
-     * @param   string  $id             User ID to look up
-     * @param   mixed   $userElements   UserElementType parameters (string or array)
-     * @param   mixed   $otherElements  Empty element(s) to add to request
-     * @return  string                  NCIP request XML
+     * @param string $id            User ID to look up
+     * @param mixed  $userElements  UserElementType parameters (string or array)
+     * @param mixed  $otherElements Empty element(s) to add to request
+     *
+     * @return string               NCIP request XML
+     * @access private
      */
-    private function getUserLookupRequest($id, $userElements, $otherElements = array())
+    private function _getUserLookupRequest($id, $userElements, $otherElements = array())
     {
         // Build the start of the XML:
         $xml = "<?xml version='1.0' encoding='UTF-8'?>" .
@@ -453,7 +456,7 @@ class XCNCIP implements DriverInterface
      */
     public function getMyTransactions($patron)
     {
-        //$request = $this->getUserLookupRequest($patron['id'], 'Visible User Id',
+        //$request = $this->_getUserLookupRequest($patron['id'], 'Visible User Id',
         //    'LoanedItemsDesired');
         $response = $this->_sendRequest($request);
         // TODO -- process response
@@ -473,7 +476,7 @@ class XCNCIP implements DriverInterface
      */
     public function getMyFines($patron)
     {
-        //$request = $this->getUserLookupRequest($patron['id'], 'Visible User Id',
+        //$request = $this->_getUserLookupRequest($patron['id'], 'Visible User Id',
         //    'UserFiscalAccountDesired');
         //$response = $this->_sendRequest($request);
         // TODO -- process response
@@ -493,7 +496,7 @@ class XCNCIP implements DriverInterface
      */
     public function getMyHolds($patron)
     {
-        //$request = $this->getUserLookupRequest($patron['id'], 'Visible User Id',
+        //$request = $this->_getUserLookupRequest($patron['id'], 'Visible User Id',
         //    'RequestedItemsDesired');
         //$response = $this->_sendRequest($request);
         // TODO -- process response
@@ -513,7 +516,7 @@ class XCNCIP implements DriverInterface
      */
     public function getMyProfile($patron)
     {
-        $request = $this->getUserLookupRequest(
+        $request = $this->_getUserLookupRequest(
             $patron['id'], array('Visible User Id', 'User Address Information')
         );
         $response = $this->_sendRequest($request);
