@@ -26,6 +26,10 @@
  *
  * @category VuFind
  * @package  ILS_Drivers
+ * @author   Christoph Krempe <vufind-tech@lists.sourceforge.net>
+ * @author   Alan Rykhus <vufind-tech@lists.sourceforge.net>
+ * @author   Jason L. Cooper <vufind-tech@lists.sourceforge.net>
+ * @author   Kun Lin <vufind-tech@lists.sourceforge.net>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_an_ils_driver Wiki
  */
@@ -36,20 +40,31 @@ require_once 'Interface.php';
  *
  * @category VuFind
  * @package  ILS_Drivers
+ * @author   Christoph Krempe <vufind-tech@lists.sourceforge.net>
+ * @author   Alan Rykhus <vufind-tech@lists.sourceforge.net>
+ * @author   Jason L. Cooper <vufind-tech@lists.sourceforge.net>
+ * @author   Kun Lin <vufind-tech@lists.sourceforge.net>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_an_ils_driver Wiki
  */
 class Aleph implements DriverInterface
 {
-    private $db;
-    private $dbName;
+    protected $host;
+    protected $bib;
+    protected $useradm;
+    protected $admlib;
+    protected $loanlib;
+    protected $wwwuser;
+    protected $wwwpasswd;
+    protected $sublibadm;
+    protected $logo;
 
     /**
      * Constructor
      *
      * @access public
      */
-    function __construct()
+    public function __construct()
     {
         // Load Configuration for this Module
         $configArray = parse_ini_file('conf/Aleph.ini', true);
@@ -62,7 +77,8 @@ class Aleph implements DriverInterface
         $this->wwwuser = $configArray['Catalog']['wwwuser'];
         $this->wwwpasswd = $configArray['Catalog']['wwwpasswd'];
         $this->sublibadm = $configArray['sublibadm'];
-        $this->logo = $configArray['logo'];
+        $this->logo = isset($configArray['logo'])
+            ? $configArray['logo'] : null;
 
     }
 
@@ -118,7 +134,7 @@ class Aleph implements DriverInterface
             $availability = false;
             if ($duedate == "On Shelf") {
                 $availability = true;
-                $duedate = NULL;
+                $duedate = null;
             }
             if (strlen($collection)) {
                 $location .= ' ' . $collection;
@@ -217,7 +233,7 @@ class Aleph implements DriverInterface
         $tagmatch = "z";
         $request = "http://$this->host/X?op=bor-auth&library=$this->useradm&bor_id=$barcode&verification=$lname&user_name=$this->wwwuser&user_password=$this->wwwpasswd";
         $answer = file($request);
-        $patron = NULL;
+        $patron = null;
         foreach ($answer as $line) {
             // transform the misspelled xml-tags:
             if (preg_match("|^<[$tagmatch]|i", $line) || preg_match("|^</[$tagmatch]|i", $line)) {
@@ -236,8 +252,7 @@ class Aleph implements DriverInterface
             $lastName = "";
             // Assumes names stored in the format 'Surname, First names'  If this
             // isn't the case alter the regular expression and the two assignments.
-            if (preg_match("/^(\w+)\s*,\s*(\w+)/", $xml->z303->z303_name, $matches))
-            {
+            if (preg_match("/^(\w+)\s*,\s*(\w+)/", $xml->z303->z303_name, $matches)) {
                 $firstName = $matches[2];
                 $lastName = $matches[1];
             }
@@ -251,7 +266,9 @@ class Aleph implements DriverInterface
             // Default the college to the useradm library and overwrite it if the
             // home_lib exists
             $patron['college'] = $this->useradm;
-            if (($home_lib != '') && (array_key_exists("$home_lib", $this->sublibadm))) {
+            if (($home_lib != '')
+                && (array_key_exists("$home_lib", $this->sublibadm))
+            ) {
                 if ($this->sublibadm["$home_lib"] != '') {
                     $patron['college'] = $this->sublibadm["$home_lib"];
                 }
@@ -262,7 +279,7 @@ class Aleph implements DriverInterface
             $patron['cat_username'] = $barcode;
             $patron['cat_password'] = "$lname";
             $patron['email'] = "$email_addr";
-            $patron['major'] = NULL;
+            $patron['major'] = null;
         }
         return $patron;
     }
@@ -287,10 +304,12 @@ class Aleph implements DriverInterface
             "&bor_id=" . $user['cat_username'] .
             "&user_name=$this->wwwuser&user_password=$this->wwwpasswd";
         $answer = file($request);
-        $xmlfile = NULL;
-        foreach ($answer as $line){
+        $xmlfile = null;
+        foreach ($answer as $line) {
             // transform the misspelled xml-tags:
-            if (preg_match("|^<[$tagmatch]|i", $line) || preg_match("|^</[$tagmatch]|i", $line)) {
+            if (preg_match("|^<[$tagmatch]|i", $line)
+                || preg_match("|^</[$tagmatch]|i", $line)
+            ) {
                 $line = preg_replace("/-/i", "_", $line);
             }
             $xmlfile = $xmlfile . $line;
@@ -298,7 +317,9 @@ class Aleph implements DriverInterface
         $xml = simplexml_load_string($xmlfile);
         $max = substr_count($xmlfile, "<item_l>");
         for ($i=0;$i < $max ; $i++) {
-            $id = str_pad($xml->item_l[$i]->z13->z13_doc_number, 9, '0', STR_PAD_LEFT);
+            $id = str_pad(
+                $xml->item_l[$i]->z13->z13_doc_number, 9, '0', STR_PAD_LEFT
+            );
             $duedate = $xml->item_l[$i]->z36->z36_due_date;
             $transList[] = array('duedate' => (string) $duedate,
                                  'id' => $id);
@@ -321,14 +342,17 @@ class Aleph implements DriverInterface
     {
         $tagmatch = "cbscindeloreisz";
         $holdList = array();
-        $request = "http://$this->host/X?op=bor-info&loans=N&holds=Y&cash=N&library=" .
+        $request
+            = "http://$this->host/X?op=bor-info&loans=N&holds=Y&cash=N&library=" .
             $user['college'] . "&bor_id=" . $user['id'] .
             "&user_name=$this->wwwuser&user_password=$this->wwwpasswd";
         $answer = file($request);
         $xmlfile = "";
-        foreach ($answer as $line){
+        foreach ($answer as $line) {
             // transform the misspelled xml-tags:
-            if (preg_match("|^<[$tagmatch]|i", $line) || preg_match("|^</[$tagmatch]|i", $line)) {
+            if (preg_match("|^<[$tagmatch]|i", $line)
+                || preg_match("|^</[$tagmatch]|i", $line)
+            ) {
                 $line = preg_replace("/-/i", "_", $line);
             }
             $xmlfile = $xmlfile . $line;
@@ -370,12 +394,13 @@ class Aleph implements DriverInterface
     {
         $tagmatch = "cbscindeloreisz";
         $finesList = array();
-        $request = "http://$this->host/X?op=bor-info&loans=N&hold=N&cash=Y&library=" .
+        $request
+            = "http://$this->host/X?op=bor-info&loans=N&hold=N&cash=Y&library=" .
             $user['college'] . "&bor_id=" . $user['id'] .
             "&verification=&user_name=$this->wwwuser&user_password=$this->wwwpasswd";
         $answer = file($request);
         $xmlfile = "";
-        foreach ($answer as $line){
+        foreach ($answer as $line) {
             // transform the misspelled xml-tags:
             if (preg_match("|^<[$tagmatch]|i", $line) || preg_match("|^</[$tagmatch]|i", $line)) {
                 $line = preg_replace("/-/i", "_", $line);
@@ -395,7 +420,8 @@ class Aleph implements DriverInterface
                     $fine = $balance;
                 }
                 $id = (string) $xml->fine[$i]->z30->z30_doc_number;
-                // Note Aleph's X-Server doesn't tell us when the book was checked out or due back, just when the fine was issued.
+                // Note Aleph's X-Server doesn't tell us when the book was checked
+                // out or due back, just when the fine was issued.
                 $finesList[] = array(
                     "amount"   => $fine,
                     "checkout" => "",
@@ -521,7 +547,8 @@ class Aleph implements DriverInterface
      *
      * @param array $user The patron array
      *
-     * @return mixed      Array of the patron's profile data on success, PEAR_Error otherwise.
+     * @return mixed      Array of the patron's profile data on success, PEAR_Error
+     * otherwise.
      * @access public
      */
     function getMyProfile($user)
@@ -529,14 +556,17 @@ class Aleph implements DriverInterface
         $recordList=array();
         $tagmatch = "cbscindeloreisz";
         $transList = array();
-        $request = "http://$this->host/X?op=bor-info&loans=N&cash=N&hold=N&library=" .
+        $request
+            = "http://$this->host/X?op=bor-info&loans=N&cash=N&hold=N&library=" .
             $user['college'] . "&bor_id=" . $user['cat_username'] .
             "&user_name=$this->wwwuser&user_password=$this->wwwpasswd";
         $answer = file($request);
-        $xmlfile = NULL;
-        foreach ($answer as $line){
+        $xmlfile = null;
+        foreach ($answer as $line) {
             // transform the misspelled xml-tags:
-            if (preg_match("|^<[$tagmatch]|i", $line) || preg_match("|^</[$tagmatch]|i", $line)) {
+            if (preg_match("|^<[$tagmatch]|i", $line)
+                || preg_match("|^</[$tagmatch]|i", $line)
+            ) {
                 $line = preg_replace("/-/i", "_", $line);
             }
             $xmlfile = $xmlfile . $line;
