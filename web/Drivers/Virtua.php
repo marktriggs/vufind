@@ -26,7 +26,7 @@
  * @link     http://vufind.org/wiki/building_an_ils_driver Wiki
  */
 require_once 'Interface.php';
-require_once 'USQOracle.php';
+require_once 'sys/Oracle_Connection.php';
 
 /**
  * VTLS Virtua Driver
@@ -69,7 +69,7 @@ class Virtua implements DriverInterface
                    '(SERVICE_NAME=' . $this->_config['Catalog']['service'] . ')' .
                  ')' .
                ')';
-        $this->_db = new oracle_connection(
+        $this->_db = new Oracle_Connection(
             $this->_config['Catalog']['user'],
             $this->_config['Catalog']['password'], $tns
         );

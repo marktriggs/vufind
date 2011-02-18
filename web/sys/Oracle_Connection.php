@@ -20,20 +20,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * @category VuFind
- * @package  ILS_Drivers
+ * @package  Support_Classes
  * @author   Greg Pendlebury <vufind-tech@lists.sourceforge.net>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/system_classes Wiki
  */
 
 /**
  * Oracle support code for VTLS Virtua Driver
  *
  * @category VuFind
- * @package  ILS_Drivers
+ * @package  Support_Classes
  * @author   Greg Pendlebury <vufind-tech@lists.sourceforge.net>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/system_classes Wiki
  */
-class oracle_connection
+class Oracle_Connection
 {
     // Database Handle
     private $_dbHandle;
@@ -144,8 +146,9 @@ class oracle_connection
      * @return bool
      * @access public
      */
-    public function bindParam($parsed, $place_holder, $data, $data_type = 'string', $length = -1)
-    {
+    public function bindParam(
+        $parsed, $place_holder, $data, $data_type = 'string', $length = -1
+    ) {
         switch ($data_type) {
         case 'string':
             $oracle_data_type = SQLT_CHR;
@@ -195,7 +198,7 @@ class oracle_connection
      * @param resource $parsed       Result returned by prepare() method.
      * @param string   $place_holder The colon-prefixed bind variable placeholder
      * used in the statement.
-     * @param string   $data         The PHP variable to be associatd with
+     * @param string   &$data        The PHP variable to be associatd with
      * $place_holder
      * @param string   $data_type    The type of $data (string, integer, float,
      * long, date, row_id, clob, or blob)
@@ -206,8 +209,9 @@ class oracle_connection
      * @return bool
      * @access public
      */
-    public function returnParam($parsed, $place_holder, &$data, $data_type = 'string', $length = -1)
-    {
+    public function returnParam(
+        $parsed, $place_holder, &$data, $data_type = 'string', $length = -1
+    ) {
         switch ($data_type) {
         case 'string':
             $oracle_data_type = SQLT_CHR;
@@ -368,7 +372,8 @@ class oracle_connection
             $clauses[]      = "$column = :$column";
         }
 
-        // Prepare the SQL for child table - turn the columns in placeholders for the bind
+        // Prepare the SQL for child table - turn the columns in placeholders for
+        // the bind
         $sql  = "DELETE FROM $table WHERE ".join(" AND ", $clauses);
         $delete = $this->prepare($sql);
 
@@ -424,7 +429,8 @@ class oracle_connection
             }
         }
 
-        $sql  = "INSERT INTO $table (".join(", ", $columns).") VALUES (".join(", ", $values).")";
+        $sql  = "INSERT INTO $table (".join(", ", $columns).") VALUES (".
+            join(", ", $values).")";
         $insert = $this->prepare($sql);
 
         // Bind Variables
