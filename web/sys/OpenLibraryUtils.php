@@ -59,7 +59,7 @@ class OpenLibraryUtils
      */
     public function getSubjects(
         $subject, $publishedIn, $subjectTypes, $ebooks = true, $details = false,
-        $limit, $offset, $publicFullText
+        $limit = 5, $offset = null, $publicFullText = true
     ) {
         // empty array to hold the result
         $result = array();
@@ -87,8 +87,8 @@ class OpenLibraryUtils
                     ".json?ebooks=" . $ebooks . "&details=" . $details .
                     "&offset=" . $offset . "&limit=50&published_in=" . $publishedIn;
 
-               // make API call
-               $result = $this->_processSubjectsApi($url, $limit, $publicFullText);
+                // make API call
+                $result = $this->_processSubjectsApi($url, $limit, $publicFullText);
             }
         }
         return $result;
@@ -98,8 +98,8 @@ class OpenLibraryUtils
      * Return the following array of values for each work:
      * title, cover_id, cover_id_type, key, ia, mainAuthor
      *
-     * @param string $url URL to request
-     * @param int    $limit The number of works to return
+     * @param string $url            URL to request
+     * @param int    $limit          The number of works to return
      * @param bool   $publicFullText Only return publically available, full-text
      * works
      *
@@ -126,8 +126,9 @@ class OpenLibraryUtils
                 $i = 1;
                 foreach ($data['works'] as $work) {
                     if ($i <= $limit) {
-                        if ($publicFullText && (!$work['public_scan'] ||
-                            !$work['has_fulltext'])) {
+                        if ($publicFullText && (!$work['public_scan']
+                            || !$work['has_fulltext'])
+                        ) {
                             continue;
                         }
                         $result[$i]['title'] = $work['title'];
@@ -153,7 +154,7 @@ class OpenLibraryUtils
      * Support function to return a normalised version of the search string
      *     for use in the API url
      *
-     * @param string     $url URL to request
+     * @param string $subject Search string to normalise
      *
      * @return string
      * @access private

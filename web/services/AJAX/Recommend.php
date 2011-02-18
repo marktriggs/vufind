@@ -39,6 +39,12 @@ require_once 'sys/Recommend/RecommendationFactory.php';
  */
 class Recommend extends Action
 {
+    /**
+     * Process incoming parameters and display recommendations.
+     *
+     * @return void
+     * @access public
+     */
     public function launch()
     {
         global $interface;
