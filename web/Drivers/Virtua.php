@@ -562,8 +562,8 @@ class Virtua implements DriverInterface
                 // Can't find their location?
                 if ($location == "") {
                     $h['req_allowed'] = false;
-                // Known location
                 } else {
+                    // Known location
                     $can_req = false;
                     // Details about this item -- note that we use 1/0 for
                     // $item_is_out since digits display better in on screen
@@ -578,7 +578,8 @@ class Virtua implements DriverInterface
                         if (in_array($item_stat_code, $status_list)
                             || $item_stat_code === null
                         ) {
-                            // ... can this user borrow on loan items at this location?
+                            // ... can this user borrow on loan items at this
+                            // location?
                             if (in_array($location, $unavailable_locs[$item_loc_code])) {
                                 $can_req = true;
                             }
@@ -597,7 +598,8 @@ class Virtua implements DriverInterface
                             if ($item_stat_code !== null) {
                                 // ... but has a status, so it can't be requested.
                             } else {
-                                // ... can the user borrow avilable items at this location?
+                                // ... can the user borrow avilable items at this
+                                // location?
                                 if (in_array($location, $available_locs[$item_loc_code])) {
                                     $can_req = true;
                                 }
@@ -623,7 +625,15 @@ class Virtua implements DriverInterface
 
     /* START - Serials functions */
 
-    // Simple utility
+    /**
+     * Simple utility -- retrieve data matching a code
+     *
+     * @param array  $data Data to search
+     * @param string $code Code to search for
+     *
+     * @return mixed
+     * @access private
+     */
     private function _getField($data, $code)
     {
         foreach ($data as $d) {
@@ -640,6 +650,11 @@ class Virtua implements DriverInterface
      *
      * This function takes care of the final string
      *    render for each pattern subpart.
+     *
+     * @param array $data Data to render
+     *
+     * @return string
+     * @access private
      */
     private function _renderPartSubPattern($data)
     {
@@ -806,6 +821,11 @@ class Virtua implements DriverInterface
      *
      *   The same sub function handles both, but they must be
      *    sent in like groups.
+     *
+     * @param array $data Data to render
+     *
+     * @return string
+     * @access private
      */
     private function _renderSubPattern($data)
     {
@@ -846,6 +866,11 @@ class Virtua implements DriverInterface
      * eg. 863/z, not 866 generally
      *   but anything non enum and chrono
      *   related ends up here.
+     *
+     * @param array $data Data to render
+     *
+     * @return array
+     * @access private
      */
     private function _renderOtherPattern($data)
     {
@@ -869,6 +894,12 @@ class Virtua implements DriverInterface
      * Renders individual holdings against a pattern
      *   Note fields and prediction patterns are handled
      *   seperately
+     *
+     * @param array $patterns Pattern data
+     * @param array $field    Field data
+     *
+     * @return array
+     * @access private
      */
     private function _renderPattern($patterns, $field)
     {
@@ -1494,8 +1525,9 @@ class Virtua implements DriverInterface
      * on error
      * @access public
      */
-    public function placeHold($patron_id, $item_id, $req_level, $pickup_loc, $last_date)
-    {
+    public function placeHold(
+        $patron_id, $item_id, $req_level, $pickup_loc, $last_date
+    ) {
         // Get the iPortal server
         $web_server = $this->_config['Catalog']['webhost'];
 
