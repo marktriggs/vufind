@@ -23,6 +23,7 @@
  * @package  Support_Classes
  * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/system_classes Wiki
  */
 
 /**
@@ -58,7 +59,7 @@ function getExtraConfigArray($name)
 {
     static $extraConfigs = array();
 
-    // If the requested settings aren't loaded yet, pull them in:    
+    // If the requested settings aren't loaded yet, pull them in:
     if (!isset($extraConfigs[$name])) {
         // Try to load the .ini file; if loading fails, the file probably doesn't
         // exist, so we can treat it as an empty array.
@@ -79,11 +80,11 @@ function getExtraConfigArray($name)
  *
  * @return array             The merged results.
  */
-function ini_merge($config_ini, $custom_ini)
+function iniMerge($config_ini, $custom_ini)
 {
     foreach ($custom_ini as $k => $v) {
         if (is_array($v)) {
-            $config_ini[$k] = ini_merge($config_ini[$k], $custom_ini[$k]);
+            $config_ini[$k] = iniMerge($config_ini[$k], $custom_ini[$k]);
         } else {
             $config_ini[$k] = $v;
         }
@@ -100,12 +101,13 @@ function ini_merge($config_ini, $custom_ini)
 function readConfig()
 {
     $mainArray = parse_ini_file('conf/config.ini', true);
-    if (isset($mainArray['Extra_Config']) && 
-        isset($mainArray['Extra_Config']['local_overrides'])) {
+    if (isset($mainArray['Extra_Config'])
+        && isset($mainArray['Extra_Config']['local_overrides'])
+    ) {
         $file = trim('conf/' . $mainArray['Extra_Config']['local_overrides']);
         $localOverride = @parse_ini_file($file, true);
         if ($localOverride) {
-            return ini_merge($mainArray, $localOverride);
+            return iniMerge($mainArray, $localOverride);
         }
     }
     return $mainArray;
