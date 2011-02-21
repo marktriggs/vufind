@@ -268,7 +268,8 @@ abstract class SearchObject_Base
                         'value'      => $value,     // raw value for use with Solr
                         'display'    => $display,   // version to display to user
                         'field'      => $field,
-                        'removalUrl' => $this->renderLinkWithoutFilter("$field:$value")
+                        'removalUrl' =>
+                            $this->renderLinkWithoutFilter("$field:$value")
                     );
                 }
             }
@@ -2051,9 +2052,9 @@ abstract class SearchObject_Base
  * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_search_object Wiki
- */
+ */ // @codingStandardsIgnoreStart
 class minSO
-{
+{   // @codingStandardsIgnoreEnd
     public $t = array();
     public $f = array();
     public $id, $i, $s, $r, $ty;
