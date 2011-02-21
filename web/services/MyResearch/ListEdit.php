@@ -81,7 +81,7 @@ class ListEdit extends Action
                 $interface->assign('message', 'You must be logged in first');
                 return $interface->fetch('AJAX/login.tpl');
             } else {
-                require_once 'Login.php';
+                include_once 'Login.php';
                 Login::launch();
             }
             exit();
@@ -98,7 +98,8 @@ class ListEdit extends Action
                     $interface->assign('listError', $result->getMessage());
                 } else {
                     if (!empty($_REQUEST['recordId'])) {
-                        $url = '../Record/' . urlencode($_REQUEST['recordId']) . '/Save';
+                        $url = '../Record/' . urlencode($_REQUEST['recordId']) .
+                            '/Save';
                     } else {
                         $url = 'Home';
                     }
