@@ -50,7 +50,9 @@ class Horizon implements DriverInterface
     function __construct()
     {
         // Load Configuration for this Module
-        $configArray = parse_ini_file('conf/Horizon.ini', true);
+        $configArray = parse_ini_file(
+            dirname(__FILE__) . '/../conf/Horizon.ini', true
+        );
 
         // Connect to database
         $this->_db = mssql_pconnect(
@@ -311,8 +313,7 @@ class Horizon implements DriverInterface
                 $amount = $row['AMOUNT'];
                 $balance += $amount;
 
-                if (isset($bib_num) && isset($item_num))
-                {
+                if (isset($bib_num) && isset($item_num)) {
                     $cko = "select convert(varchar(12),dateadd(dd, date, '01 jan 1970')) as CHECKOUT " .
                            "from burb where borrower#=" . $borrower_num . " " .
                            "and item#=" . $item_num . " and block=\"infocko\"";
