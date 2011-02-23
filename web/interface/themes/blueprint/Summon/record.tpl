@@ -159,7 +159,7 @@
         <th>{translate text='Subjects'}: </th>
         <td>
     {foreach from=$record.SubjectTerms item=field name=loop}
-      <a href="{$path}/Summon/Search?type=SubjectTerms&amp;lookfor=%22{$field|escape:"url"}%22">{$field|escape}<br/>
+      <a href="{$path}/Summon/Search?type=SubjectTerms&amp;lookfor=%22{$field|escape:"url"}%22">{$field|escape}</a><br/>
     {/foreach}
         </td>
       </tr>

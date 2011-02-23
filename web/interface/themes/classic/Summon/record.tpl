@@ -36,7 +36,7 @@
           <div class="button alignright">
           {if $record.URI && (!$openUrlBase || !$record.hasFullText)}
             {foreach from=$record.URI.0 item="value"}
-          <a href="{$value|escape}">{translate text='Get full text'}</a><br>
+          <a href="{$value|escape}">{translate text='Get full text'}</a><br/>
             {/foreach}
           {elseif $openUrlBase}
             {include file="Search/openurl.tpl" openUrl=$record.openUrl}
@@ -104,7 +104,7 @@
               <th>{translate text='ISSN'}: </th>
               <td>
               {foreach from=$record.ISSN item="value"}
-                {$value|escape}<br>
+                {$value|escape}<br/>
               {/foreach}
               </td>
             </tr>
@@ -161,7 +161,7 @@
               <th>{translate text='Subjects'}: </th>
               <td>
                 {foreach from=$record.SubjectTerms item=field name=loop}
-                  <a href="{$path}/Summon/Search?type=SubjectTerms&amp;lookfor=%22{$field|escape:"url"}%22">{$field|escape}<br>
+                  <a href="{$path}/Summon/Search?type=SubjectTerms&amp;lookfor=%22{$field|escape:"url"}%22">{$field|escape}</a><br/>
                 {/foreach}
               </td>
             </tr>
