@@ -25,7 +25,7 @@
             <br>
             {/if}
 
-            {if $record.PublicationTitle}{translate text='Published in'} {$record.PublicationTitle.0|escape}{/if}
+            {if $record.PublicationTitle}{translate text='Published in'} {$record.PublicationTitle.0|highlight}{/if}
             {assign var=pdxml value="PublicationDate_xml"}
             {if $record.$pdxml}({if $record.$pdxml.0.month}{$record.$pdxml.0.month|escape}/{/if}{if $record.$pdxml.0.day}{$record.$pdxml.0.day|escape}/{/if}{if $record.$pdxml.0.year}{$record.$pdxml.0.year|escape}){/if}{elseif $record.PublicationDate}{$record.PublicationDate.0|escape}{/if}
           </div>
