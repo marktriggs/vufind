@@ -1600,6 +1600,9 @@ abstract class SearchObject_Base
      */
     protected function findSearchTerm($needle)
     {
+        // Escape slashes in $needle to avoid regular expression errors:
+        $needle = str_replace('/', '\/', $needle);
+
         // Advanced search
         if (isset($this->searchTerms[0]['group'])) {
             foreach ($this->searchTerms as $group) {
