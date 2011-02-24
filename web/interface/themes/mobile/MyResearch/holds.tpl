@@ -20,5 +20,3 @@
 {/if}
 
 {include file="MyResearch/menu.tpl"}
-
-</div>
