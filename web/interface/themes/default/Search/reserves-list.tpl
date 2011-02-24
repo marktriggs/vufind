@@ -22,7 +22,7 @@
             {translate text="Showing"}
             <b>{$recordStart}</b> - <b>{$recordEnd}</b>
             {translate text='of'} <b>{$recordCount}</b>
-            {translate text='Reserves'}</b>
+            {translate text='Reserves'}
           </div>
   
           <div class="yui-u toggle">
