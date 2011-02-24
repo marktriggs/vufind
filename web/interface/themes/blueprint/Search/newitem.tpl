@@ -1,6 +1,6 @@
 <div class="span-18">
   <h3>{translate text='Find New Items'}</h3>
-  <form method="get" action="{$url}/Search/NewItem" name="searchForm" class="search">
+  <form method="get" action="{$url}/Search/NewItem" class="search">
     <div class="span-5">
       <fieldset>
         <legend>{translate text='Range'}:</legend>
