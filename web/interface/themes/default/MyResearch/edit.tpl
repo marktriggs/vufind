@@ -22,7 +22,7 @@
               {foreach from=$savedData item="current"}
                 <tr>
                   <td>{translate text='List'}: </td>
-                  <td>{$current.listTitle|escape:"html"}<input type="hidden" name="lists[]" value="{$current.listId}"</td>
+                  <td>{$current.listTitle|escape:"html"}<input type="hidden" name="lists[]" value="{$current.listId}"></td>
                 </tr>
                 <tr>
                   <td><label for="tags{$current.listId}">{translate text='Tags'}:</label></td>
