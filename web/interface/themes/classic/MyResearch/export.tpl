@@ -14,7 +14,7 @@
       <table>
         {foreach from=$exportList item=favorite}
         <tr>
-          <th class="label">{translate text='Title'}:</td>
+          <th class="label">{translate text='Title'}:</th>
           <td>{$favorite.title|escape}</td>
         </tr>
         {/foreach}
@@ -29,7 +29,7 @@
           </td>
         </tr>
         <tr>
-          <th>&nbsp</th>
+          <th>&nbsp;</th>
           <td><input class="submit" type="submit" name="submit" value="{translate text='Export'}">
               {foreach from=$exportIDS item=exportID}
                 <input type="hidden" name="ids[]" value="{$exportID|escape}" />

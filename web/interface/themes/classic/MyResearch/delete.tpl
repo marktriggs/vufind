@@ -18,12 +18,12 @@
       <table>
         {foreach from=$deleteList item=favorite}
         <tr>
-          <th class="label">{translate text='Title'}:</td>
+          <th class="label">{translate text='Title'}:</th>
           <td>{$favorite.title|escape}</td>
         </tr>
         {/foreach}
         <tr>
-          <th>&nbsp</th>
+          <th>&nbsp;</th>
           <td><input class="submit" type="submit" name="submit" value="{translate text='Delete'}">
               {foreach from=$deleteIDS item=deleteID}
                 <input type="hidden" name="ids[]" value="{$deleteID|escape}" />

@@ -14,24 +14,24 @@
       <table>
         {foreach from=$emailList item=favorite}
         <tr>
-          <th class="label">{translate text='Title'}:</td>
+          <th class="label">{translate text='Title'}:</th>
           <td>{$favorite.title|escape}</td>
         </tr>
         {/foreach}
         <tr>
-          <th class="label"><label for="to">{translate text='To'}:</label></td>
+          <th class="label"><label for="to">{translate text='To'}:</label></th>
           <td><input type="text" name="to" id="to" size="40" value="{$formTo|escape}"/></td>
         </tr>
         <tr>
-          <th class="label"><label for="from">{translate text='From'}:</label></td>
+          <th class="label"><label for="from">{translate text='From'}:</label></th>
           <td><input type="text" name="from" id="from" size="40" value="{$formFrom|escape}"/></td>
         </tr>
         <tr>
-          <th class="label"><label for="message">{translate text='Message'}:</label></td>
+          <th class="label"><label for="message">{translate text='Message'}:</label></th>
           <td><textarea name="message" id="message" rows="3" cols="40">{$formMessage|escape}</textarea></td>
         </tr>
         <tr>
-          <th>&nbsp</th>
+          <th>&nbsp;</th>
           <td><input class="submit" type="submit" name="submit" value="{translate text='Send'}"/></td>
         </tr>
       </table>
