@@ -20,7 +20,7 @@
     <td><label for="provider">{translate text="Provider"}:</label></td>
     <td>
       <select name="provider" id="provider">
-        <option selected=true value="">{translate text="Select your carrier"}</option>
+        <option selected="selected" value="">{translate text="Select your carrier"}</option>
         {foreach from=$carriers key=val item=details}
         <option value="{$val}">{$details.name|escape}</option>
         {/foreach}
