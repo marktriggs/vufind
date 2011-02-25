@@ -1,4 +1,4 @@
-﻿<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=utf-8">
 <h1>Leideanna Úsáideacha Cuardaigh</h1>
 
 <ul class="HelpMenu">
@@ -21,12 +21,12 @@
 <dl class="Content">
   <dt><a name="Wildcard Searches"></a>Cuardaigh Shaoróige</dt>
   <dd>
-    <p>Úsáid an siombail<strong>?</strong> chun cuardach saoróige aon charachtar a dhéanamh.</p>
+    <p>Úsáid an siombail <strong>?</strong> chun cuardach saoróige aon charachtar a dhéanamh.</p>
     <p>Mar shampla, má tá tú ag cuardach &quot;text&quot; nó &quot;test&quot; féadfaidh tú </p>
     <pre class="code">te?t</pre> a úsáid i gcomhair an chuardaigh. 
     <p>Úsáid an siombail <strong>*</strong> chun cuardach saoróige ilcharactar, 0 nó níos mó, a dhéanamh.</p>
     <p>Mar shampla, féadfaidh tú </p>
-    <pre class="code">test*</pre> a úsáid chun test, tests nó tester, a chuardach</pre>
+    <pre class="code">test*</pre> <p>a úsáid chun test, tests nó tester, a chuardach.</p>
     <p>Féadfaidh tú cuardaigh shaoróige a dhéanamh i lár téarma.</p>
     <pre class="code">te*t</pre>
     <p>Tabhair faoi deara: Ní féidir na siombailí * ná ? a úsáid mar chéad charachtar chun cuardach a dhéanamh.</p>
@@ -34,7 +34,7 @@
   
   <dt><a name="Fuzzy Searches"></a>Cuardaigh Neamhbheachta</dt>
   <dd>
-    <p>Úsáid siombail an tilde <strong>~</strong> ag deireadh Téarma<strong>Aon</strong> fhocail. Mar shampla, úsáid an cuardach neamhbheacht: </p>
+    <p>Úsáid siombail an tilde <strong>~</strong> ag deireadh Téarma <strong>Aon</strong> fhocail. Mar shampla, úsáid an cuardach neamhbheacht: </p>
     <pre class="code">roam~ </pre>chun cuardach a dhéanamh ar téarma a litrítear ar bhealach cosúil le “roam”.
     <p>Aimseoidh an cuardach seo téarmaí mar “foam” agus “roams”.</p>
     <p>Féadfar paraiméadar breise a chur leis chun an chosúlacht atá riachtanach a shainiú.  Má tá an luach idir 0 agus 1, agus má tá an luach sin níos cóngaraí do 1, ní dhéanfar ach téarmaí a bhfuil cosúlacht níos airde acu a mheaitseáil. Mar shampla:</p>
@@ -45,7 +45,7 @@
   <dt><a name="Proximity Searches"></a>Cuardaigh Ghaireachta</dt>
   <dd>
     <p>
-      Úsáid siombail an tilde <strong>~</strong> ag deireadh Téarma<strong>Il</strong>fhoclach. Mar shampla, chun cuardach a dhéanamh ar “economics” agus “Keynes” atá laistigh de 10 bhfocal ó chéile: iontráil
+      Úsáid siombail an tilde <strong>~</strong> ag deireadh Téarma <strong>Il</strong> fhoclach. Mar shampla, chun cuardach a dhéanamh ar “economics” agus “Keynes” atá laistigh de 10 bhfocal ó chéile: iontráil
     </p>
     <pre class="code">&quot;economics Keynes&quot;~10</pre>
   </dd> {literal} <dt><a name="Range Searches"></a>Cuardaigh Réimsí</dt>
