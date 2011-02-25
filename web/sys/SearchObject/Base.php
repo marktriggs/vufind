@@ -2050,6 +2050,11 @@ abstract class SearchObject_Base
  * $searchObject  = SearchObjectFactory::initSearchObject();
  * $searchObject->deminify(unserialize($search));
  *
+ * Note: codingStandardsIgnore settings within this class are used to suppress
+ *       warnings related to the name not meeting PEAR standards; since there
+ *       are serialized versions of this class stored in databases in the wild,
+ *       it is too late to easily rename it for standards compliance.
+ *
  * @category VuFind
  * @package  SearchObject
  * @author   Demian Katz <demian.katz@villanova.edu>
@@ -2071,9 +2076,9 @@ class minSO
      * @param object $searchObject Search Object to minify
      *
      * @access public
-     */
+     */ // @codingStandardsIgnoreStart
     public function __construct($searchObject)
-    {
+    {   // @codingStandardsIgnoreEnd
         // Most values will transfer without changes
         $this->id = $searchObject->getSearchId();
         $this->i  = $searchObject->getStartTime();
