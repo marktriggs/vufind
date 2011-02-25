@@ -60,9 +60,7 @@ function smarty_modifier_addEllipsis($highlighted, $fullString)
         
         // If the last five characters don't match, chances are something was cut
         // from the end:
-        if (substr($dehighlighted, strlen($dehighlighted) - 6, 5)
-            != substr($fullString, strlen($fullString) - 6, 5)
-        ) {
+        if (substr($dehighlighted, -5) != substr($fullString, -5)) {
             $highlighted .= '...';
         }
     }
