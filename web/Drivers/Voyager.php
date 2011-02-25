@@ -41,10 +41,10 @@ require_once 'sys/Proxy_Request.php';
  */
 class Voyager implements DriverInterface
 {
-    private $db;
-    private $dbName;
-    private $config;
-    private $statusRankings = false;        // used by _pickStatus() method
+    protected $db;
+    protected $dbName;
+    protected $config;
+    protected $statusRankings = false;        // used by pickStatus() method
 
     /**
      * Constructor
@@ -88,15 +88,15 @@ class Voyager implements DriverInterface
     }
 
     /**
-     * Private support method to pick which status message to display when multiple
+     * Protected support method to pick which status message to display when multiple
      * options are present.
      *
      * @param array $statusArray Array of status messages to choose from.
      *
      * @return string            The best status message to display.
-     * @access private
+     * @access protected
      */
-    private function _pickStatus($statusArray)
+    protected function pickStatus($statusArray)
     {
         // This array controls the rankings of possible status messages.  The lower
         // the ID in the ITEM_STATUS_TYPE table, the higher the priority of the
@@ -132,18 +132,18 @@ class Voyager implements DriverInterface
     }
 
     /**
-     * Private support method to take an array of status strings and determine
+     * Protected support method to take an array of status strings and determine
      * whether or not this indicates an available item.  Returns an array with
      * two keys: 'available', the boolean availability status, and 'otherStatuses',
      * every status code found other than "Not Charged" - for use with
-     * _pickStatus().
+     * pickStatus().
      *
      * @param array $statusArray The status codes to analyze.
      *
      * @return array             Availability and other status information.
-     * @access private
+     * @access protected
      */
-    private function _determineAvailability($statusArray)
+    protected function determineAvailability($statusArray)
     {
         // It's possible for a record to have multiple status codes.  We
         // need to loop through in search of the "Not Charged" (i.e. on
@@ -247,13 +247,13 @@ class Voyager implements DriverInterface
         $status = array();
         foreach ($data as $current) {
             // Get availability/status info based on the array of status codes:
-            $availability = $this->_determineAvailability($current['status_array']);
+            $availability = $this->determineAvailability($current['status_array']);
 
             // If we found other statuses, we should override the display value
             // appropriately:
             if (count($availability['otherStatuses']) > 0) {
                 $current['status']
-                    = $this->_pickStatus($availability['otherStatuses']);
+                    = $this->pickStatus($availability['otherStatuses']);
             }
             $current['availability'] = $availability['available'];
             $status[] = $current;
@@ -384,13 +384,13 @@ class Voyager implements DriverInterface
         foreach ($data as $item) {
             foreach ($item as $number => $row) {
                 // Get availability/status info based on the array of status codes:
-                $availability = $this->_determineAvailability($row['STATUS_ARRAY']);
+                $availability = $this->determineAvailability($row['STATUS_ARRAY']);
 
                 // If we found other statuses, we should override the display value
                 // appropriately:
                 if (count($availability['otherStatuses']) > 0) {
                     $row['STATUS']
-                        = $this->_pickStatus($availability['otherStatuses']);
+                        = $this->pickStatus($availability['otherStatuses']);
                 }
 
                 $holding[$i] = array(
