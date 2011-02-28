@@ -45,38 +45,38 @@ class SearchObject_Solr extends SearchObject_Base
 {
     // SOLR QUERY
     // Parsed query
-    private $query = null;
+    protected $query = null;
     // Facets
-    private $facetLimit = 30;
-    private $facetOffset = null;
-    private $facetPrefix = null;
-    private $facetSort = null;
+    protected $facetLimit = 30;
+    protected $facetOffset = null;
+    protected $facetPrefix = null;
+    protected $facetSort = null;
 
     // Index
-    private $index = null;
+    protected $index = null;
     // Field List
-    private $fields = 'score';
+    protected $fields = 'score';
     // HTTP Method
-    //private $method = HTTP_REQUEST_METHOD_GET;
-    private $method = HTTP_REQUEST_METHOD_POST;
+    //protected $method = HTTP_REQUEST_METHOD_GET;
+    protected $method = HTTP_REQUEST_METHOD_POST;
     // Result
-    private $indexResult;
+    protected $indexResult;
 
     // OTHER VARIABLES
     // Index
-    private $indexEngine = null;
+    protected $indexEngine = null;
     // Facets information
-    private $allFacetSettings = array();    // loaded from facets.ini
+    protected $allFacetSettings = array();    // loaded from facets.ini
     // Optional, used on author screen for example
-    private $searchSubType  = '';
+    protected $searchSubType  = '';
     // Used to pass hidden filter queries to Solr
-    private $hiddenFilters = array();
+    protected $hiddenFilters = array();
 
     // Spelling
-    private $spellingLimit = 3;
-    private $dictionary    = 'default';
-    private $spellSimple   = false;
-    private $spellSkipNumeric = true;
+    protected $spellingLimit = 3;
+    protected $dictionary    = 'default';
+    protected $spellSimple   = false;
+    protected $spellSkipNumeric = true;
 
     /**
      * Constructor. Initialise some details about the server
