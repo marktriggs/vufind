@@ -1373,7 +1373,7 @@ class SearchObject_Solr extends SearchObject_Base
         $xsl = new XSLTProcessor();
         $xsl->registerPHPFunctions('urlencode');
         $xsl->registerPHPFunctions('translate');
-        $xsl->registerPHPFunctions('xsl_rss_date');
+        $xsl->registerPHPFunctions('xslRssDate');
 
         // On-screen display value for our search
         if ($this->searchType == 'newitem') {
@@ -1417,7 +1417,7 @@ class SearchObject_Solr extends SearchObject_Base
  *
  * @return string    RFC 822 date
  */
-function xsl_rss_date($in)
+function xslRssDate($in)
 {
     static $months = array(
         1 => "Jan", 2 => "Feb", 3 => "Mar", 4 => "Apr", 5 => "May", 6 => "Jun",

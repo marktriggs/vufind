@@ -45,7 +45,7 @@
             <xsl:choose>
               <xsl:when test="./last_indexed">
                 <pubDate>
-                  <xsl:value-of select="php:function('xsl_rss_date', string(./last_indexed))"/>
+                  <xsl:value-of select="php:function('xslRssDate', string(./last_indexed))"/>
                 </pubDate>
               </xsl:when>
               <xsl:when test="./publishDate">
