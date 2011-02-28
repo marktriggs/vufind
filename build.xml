@@ -14,6 +14,7 @@
   <property name="mysqlrootuser" value="root" />
   <property name="mysqlrootpass" value="password" />
   <property name="marctestfile" value="${project.basedir}/tests/catalog_INCR-TEST_SAMPLE.mrc" />
+  <property name="version" value="1.1" />
 
   <!-- Main Target -->
   <target name="main" description="main target">
@@ -114,5 +115,38 @@
     <exec command="VUFIND_HOME=${srcdir} ${srcdir}/tests/auto_test.sh stop" outputProperty="LASTOUTPUT" />
     <echo message="${LASTOUTPUT}" />
 
+  </target>
+
+  <!-- Prepare VuFind for distribution -->
+  <target name="package" description="build VuFind packages for distribution">
+    <!-- make sure the work area is empty, then rebuild it -->
+    <delete dir="${builddir}/packages" includeemptydirs="true" failonerror="true" />
+    <mkdir dir="${builddir}/packages" />
+    <delete dir="${builddir}/export" includeemptydirs="true" failonerror="true" />
+    <mkdir dir="${builddir}/export" />
+
+    <!-- export the source into the temporary directory -->
+    <exec command="svn export ${srcdir} ${builddir}/export/vufind-${version}" />
+
+    <!-- build the standard tar.gz archive -->
+    <exec command="tar -C${builddir}/export -c vufind-${version} &gt; ${builddir}/packages/vufind-${version}.tar" />
+    <exec command="gzip ${builddir}/packages/vufind-${version}.tar" />
+
+    <!-- build the DEB package -->
+    <mkdir dir="${builddir}/export/vufind/usr/local" />
+    <copy todir="${builddir}/export/vufind/usr/local/vufind">
+      <fileset dir="${builddir}/export/vufind-${version}">
+        <include name="**" />
+      </fileset>
+    </copy>
+    <move file="${builddir}/export/vufind/usr/local/vufind/packages/DEBIAN" todir="${builddir}/export/vufind" includeemptydirs="true"/>
+    <exec command="chmod 0775 ${builddir}/export/vufind/DEBIAN/postinst" />
+    <exec command="dpkg-deb -b ${builddir}/export/vufind ${builddir}/packages/vufind_${version}.deb" />
+
+    <!-- clean up -->
+    <delete dir="${builddir}/export" includeemptydirs="true" failonerror="true" />
+
+    <!-- report success -->
+    <echo message="Packages successfully generated in ${builddir}/packages" />
   </target>
 </project>
