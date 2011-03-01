@@ -69,79 +69,23 @@ class Records extends Action
     }
 
     /**
-     * Display (and possibly edit) a specified record.
-     *
-     * NOTE: It is not really possible to adequately edit a record based only on
-     * the data within Solr, so this function is dangerous -- it doesn't really do
-     * what it seems to do, and there really isn't any way to make it better.  It
-     * is currently disabled in the templates, but it should probably be removed
-     * entirely at some point.
-     *
-     * @param bool $allowChanges Is editing allowed?
-     *
-     * @return void
-     * @access public
-     */
-    public function editRecord($allowChanges = true)
-    {
-        global $interface;
-
-        // Read in the original record:
-        $record = $this->_db->getRecord($_GET['id']);
-
-        // Save changes if necessary
-        if (isset($_POST['submit']) && $_POST['submit'] == 'Save') {
-            // Strip off the "solr_" prefix used to identify index fields:
-            $fields = array();
-            foreach ($_POST as $field => $value) {
-                if (substr($field, 0, 5) == 'solr_') {
-                    $fields[substr($field, 5)] = $value;
-                }
-            }
-
-            // Make sure we haven't lost the ID:
-            if (strlen(trim($fields['id'][0])) == 0) {
-                $fields['id'][0] = $_GET['id'];
-            }
-
-            // Write the changes to Solr using the XML interface.
-            // TODO: Find a way to represent control characters (ASCII 29, 30, 31)
-            //       commonly found in MARC; until we can do this, we can't save
-            //       changes due to the content of the fullrecord field and the
-            //       limitations of XML.  This may need to wait until a non-XML
-            //       transport layer is available for external Solr interfacing.
-            $xml = $this->_db->getSaveXML($fields);
-            $this->_db->saveRecord($xml);
-            $this->_db->commit();
-
-            // Redirect to the newly-saved record (in case the ID changed):
-            if ($_GET['id'] != $fields['id']) {
-                header(
-                    "Location: Records?util=editRecord&id=" .
-                    urlencode($fields['id'][0])
-                );
-                die();
-            }
-        }
-
-        $interface->assign('record', $record);
-        $interface->assign('recordId', $_GET['id']);
-        $interface->assign('allowChanges', $allowChanges);
-
-        $interface->setTemplate('record-edit.tpl');
-        $interface->display('layout-admin.tpl');
-    }
-
-    /**
-     * Display (without editing capabilities) a specified record.
+     * Display a specified record.
      *
      * @return void
      * @access public
      */
     public function viewRecord()
     {
-        // View is exactly the same as edit, but it doesn't allow changes.
-        $this->editRecord(false);
+        global $interface;
+
+        // Read in the original record:
+        $record = $this->_db->getRecord($_GET['id']);
+
+        $interface->assign('record', $record);
+        $interface->assign('recordId', $_GET['id']);
+
+        $interface->setTemplate('record-view.tpl');
+        $interface->display('layout-admin.tpl');
     }
 
     /**

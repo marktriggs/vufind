@@ -11,7 +11,6 @@
     <input type="hidden" name="util" value=""/>
     <label class="displayBlock">{translate text="Record Id"}</label>
     <input type="text" name="id" size="50"/>
-    {* TODO: Make this work -- <input type="submit" name="submit" value="Edit" onclick="document.forms['recordEdit'].elements['util'].value='editRecord';"> *}
     <input class="button" type="submit" name="submit" value="View" onclick="document.forms['recordEdit'].elements['util'].value='viewRecord';"/>
     <input class="button" type="submit" name="submit" value="Delete" onclick="if (!confirm('Are you sure?')) return false; else document.forms['recordEdit'].elements['util'].value='deleteRecord';"/>
   </form>
