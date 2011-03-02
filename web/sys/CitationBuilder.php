@@ -217,7 +217,13 @@ class CitationBuilder
         if (isset($parts[1]) && !$this->_isDateRange($parts[1])) {
             $fnameParts = explode(' ', $parts[1]);
             for ($i = 0; $i < count($fnameParts); $i++) {
-                $fnameParts[$i] = substr($fnameParts[$i], 0, 1) . '.';
+                // Use the multi-byte substring function if available to avoid
+                // problems with accented characters:
+                if (function_exists('mb_substr')) {
+                    $fnameParts[$i] = mb_substr($fnameParts[$i], 0, 1, 'utf8') . '.';
+                } else {
+                    $fnameParts[$i] = substr($fnameParts[$i], 0, 1) . '.';
+                }
             }
             $name .= ', ' . implode(' ', $fnameParts);
             if (isset($parts[2]) && $this->_isNameSuffix($parts[2])) {
