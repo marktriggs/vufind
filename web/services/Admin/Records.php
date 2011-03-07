@@ -26,7 +26,7 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-require_once 'Action.php';
+require_once 'Admin.php';
 
 /**
  * Records action for Admin module
@@ -38,7 +38,7 @@ require_once 'Action.php';
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-class Records extends Action
+class Records extends Admin
 {
     private $_db;
 

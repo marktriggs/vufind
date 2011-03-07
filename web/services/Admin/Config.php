@@ -26,7 +26,7 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-require_once 'Action.php';
+require_once 'Admin.php';
 require_once 'sys/ConfigArray.php';
 
 /**
@@ -39,7 +39,7 @@ require_once 'sys/ConfigArray.php';
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-class Config extends Action
+class Config extends Admin
 {
     /**
      * Process parameters and display the page.

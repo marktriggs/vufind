@@ -26,7 +26,7 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-require_once 'Action.php';
+require_once 'Admin.php';
 
 /**
  * Maintenance action for Admin module.
@@ -38,7 +38,7 @@ require_once 'Action.php';
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-class Maintenance extends Action
+class Maintenance extends Admin
 {
     /**
      * Process parameters and display the page.

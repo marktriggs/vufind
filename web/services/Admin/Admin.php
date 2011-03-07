@@ -1,10 +1,10 @@
 <?php
 /**
- * Home action for Admin module.
+ * Parent for all actions in the Admin module.
  *
  * PHP version 5
  *
- * Copyright (C) Villanova University 2007.
+ * Copyright (C) Villanova University 2011.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
@@ -26,12 +26,10 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-require_once 'Admin.php';
-
-require_once 'XML/Unserializer.php';
+require_once 'Action.php';
 
 /**
- * Home action for Admin module.
+ * Parent for all actions in the Admin module.
  *
  * @category VuFind
  * @package  Controller_Admin
@@ -40,38 +38,27 @@ require_once 'XML/Unserializer.php';
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-class Home extends Admin
+abstract class Admin extends Action
 {
     /**
-     * Process parameters and display the page.
+     * Constructor
      *
-     * @return void
      * @access public
      */
-    public function launch()
+    public function __construct()
     {
         global $configArray;
         global $interface;
 
-        // Load SOLR Statistics
-        if ($configArray['Index']['engine'] == 'Solr') {
-            $xml = @file_get_contents(
-                $configArray['Index']['url'] . '/admin/multicore'
-            );
-
-            if ($xml) {
-                $options = array('parseAttributes' => 'true',
-                                 'keyAttribute' => 'name');
-                $unxml = new XML_Unserializer($options);
-                $unxml->unserialize($xml);
-                $data = $unxml->getUnserializedData();
-                $interface->assign('data', $data['status']);
-            }
+        // If the Admin module is disabled, die now with an appropriate message:
+        if (!isset($configArray['Site']['admin_enabled'])
+            || !$configArray['Site']['admin_enabled']
+        ) {
+            $interface->setPageTitle('Admin Disabled');
+            $interface->setTemplate('disabled.tpl');
+            $interface->display('layout-admin.tpl');
+            die();
         }
-
-        $interface->setTemplate('home.tpl');
-        $interface->setPageTitle('Home');
-        $interface->display('layout-admin.tpl');
     }
 }
 
