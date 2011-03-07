@@ -267,10 +267,18 @@ class ExternalReviews
                                 'file' => 'BLREVIEW.XML'),
             'PWREVIEW' => array('title' => "Publisher's Weekly Review",
                                 'file' => 'PWREVIEW.XML'),
+            'LJREVIEW' => array('title' => 'Library Journal Review',
+                                'file' => 'LJREVIEW.XML'),
             'SLJREVIEW' => array('title' => 'School Library Journal Review',
                                 'file' => 'SLJREVIEW.XML'),
             'HBREVIEW' => array('title' => 'Horn Book Review',
                                 'file' => 'HBREVIEW.XML'),
+            'KIRKREVIEW' => array('title' => 'Kirkus Book Review',
+                                'file' => 'KIRKREVIEW.XML'),
+            'CRITICASREVIEW' => array('title' => 'Criticas Review',
+                                'file' => 'CRITICASREVIEW.XML'),
+            // These last two entries are probably typos -- retained for legacy
+            // compatibility just in case they're actually used for something!
             'KIREVIEW' => array('title' => 'Kirkus Book Review',
                                 'file' => 'KIREVIEW.XML'),
             'CRITICASEREVIEW' => array('title' => 'Criti Case Review',
