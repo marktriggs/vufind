@@ -515,7 +515,9 @@ class Solr implements IndexEngine
             // unmodified (it's probably an advanced search that won't benefit from
             // tokenization).  We'll just set all possible values to the same thing,
             // except that we'll try to do the "one phrase" in quotes if possible.
-            $onephrase = strstr($lookfor, '"') ? $lookfor : '"' . $lookfor . '"';
+            // IMPORTANT: If we detect a boolean NOT, we MUST omit the quotes.
+            $onephrase = (strstr($lookfor, '"') || strstr($lookfor, ' NOT '))
+                ? $lookfor : '"' . $lookfor . '"';
             $values = array(
                 'onephrase' => $onephrase, 'and' => $lookfor, 'or' => $lookfor
             );
