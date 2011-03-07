@@ -3,12 +3,12 @@
  * Script to upgrade VuFind configuration files.
  *
  * command line arguments:
- *   * path to RC2 installation
- *   * path to 1.0 config.ini file (optional)
+ *   * path to 1.0.x installation
+ *   * path to 1.1 config.ini file (optional)
  *
  * PHP version 5
  *
- * Copyright (C) Villanova University 2009.
+ * Copyright (C) Villanova University 2011.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
@@ -34,34 +34,35 @@
 // Make sure required parameter is present:
 $old_config_path = isset($argv[1]) ? $argv[1] : '';
 if (empty($old_config_path)) {
-    die("Usage: {$argv[0]} [RC2 base path] [1.0 config.ini file (optional)]\n");
+    die("Usage: {$argv[0]} [1.0.x base path] [1.1 config.ini file (optional)]\n");
 }
 
 // Build input file paths:
-$old_config_input = str_replace(
-    array('//',"\\"), '/', $old_config_path . '/web/conf/config.ini'
-);
-$old_facets_input = str_replace(
-    array('//',"\\"), '/', $old_config_path . '/web/conf/facets.ini'
-);
-$old_search_input = str_replace(
-    array('//',"\\"), '/', $old_config_path . '/web/conf/searches.ini'
-);
-$new_config_input = empty($argv[2]) ? 'web/conf/config.ini' : $argv[2];
-$new_facets_input = 'web/conf/facets.ini';
-$new_search_input = 'web/conf/searches.ini';
+$files = array('config', 'facets', 'searches', 'sms', 'Summon', 'WorldCat');
+$old_inputs = array();
+$new_inputs = array();
+foreach ($files as $current) {
+    $old_inputs[$current] = str_replace(
+        array('//',"\\"), '/', $old_config_path . '/web/conf/' . $current . '.ini'
+    );
+    
+    // Special case for config.ini, since it can be overridden via command line:
+    if ($current == 'config') {
+        $new_inputs[$current] = empty($argv[2]) ? 'web/conf/config.ini' : $argv[2];
+    } else {
+        $new_inputs[$current] = 'web/conf/' . $current . '.ini';
+    }
+}
 
 // Check for existence of old config files:
-$files = array($old_config_input, $old_facets_input, $old_search_input);
-foreach ($files as $file) {
+foreach ($old_inputs as $file) {
     if (!file_exists($file)) {
         die("Error: Cannot open file {$file}.\n");
     }
 }
 
 // Check for existence of new config files:
-$files = array($new_config_input, $new_facets_input, $new_search_input);
-foreach ($files as $file) {
+foreach ($new_inputs as $file) {
     if (!file_exists($file)) {
         die("Error: Cannot open file {$file}.\n" .
             "Please run this script from the root of your VuFind installation.\n");
@@ -74,15 +75,18 @@ foreach ($files as $file) {
 #### configuration file upgrade ####
 
 This script will upgrade some of your configuration files in web/conf/. It
-reads values from your RC2 files and puts them into the new 1.0 versions.
+reads values from your 1.0.x files and puts them into the new 1.1 versions.
 This is an automated process, so the results may require some manual cleanup.
 
 **** PROCESSING FILES... ****
 <?php
 
-fixConfigIni($old_config_input, $new_config_input);
-fixFacetsIni($old_facets_input, $new_facets_input);
-fixSearchIni($old_search_input, $new_search_input);
+fixConfigIni($old_inputs['config'], $new_inputs['config']);
+fixFacetsIni($old_inputs['facets'], $new_inputs['facets']);
+fixSearchIni($old_inputs['searches'], $new_inputs['searches']);
+fixSummonIni($old_inputs['Summon'], $new_inputs['Summon']);
+fixWorldCatIni($old_inputs['WorldCat'], $new_inputs['WorldCat']);
+fixSMSIni($old_inputs['sms'], $new_inputs['sms']);
 
 // Display parting notes now that we are done:
 ?>
@@ -96,8 +100,8 @@ Known issues to watch for:
 
 - Disabled settings may get turned back on.  You will have to comment
   them back out again.
-- Comments from your RC2 files will be lost and replaced with the new
-  default comments from the 1.0 files -- if you have important
+- Comments from your 1.0.x files will be lost and replaced with the new
+  default comments from the 1.1 files -- if you have important
   information embedded there, you will need to merge it by hand.
 - Boolean "true" will map to "1" and "false" will map to "".  This
   is functionally equivalent, but you may want to adjust the file
@@ -127,19 +131,6 @@ function fixConfigIni($old_config_input, $new_config_input)
         foreach ($subsection as $key => $value) {
             $new_config[$section][$key] = $value;
         }
-    }
-
-    // patch some values manually -- the [COinS] and [OpenURL] sections have changed
-    if (isset($old_config['COinS']['identifier'])) {
-        $new_config['OpenURL']['rfr_id'] = $old_config['COinS']['identifier'];
-    }
-    unset($new_config['COinS']);
-    unset($new_config['OpenURL']['api']);
-    if (isset($new_config['OpenURL']['url'])) {
-        $new_config['OpenURL']['resolver']
-            = stristr($new_config['OpenURL']['url'], 'sfx') ? 'sfx' : 'other';
-        list($new_config['OpenURL']['url'])
-            = explode('?', $new_config['OpenURL']['url']);
     }
 
     // save the file
@@ -174,12 +165,20 @@ function fixFacetsIni($old_facets_input, $new_facets_input)
         }
     }
 
-    // we want to retain the old installation's various facet groups
-    // exactly as-is
-    $new_config['Results'] = $old_config['Results'];
-    $new_config['ResultsTop'] = $old_config['ResultsTop'];
-    $new_config['Advanced'] = $old_config['Advanced'];
-    $new_config['Author'] = $old_config['Author'];
+    // we need to do some special handling for facet groups -- we want to keep
+    // them almost exactly as-is, except that we need to rename era facets and
+    // add the new publication date option.
+    $facetGroups = array('Results', 'ResultsTop', 'Advanced', 'Author');
+    foreach ($facetGroups as $group) {
+        $new_config[$group] = array();
+        foreach ($old_config[$group] as $key => $value) {
+            if ($key == 'era') {
+                $key = 'era_facet';
+            }
+            $new_config[$group][$key] = $value;
+        }
+    }
+    $new_config['Results']['publishDate'] = "adv_search_year";
 
     // save the file
     if (!writeIniFile($new_config, $new_comments, $new_config_file)) {
@@ -225,6 +224,87 @@ function fixSearchIni($old_search_input, $new_search_input)
 
     // report success
     echo "\nInput:  {$old_search_input}\n";
+    echo "Output: {$new_config_file}\n";
+}
+
+/**
+ * Process the Summon.ini file.
+ *
+ * @param string $old_input The old input file
+ * @param string $new_input The new input file
+ *
+ * @return void
+ */
+function fixSummonIni($old_input, $new_input)
+{
+    $old_config = parse_ini_file($old_input, true);
+    $new_config = parse_ini_file($new_input, true);
+    $new_comments = readIniComments($new_input);
+    $new_config_file = 'web/conf/Summon.ini.new';
+
+    // override new version's defaults with matching settings from old version:
+    foreach ($old_config as $section => $subsection) {
+        foreach ($subsection as $key => $value) {
+            $new_config[$section][$key] = $value;
+        }
+    }
+
+    // we want to retain the old installation's search and facet settings
+    // exactly as-is
+    $new_config['Facets'] = $old_config['Facets'];
+    $new_config['FacetsTop'] = $old_config['FacetsTop'];
+    $new_config['Basic_Searches'] = $old_config['Basic_Searches'];
+    $new_config['Advanced_Searches'] = $old_config['Advanced_Searches'];
+
+    // save the file
+    if (!writeIniFile($new_config, $new_comments, $new_config_file)) {
+        die("Error: Problem writing to {$new_config_file}.");
+    }
+
+    // report success
+    echo "\nInput:  {$old_input}\n";
+    echo "Output: {$new_config_file}\n";
+}
+
+/**
+ * Process the sms.ini file.
+ *
+ * @param string $old_input The old input file
+ * @param string $new_input The new input file
+ *
+ * @return void
+ */
+function fixSMSIni($old_input, $new_input)
+{
+    // No changes this release -- just copy the old file into place!
+    $new_config_file = 'web/conf/sms.ini.new';
+    if (!copy($old_input, $new_config_file)) {
+        die("Error: Could not copy {$old_input} to {$new_config_file}.");
+    }
+
+    // report success
+    echo "\nInput:  {$old_input}\n";
+    echo "Output: {$new_config_file}\n";
+}
+
+/**
+ * Process the WorldCat.ini file.
+ *
+ * @param string $old_input The old input file
+ * @param string $new_input The new input file
+ *
+ * @return void
+ */
+function fixWorldCatIni($old_input, $new_input)
+{
+    // No changes this release -- just copy the old file into place!
+    $new_config_file = 'web/conf/WorldCat.ini.new';
+    if (!copy($old_input, $new_config_file)) {
+        die("Error: Could not copy {$old_input} to {$new_config_file}.");
+    }
+
+    // report success
+    echo "\nInput:  {$old_input}\n";
     echo "Output: {$new_config_file}\n";
 }
 
