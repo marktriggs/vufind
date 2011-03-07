@@ -81,6 +81,7 @@ This is an automated process, so the results may require some manual cleanup.
 **** PROCESSING FILES... ****
 <?php
 
+// Update configuration files:
 fixConfigIni($old_inputs['config'], $new_inputs['config']);
 fixFacetsIni($old_inputs['facets'], $new_inputs['facets']);
 fixSearchIni($old_inputs['searches'], $new_inputs['searches']);
@@ -88,9 +89,12 @@ fixSummonIni($old_inputs['Summon'], $new_inputs['Summon']);
 fixWorldCatIni($old_inputs['WorldCat'], $new_inputs['WorldCat']);
 fixSMSIni($old_inputs['sms'], $new_inputs['sms']);
 
+// Check to see if any recommended dependencies are missing:
+echo "\n**** CHECKING DEPENDENCIES... ****\n\n";
+checkDependencies();
+
 // Display parting notes now that we are done:
 ?>
-
 **** DONE PROCESSING. ****
 
 Please check all of the output files (web/conf/*.new) to make sure you are
@@ -110,6 +114,50 @@ Known issues to watch for:
 When you have made the necessary corrections, just copy the *.new files
 over the equivalent *.ini files (i.e. replace config.ini with config.ini.new).
 <?php
+
+/**
+ * Display warning messages about missing recommended dependencies.
+ *
+ * @return void
+ */
+function checkDependencies()
+{
+    $problems = 0;
+    
+    // Is the mbstring library missing?
+    if (!function_exists('mb_substr')) {
+        echo "Your PHP installation appears to be missing the mbstring plug-in.\n";
+        echo "For better language support, it is recommended that you add this.\n";
+        echo "For details on how to do this, see http://vufind.org/wiki/installation";
+        echo "\nand look at the PHP installation instructions for your platform.\n\n";
+        $problems++;
+    }
+
+    // Is Smarty out of date or too new?
+    include_once 'Smarty/Smarty.class.php';
+    $smarty = new Smarty();
+    $version = explode('.', $smarty->_version);
+    if ($version[0] != 2 || $version[1] < 6
+        || ($version[1] == 6 && $version[2] < 26)
+    ) {
+        echo "VuFind is designed and tested using Smarty 2.6.26.  You appear to\n";
+        if ($version[0] < 3) {
+            echo "have an older version installed.";
+        } else {
+            echo "have a newer version installed.";
+        }
+        echo "  It is strongly recommended\n";
+        echo "that you obtain version 2.6.26 from http://smarty.net and install\n";
+        echo "it in your PHP search path (often /usr/share/php/Smarty under\n";
+        echo "Linux or c:\Program Files\PHP\Pear\Smarty under Windows).\n\n";
+        $problems++;
+    }
+
+    // No problems?  Display a message.
+    if (!$problems) {
+        echo "No dependency problems found.\n\n";
+    }
+}
 
 /**
  * Process the config.ini file.
