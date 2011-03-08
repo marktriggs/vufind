@@ -100,7 +100,8 @@ interface RecordInterface
      * represented by this record (empty if unavailable).  In most cases, 
      * this will use the XISSN/XISBN logic to find matches.
      *
-     * @return mixed Editions in index engine result format (or null if no hits, or PEAR_Error object).
+     * @return mixed Editions in index engine result format (or null if no hits,
+     * or PEAR_Error object).
      * @access public
      */
     public function getEditions();
@@ -173,7 +174,8 @@ interface RecordInterface
      * user's favorites list.
      *
      * @param object $user      User object owning tag/note metadata.
-     * @param int    $listId    ID of list containing desired tags/notes (or null to show tags/notes from all user's lists).
+     * @param int    $listId    ID of list containing desired tags/notes (or null
+     * to show tags/notes from all user's lists).
      * @param bool   $allowEdit Should we display edit controls?
      *
      * @return string           Name of Smarty template file to display.
@@ -251,7 +253,8 @@ interface RecordInterface
      * Return an XML representation of the record using the specified format.
      * Return false if the format is unsupported.
      *
-     * @param string $format Name of format to use (corresponds with OAI-PMH metadataPrefix parameter).
+     * @param string $format Name of format to use (corresponds with OAI-PMH
+     * metadataPrefix parameter).
      *
      * @return mixed         XML, or false if format unsupported.
      * @access public
