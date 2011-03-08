@@ -2,7 +2,7 @@
 {js filename="check_save_statuses.js"}
 {js filename="jquery.cookie.js"}
 {js filename="cart.js"}
-
+{js filename="openurl.js"}
 {if $showPreviews}
 {js filename="preview.js"}
 {/if}

@@ -1,5 +1,11 @@
 $(document).ready(function() {
     checkSaveStatuses();
+    // attach click event to the save record link
+    $('a.saveRecord').click(function() {
+        var id = this.id.substr('saveRecord'.length);
+        var $dialog = getLightbox('Record', 'Save', id, null, this.title, 'Record', 'Save', id);
+        return false;
+    });    
 });
 
 function checkSaveStatuses() {

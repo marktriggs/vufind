@@ -37,20 +37,17 @@
     {js filename="jquery-1.4.4.min.js"}
     {js filename="jquery.form.js"}
     {js filename="jquery.metadata.js"}
-    {js filename="jquery.validate.min.js"}
+    {js filename="jquery.validate.min.js"}    
     
     {* Load jQuery UI *}
     {js filename="jquery-ui-1.8.7.custom/js/jquery-ui-1.8.7.custom.min.js"}
     <link rel="stylesheet" type="text/css" media="screen, projection" href="{$url}/interface/themes/blueprint/js/jquery-ui-1.8.7.custom/css/smoothness/jquery-ui-1.8.7.custom.css" />
-    
-    {* load phone number validators - for the validation plugin *}
-    {js filename="phone_number_validator.js"}
-    
-    {* Load rc4 encryption library *}
-	{js filename="rc4.js"}
+        
+    {* Load dialog/lightbox functions *}
+    {js filename="lightbox.js"}
 
-    {* Load main javascript functions *}
-    {js filename="main.js"}
+    {* Load common javascript functions *}
+    {js filename="common.js"}
 
     {* Load VuFind specific stylesheets *}
     {css media="screen, projection" filename="styles.css"}

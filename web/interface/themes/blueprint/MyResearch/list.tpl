@@ -1,11 +1,13 @@
+{js filename="bulk_actions.js"}
+
 <div class="span-18">
   {if $list}
     <div class="floatright">
       <form method="post" name="addForm" action="{$url}/MyResearch/Bulk">
         <input type="hidden" name="listID" value="{$list->id|escape}" />
         <input type="hidden" name="listName" value="{$list->title|escape}" />
-        <input type="submit" class="edit" name="editList" value="{translate text="edit_list"}" />
-        <input type="submit" class="delete" name="deleteList" value="{translate text="delete_list"}" />
+        <input type="submit" class="edit smallButton" name="editList" value="{translate text="edit_list"}" />
+        <input type="submit" class="delete smallButton" name="deleteList" value="{translate text="delete_list"}" />
       </form>
     </div>
     <h3 class="list">{$list->title|escape:"html"}</h3>
@@ -42,17 +44,17 @@
       </div>
       <div class="clear"></div>
     </div>
-    <form method="post" name="addForm" action="{$url}/MyResearch/Bulk">
+    <form method="post" name="bulkActionForm" action="{$url}/MyResearch/Bulk">
     {if $list && $list->id}
       <input type="hidden" name="listID" value="{$list->id|escape}" />
       <input type="hidden" name="listName" value="{$list->title|escape}" />
     {/if}
     <div class="bulkActionButtons">
       <input type="checkbox" class="selectAllCheckboxes floatleft" name="selectAll" id="addFormCheckboxSelectAll"/> <label for="addFormCheckboxSelectAll">{translate text="select_page"}</label>
-      <input type="submit" class="mail floatright" name="email" value="{translate text='email_selected'}"/>
-      <input type="submit" class="delete floatright" name="delete" value="{translate text='delete_selected'}"/>
+      <input type="submit" class="mail floatright smallButton" name="email" value="{translate text='email_selected'}" title="{translate text='email_selected'}"/>
+      <input type="submit" class="delete floatright smallButton" name="delete" value="{translate text='delete_selected'}" title="{translate text='delete_selected'}"/>
       {if is_array($exportOptions) && count($exportOptions) > 0}
-      <input type="submit" class="export floatright" name="export" value="{translate text='export_selected'}"/>
+      <input type="submit" class="export floatright smallButton" name="export" value="{translate text='export_selected'}" title="{translate text='export_selected'}"/>
       {/if}
       <div class="clear"></div>
     </div> 

@@ -1,10 +1,9 @@
-<div align="left">
+<form action="{$url}/MyResearch/Export" method="post" name="bulkExport">
   {if $errorMsg}<div class="error">{$errorMsg|translate}</div>{/if}
   {if $infoMsg}<div class="info">{$infoMsg|translate}</div>{/if}
 
   <div id="popupMessages"></div>
   <div id="popupDetails"> 
-    <form action="{$url}/MyResearch/Export" method="post">
       {foreach from=$exportList item=favorite}
         <strong>{translate text='Title'}:</strong>
         {$favorite.title|escape}<br />
@@ -29,6 +28,5 @@
       {if $followupAction}
       <input type="hidden" name="followupAction" value="{$followupAction|escape}" />
       {/if}
-    </form>
   </div>
-</div>
+</form>

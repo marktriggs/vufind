@@ -111,31 +111,7 @@ div.bulkActionButtons {
 div.bulkActionButtons input {
      margin-right: 5px;
 }
-div.bulkActionButtons .mail {
-    background-position: 2px center;
-    padding: 2px 2px 2px 25px;
-}
-div.bulkActionButtons .delete {
-    background-position: 2px center;
-    padding: 2px 2px 2px 25px;
-}
-div.bulkActionButtons .export {
-    background-position: 2px center;
-    padding: 2px 2px 2px 25px;
-}
-div.bulkActionButtons .fav {
-    background-position: 2px center;
-    padding: 2px 2px 2px 25px;
-}
-div.bulkActionButtons .cartView {
-    background-position: 2px center;
-    padding: 2px 2px 2px 25px;
-}
-div.bulkActionButtons .cartAdd {
-    background-position: 2px center;
-    padding: 2px 2px 2px 25px;
-}
-div.bulkActionButtons .cartEmpty {
+input.smallButton {
     background-position: 2px center;
     padding: 2px 2px 2px 25px;
 }

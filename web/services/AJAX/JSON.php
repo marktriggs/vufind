@@ -499,10 +499,14 @@ class JSON extends Action
      */
     public function exportFavorites()
     {
+        global $configArray;
         $_SESSION['exportIDS'] =  $_POST['ids'];
         $_SESSION['exportFormat'] = $_POST['format'];
 
-        $this->output(array('result'=>translate('Done')), JSON::STATUS_OK);
+        $html = '<p><a class="save" onclick="hideLightbox();" href="'
+           . $configArray['Site']['url'] . '/MyResearch/Bulk?exportInit">' 
+           . translate('Download') . '</a></p>';
+        $this->output(array('result'=>translate('Done'), 'result_additional'=>$html), JSON::STATUS_OK);
     }
 
     /**

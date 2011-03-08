@@ -2,10 +2,13 @@
 <script type="text/javascript" src="https://s7.addthis.com/js/250/addthis_widget.js?pub={$addThis|escape:"url"}"></script>
 {/if}
 
+{js filename="record.js"}
 {js filename="check_save_statuses.js"}
-
 {if $showPreviews}
-{js filename="preview.js"}
+  {js filename="preview.js"}
+{/if}
+{if $coreOpenURL || $holdingsOpenURL}
+  {js filename="openurl.js"}
 {/if}
 
 <div class="span-18">

@@ -1,4 +1,4 @@
-<div class="alignleft">
+<form action="{$url}/MyResearch/Delete" method="post" name="bulkDelete">
   {if $errorMsg}<div class="error">{$errorMsg|translate}</div>{/if}
   {if $infoMsg}<div class="info">{$infoMsg|translate}</div>{/if}
 
@@ -9,7 +9,7 @@
     {else}
       <h2>{translate text="List"}: {$list->title|escape}</h2>
     {/if}
-    <form action="{$url}/MyResearch/Delete" method="post">
+    
       {foreach from=$deleteList item=favorite}
         <strong>{translate text='Title'}:</strong>
         {$favorite.title|escape}<br />
@@ -26,6 +26,5 @@
       {if $followupAction}
       <input type="hidden" name="followupAction" value="{$followupAction|escape}" />
       {/if}
-    </form>
   </div>
-</div>
+</form>
