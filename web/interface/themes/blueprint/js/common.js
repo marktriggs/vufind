@@ -41,7 +41,14 @@ $(document).ready(function(){
         window.open(path + '/Help/Home?topic=advsearch', 'Help', 'width=625, height=510');
         return false;
     });
-    
+
+    // assign click event to "email search" links
+    $('a.mailSearch').click(function() {
+        var id = this.id.substr('mailSearch'.length);
+        var $dialog = getLightbox('Search', 'Email', id, null, this.title);
+        return false;
+    });
+
     // assign action to the "select all checkboxes" class
     $('input[type="checkbox"].selectAllCheckboxes').change(function(){
         $(this.form).find('input[type="checkbox"]').attr('checked', $(this).attr('checked'));
