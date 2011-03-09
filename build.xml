@@ -35,13 +35,14 @@
         <include name="util/**/*.php" />
         <include name="web/**/*.php" />
         <exclude name="web/Crypt/**/*.php" />
+        <exclude name="web/Horde/**/*.php" />
         <exclude name="web/interface/compile/**/*.php" />
         <exclude name="web/sys/mobileesp/**/*.php" />
       </fileset>
     </phpdoc>
 
     <!-- PHP CodeSniffer -->
-    <exec command="phpcs --standard=PEAR --ignore=${srcdir}/web/sys/mobileesp/*,${srcdir}/web/interface/themes/mobile/iWebKit/*,${srcdir}/web/Crypt/*,${srcdir}/web/sys/SIP2.php,${srcdir}/web/js/rc4.js,${srcdir}/web/interface/themes/blueprint/js/rc4.js,${srcdir}/web/js/phpserializer.js,${srcdir}/web/interface/themes/blueprint/js/jquery*.js,${srcdir}/web/interface/themes/blueprint/js/jquery-ui*/*,${srcdir}/web/interface/themes/blueprint/css/blueprint/*,${srcdir}/web/interface/compile/* --report=checkstyle ${srcdir} > ${builddir}/reports/checkstyle.xml" escape="false" />
+    <exec command="phpcs --standard=PEAR --ignore=${srcdir}/web/sys/mobileesp/*,${srcdir}/web/interface/themes/mobile/iWebKit/*,${srcdir}/web/Crypt/*,${srcdir}/web/Horde/*,${srcdir}/web/sys/SIP2.php,${srcdir}/web/js/rc4.js,${srcdir}/web/interface/themes/blueprint/js/rc4.js,${srcdir}/web/js/phpserializer.js,${srcdir}/web/interface/themes/blueprint/js/jquery*.js,${srcdir}/web/interface/themes/blueprint/js/jquery-ui*/*,${srcdir}/web/interface/themes/blueprint/css/blueprint/*,${srcdir}/web/interface/compile/* --report=checkstyle ${srcdir} > ${builddir}/reports/checkstyle.xml" escape="false" />
 
     <!-- PHPUnit -->
     <exec command="phpunit --log-junit ${builddir}/reports/phpunit.xml --coverage-clover ${builddir}/reports/coverage/clover.xml --coverage-html ${builddir}/reports/coverage/ ${srcdir}/tests/AllTests.php"/>
