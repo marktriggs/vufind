@@ -7,7 +7,7 @@
         <input type="hidden" name="listID" value="{$list->id|escape}" />
         <input type="hidden" name="listName" value="{$list->title|escape}" />
         <input type="submit" class="edit smallButton" name="editList" value="{translate text="edit_list"}" />
-        <input type="submit" class="delete smallButton" name="deleteList" value="{translate text="delete_list"}" />
+        <input type="submit" class="delete deleteList smallButton" id="deleteList{$list->id|escape}" title="{translate text="delete_list"}" name="deleteList" value="{translate text="delete_list"}" />
       </form>
     </div>
     <h3 class="list">{$list->title|escape:"html"}</h3>

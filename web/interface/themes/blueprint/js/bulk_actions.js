@@ -23,4 +23,12 @@ function registerBulkActions() {
         getLightbox('MyResearch', action, '', '', message, '', '', '', {ids:ids});
         return false;
     });
+
+    // Support delete list button:
+    $('.deleteList').unbind('click').click(function(){
+        var id = $(this).attr('id').substr('deleteList'.length);
+        var message = $(this).attr('title');
+        var postParams = {listID: id, deleteList: 'deleteList'};
+        getLightbox('MyResearch', 'Confirm', '', '', message, 'MyResearch', 'Favorites', '');
+    });
 }
