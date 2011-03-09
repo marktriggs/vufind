@@ -69,6 +69,19 @@ function displayFormError($form, error) {
     $form.prepend('<div class="error">' + error + '</div>');
 }
 
+function displayFormInfo($form, msg) {
+    $form.parent().parent().find('.info').remove();
+    $form.parent().prepend('<div class="info">' + msg + '</div>');
+}
+
+function showLoadingGraphic($form) {
+    $form.parent().prepend('<div class="dialogLoading">&nbsp;</div>');
+}
+
+function hideLoadingGraphic($form) {
+    $form.parent().parent().find('.dialogLoading').remove();
+}
+
 /**
  * This is called by the lightbox when it
  * finished loading the dialog content from the server
@@ -218,15 +231,20 @@ function registerAjaxListEdit() {
 function registerAjaxEmailRecord() {
     $('#modalDialog > form[name="emailRecord"]').unbind('submit').submit(function(){
         if (!$(this).valid()) { return false; }
+        showLoadingGraphic($(this));
+        $(this).hide();
         var url = path + '/AJAX/JSON?' + $.param({method:'emailRecord',id:this.id.value});
         $(this).ajaxSubmit({
             url: url,
             dataType: 'json',
             success: function(response, statusText, xhr, $form) {
+                hideLoadingGraphic($form);
                 if (response.status == 'OK') {
+                    displayFormInfo($form, response.data);
                     // close the dialog
-                    hideLightbox();
+                    setTimeout(function() { hideLightbox(); }, 2000);
                 } else {
+                    $form.show();
                     displayFormError($form, response.data);
                 }
             }
@@ -238,16 +256,21 @@ function registerAjaxEmailRecord() {
 function registerAjaxSMSRecord() {
     $('#modalDialog > form[name="smsRecord"]').unbind('submit').submit(function(){
         if (!$(this).valid()) { return false; }
+        showLoadingGraphic($(this));
+        $(this).hide();
         var url = path + '/AJAX/JSON?' + $.param({method:'smsRecord',id:this.id.value});
         $(this).ajaxSubmit({
             url: url,
             dataType: 'json',
             clearForm: true,
             success: function(response, statusText, xhr, $form) {
+                hideLoadingGraphic($form);
                 if (response.status == 'OK') {
+                    displayFormInfo($form, response.data);
                     // close the dialog
-                    hideLightbox();
+                    setTimeout(function() { hideLightbox(); }, 2000);
                 } else {
+                    $form.show();
                     displayFormError($form, response.data);
                 }
             }
@@ -300,15 +323,21 @@ function refreshTagList(id) {
 function registerAjaxEmailSearch() {
     $('#modalDialog > form[name="emailSearch"]').unbind('submit').submit(function(){
         if (!$(this).valid()) { return false; }
+        showLoadingGraphic($(this));
+        $(this).hide();
         var url = path + '/AJAX/JSON?' + $.param({method:'emailSearch'});
         $(this).ajaxSubmit({
             url: url,
             dataType: 'json',
             data: {url:window.location.href},
             success: function(response, statusText, xhr, $form) {
+                hideLoadingGraphic($form);
                 if (response.status == 'OK') {
-                    hideLightbox();
+                    displayFormInfo($form, response.data);
+                    // close the dialog
+                    setTimeout(function() { hideLightbox(); }, 2000);
                 } else {
+                    $form.show();
                     displayFormError($form, response.data);
                 }
             }

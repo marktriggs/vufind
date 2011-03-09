@@ -297,7 +297,7 @@ class JSON extends Action
             $this->output(translate($result->getMessage()), JSON::STATUS_ERROR);
         }
 
-        $this->output(translate('Done'), JSON::STATUS_OK);
+        $this->output(translate('email_success'), JSON::STATUS_OK);
     }
 
     /**
@@ -319,7 +319,7 @@ class JSON extends Action
             $this->output(translate($result->getMessage()), JSON::STATUS_ERROR);
         }
 
-        $this->output(translate('Done'), JSON::STATUS_OK);
+        $this->output(translate('sms_success'), JSON::STATUS_OK);
     }
 
     /**
@@ -460,7 +460,7 @@ class JSON extends Action
             $this->output(translate($result->getMessage()), JSON::STATUS_ERROR);
         }
 
-        $this->output(translate('Done'), JSON::STATUS_OK);
+        $this->output(translate('email_success'), JSON::STATUS_OK);
     }
 
     /**
