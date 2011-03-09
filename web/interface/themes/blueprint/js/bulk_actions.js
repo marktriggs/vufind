@@ -29,6 +29,7 @@ function registerBulkActions() {
         var id = $(this).attr('id').substr('deleteList'.length);
         var message = $(this).attr('title');
         var postParams = {listID: id, deleteList: 'deleteList'};
-        getLightbox('MyResearch', 'Confirm', '', '', message, 'MyResearch', 'Favorites', '');
+        getLightbox('MyResearch', 'Confirm', '', '', message, 'MyResearch', 'Favorites', '', postParams);
+        return false;
     });
 }
