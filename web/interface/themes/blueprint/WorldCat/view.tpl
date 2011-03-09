@@ -1,3 +1,4 @@
+{js filename="record.js"}
 <div class="span-18">
   <div class="toolbar">
     <ul>

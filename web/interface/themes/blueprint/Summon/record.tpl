@@ -1,3 +1,5 @@
+{js filename="record.js"}
+{js filename="openurl.js"}
 <div class="span-18">
   <div class="toolbar">
     <ul>

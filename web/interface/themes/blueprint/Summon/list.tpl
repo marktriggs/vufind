@@ -1,3 +1,4 @@
+{js filename="openurl.js"}
 {* Main Listing *}
 <div class="span-18">
   {* Recommendations *}
