@@ -49,54 +49,10 @@
       {if $nextRecord}<a href="{$url}/Record/{$nextRecord}">{translate text="Next"} &raquo;</a>{/if}
     </div>
     {/if}
-    
-    <div class="span-13">
-      {include file=$coreMetadata} 
-    </div>
 
-    <div class="span-4 last">
-      {* Display Cover Image *}
-      {if $isbn}
-      <a href="{$path}/bookcover.php?isn={$isbn|escape:"url"}&amp;size=large">
-        <img alt="{translate text='Cover Image'}" class="recordcover" src="{$path}/bookcover.php?isn={$isbn|escape:"url"}&amp;size=medium"/>
-      </a>
-      {/if}
-      {* End Cover Image *}
-      
-      {* Display the lists that this record is saved to *}
-      <div class="savedLists info hide" id="savedLists{$id|escape}">
-        <strong>{translate text="Saved in"}:</strong>
-      </div>
-
-      {if $showPreviews && (!empty($holdingLCCN) || !empty($isbn) || !empty($holdingOCLC))}
-        {if $showGBSPreviews}      
-          <div class="previewDiv"> 
-            <a title="{translate text='Preview from'} Google Books" class="hide previewGBS{if $isbn} ISBN{$isbn}{/if}{if $holdingLCCN} LCCN{$holdingLCCN}{/if}{if $holdingOCLC} OCLC{$holdingOCLC|@implode:' OCLC'}{/if}" target="_blank">
-              <img src="https://www.google.com/intl/en/googlebooks/images/gbs_preview_button1.png" alt="{translate text='Preview'}"/>
-            </a>
-          </div>
-        {/if}
-        {if $showOLPreviews}
-          <div class="previewDiv">
-            <a title="{translate text='Preview from'} Open Library" href="" class="hide previewOL{if $isbn} ISBN{$isbn}{/if}{if $holdingLCCN} LCCN{$holdingLCCN}{/if}{if $holdingOCLC} OCLC{$holdingOCLC|@implode:' OCLC'}{/if}" target="_blank">
-              <img src="{$path}/images/preview_ol.gif" alt="{translate text='Preview'}"/>
-            </a>
-          </div> 
-        {/if}
-        {if $showHTPreviews}
-          <div class="previewDiv">
-            <a title="{translate text='Preview from'} HathiTrust" class="hide previewHT{if $isbn} ISBN{$isbn}{/if}{if $holdingLCCN} LCCN{$holdingLCCN}{/if}{if $holdingOCLC} OCLC{$holdingOCLC|@implode:' OCLC'}{/if}" target="_blank">
-              <img src="{$path}/images/preview_ht.gif" alt="{translate text='Preview'}"/>
-            </a>
-          </div> 
-        {/if}
-        <span class="previewBibkeys{if $isbn} ISBN{$isbn}{/if}{if $holdingLCCN} LCCN{$holdingLCCN}{/if}{if $holdingOCLC} OCLC{$holdingOCLC|@implode:' OCLC'}{/if}"></span>
-      {/if}
-    </div>
-    
-    <div class="clear"></div>
+    {include file=$coreMetadata}
   </div>
-        
+
   <div id="tabnav">
     <ul>
       <li{if $tab == 'Holdings'} class="active"{/if}>
@@ -129,13 +85,13 @@
     </ul>
     <div class="clear"></div>
   </div>
-           
-                    
+
+
   <div class="recordsubcontent">
     {include file="Record/$subTemplate"}
   </div>
 
-  {* Add COINS *}  
+  {* Add COINS *}
   <span class="Z3988" title="{$openURL|escape}"></span>
 </div>
 
