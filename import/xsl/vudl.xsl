@@ -127,13 +127,6 @@
                     </field>
                 </xsl:if>
 
-                <!-- URL -->
-                <xsl:if test="//dc:identifier">
-                    <field name="url">
-                        <xsl:value-of select="//dc:identifier[normalize-space()]"/>
-                    </field>
-                </xsl:if>
-
                 <!-- FULL TEXT -->
                 <field name="fulltext">
                     <xsl:for-each select="//METS:fileGrp[@USE=&quot;OCR-DIRTY&quot;]/METS:file/METS:FLocat">

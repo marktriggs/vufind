@@ -66,6 +66,24 @@ class VudlRecord extends IndexRecord
         $thumb = isset($result->thumbnail) ? trim($result->thumbnail) : false;
         return empty($thumb) ? false : $thumb;
     }
+
+    /**
+     * Return an associative array of URLs associated with this record (key = URL,
+     * value = description).
+     *
+     * @return array
+     * @access protected
+     */
+    protected function getURLs()
+    {
+        global $configArray;
+
+        // VuDL records get displayed within a custom VuFind module -- let's just
+        // link directly there:
+        $url = $configArray['Site']['url'] . '/VuDL/Record?id=' .
+            urlencode($this->getUniqueID());
+        return array($url => $url);
+    }
 }
 
 ?>
