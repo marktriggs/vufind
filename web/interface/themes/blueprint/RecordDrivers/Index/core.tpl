@@ -176,10 +176,10 @@
 
 <div class="span-4 last">
   {* Display Cover Image *}
-  {if $isbn}
-  <a href="{$path}/bookcover.php?isn={$isbn|escape:"url"}&amp;size=large">
-    <img alt="{translate text='Cover Image'}" class="recordcover" src="{$path}/bookcover.php?isn={$isbn|escape:"url"}&amp;size=medium"/>
-  </a>
+  {if $coreThumbMedium}
+    {if $coreThumbLarge}<a href="{$coreThumbLarge|escape}">{/if}
+      <img alt="{translate text='Cover Image'}" class="recordcover" src="{$coreThumbMedium|escape}"/>
+    {if $coreThumbLarge}</a>{/if}
   {/if}
   {* End Cover Image *}
 

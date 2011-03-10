@@ -1,5 +1,5 @@
-{if $isbn}
-  <img alt="{translate text='Cover Image'}" src="{$path}/bookcover.php?isn={$isbn|escape:"url"}&amp;size=medium" style="float:right; width:25%; padding: 3px 3px 0px 3px;">
+{if $coreThumbMedium}
+  <img alt="{translate text='Cover Image'}" src="{$coreThumbMedium|escape}" style="float:right; width:25%; padding: 3px 3px 0px 3px;">
 {else}
   <img src="{$path}/bookcover.php" alt="{translate text='No Cover Image'}" style="float:right; padding: 3px 3px 0px 3px;">
 {/if}

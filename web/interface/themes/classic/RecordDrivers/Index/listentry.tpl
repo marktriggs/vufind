@@ -3,7 +3,11 @@
   <div class="yui-u first">
     <label for="listID{$listId|escape}" class="hiddenLabel">{translate text="Select"} {$listTitle|escape}</label>
     <input id="listID{$listId|escape}" type="checkbox" name="ids[]" value="{$listId|escape}" class="ui_checkboxes" />
-    <img src="{$path}/bookcover.php?isn={$listISBN|escape:"url"}&amp;size=small" class="alignleft"  alt="{translate text='Cover Image'}" />
+    {if $listThumb}
+      <img src="{$listThumb|escape}" class="alignleft" alt="{translate text='Cover Image'}"/>
+    {else}
+      <img src="{$path}/bookcover.php" class="alignleft" alt="{translate text='No Cover Image'}"/>
+    {/if}
 
     <div class="resultitem">
       <a href="{$url}/Record/{$listId|escape:"url"}" class="title">{$listTitle|escape}</a><br>

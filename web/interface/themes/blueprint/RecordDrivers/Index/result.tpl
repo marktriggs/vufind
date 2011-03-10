@@ -4,8 +4,8 @@
   <input id="checkbox_{$summId|regex_replace:'/[^a-z0-9]/':''|escape}" type="checkbox" name="id[]" value="{$summId|escape}" class="checkbox addToCartCheckbox"/>
    *}
   <div class="span-2">
-  {if $summISBN}
-    <img src="{$path}/bookcover.php?isn={$summISBN|escape:"url"}&amp;size=small" class="summcover" alt="{translate text='Cover Image'}"/>
+  {if $summThumb}
+    <img src="{$summThumb|escape}" class="summcover" alt="{translate text='Cover Image'}"/>
     {else}
     <img src="{$path}/bookcover.php" class="summcover" alt="{translate text='No Cover Image'}"/>
   {/if}

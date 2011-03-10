@@ -229,6 +229,8 @@ class IndexRecord implements RecordInterface
         $interface->assign('coreEdition', $this->getEdition());
         $interface->assign('coreSeries', $this->getSeries());
         $interface->assign('coreSubjects', $this->getAllSubjectHeadings());
+        $interface->assign('coreThumbMedium', $this->getThumbnail('medium'));
+        $interface->assign('coreThumbLarge', $this->getThumbnail('large'));
 
         // Only display OpenURL link if the option is turned on and we have
         // an ISSN.  We may eventually want to make this rule more flexible,
@@ -493,7 +495,7 @@ class IndexRecord implements RecordInterface
         $interface->assign('listFormats', $this->getFormats());
         $interface->assign('listTitle', $this->getTitle());
         $interface->assign('listAuthor', $this->getPrimaryAuthor());
-        $interface->assign('listISBN', $this->getCleanISBN());
+        $interface->assign('listThumb', $this->getThumbnail());
 
         // Extract user metadata from the database:
         $notes = array();
@@ -674,6 +676,7 @@ class IndexRecord implements RecordInterface
         $interface->assign('summAuthor', $this->getPrimaryAuthor());
         $interface->assign('summDate', $this->getPublicationDates());
         $interface->assign('summISBN', $this->getCleanISBN());
+        $interface->assign('summThumb', $this->getThumbnail());
         $issn = $this->getCleanISSN();
         $interface->assign('summISSN', $issn);
         $interface->assign('summLCCN', $this->getLCCN());
@@ -1690,6 +1693,27 @@ class IndexRecord implements RecordInterface
     {
         return isset($this->fields['oclc_num']) ?
             $this->fields['oclc_num'] : array();
+    }
+
+    /**
+     * Return a URL to a thumbnail preview of the record, if available; false
+     * otherwise.
+     *
+     * @param array $params Size of thumbnail (small, medium or large -- small is
+     * default).
+     *
+     * @return mixed
+     * @access protected
+     */
+    protected function getThumbnail($size = 'small')
+    {
+        global $configArray;
+
+        if ($isbn = $this->getCleanISBN()) {
+            return $configArray['Site']['url'] . '/bookcover.php?isn=' .
+                urlencode($isbn) . '&size=' . urlencode($size);
+        }
+        return false;
     }
 }
 

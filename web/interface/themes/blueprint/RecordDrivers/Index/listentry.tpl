@@ -3,8 +3,8 @@
     <input id="checkbox_{$listId|regex_replace:'/[^a-z0-9]/':''|escape}" type="checkbox" name="ids[]" value="{$listId|escape}" class="checkbox"/>
     <input type="hidden" name="idsAll[]" value="{$listId|escape}" />
     <div class="span-2">
-    {if $listISBN}
-      <img src="{$path}/bookcover.php?isn={$listISBN|escape:"url"}&amp;size=small" class="summcover" alt="{translate text='Cover Image'}"/>
+    {if $listThumb}
+      <img src="{$listThumb|escape}" class="summcover" alt="{translate text='Cover Image'}"/>
     {else}
       <img src="{$path}/bookcover.php" class="summcover" alt="{translate text='No Cover Image'}"/>
     {/if}

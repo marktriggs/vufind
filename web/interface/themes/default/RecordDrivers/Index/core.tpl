@@ -34,12 +34,12 @@
 {/literal}
 {* Display Cover Image *}
 
-  {if $isbn}
-  <div class="alignright">
-  <a href="{$path}/bookcover.php?isn={$isbn|escape:"url"}&amp;size=large">
-      <img alt="{translate text='Cover Image'}" class="recordcover" src="{$path}/bookcover.php?isn={$isbn|escape:"url"}&amp;size=medium">
-    </a>
-  </div>
+  {if $coreThumbMedium}
+    <div class="alignright">
+      {if $coreThumbLarge}<a href="{$coreThumbLarge|escape}">{/if}
+        <img alt="{translate text='Cover Image'}" class="recordcover" src="{$coreThumbMedium|escape}">
+      {if $coreThumbLarge}</a>{/if}
+    </div>
   {else}
 {* <img src="{$path}/bookcover.php" alt="{translate text='No Cover Image'}"> *}
   {/if}
