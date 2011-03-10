@@ -6,7 +6,7 @@
       <div class="recordId" id="record{$record.id|escape}">
         <span class="recordNumber">{$recordStart+$smarty.foreach.recordLoop.iteration-1}</span>
         <div class="span-2">
-          {if $summISBN}
+          {if $record.isbn}
           <img src="{$path}/bookcover.php?isn={$record.isbn|@formatISBN|escape:"url"}&amp;size=small" class="summcover" alt="{translate text='Cover Image'}"/>
           {else}
           <img src="{$path}/bookcover.php" class="summcover" alt="{translate text='No Cover Image'}"/>
