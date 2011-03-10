@@ -108,10 +108,13 @@ if (!$db) {
 }
 
 // add new tables:
-addNewTables($db);
+addNewTables();
+
+// adjust existing tables:
+updateExistingTables();
 
 // clean up anonymous tags:
-cleanUpAnonymousTags($db);
+cleanUpAnonymousTags();
 
 /**
  * Support function to execute a SQL statement.
@@ -226,6 +229,18 @@ function addNewTables()
     }
 
     echo "Done creating tables.\n\n";
+}
+
+/**
+ * Routine to update existing tables in the database.
+ *
+ * @return void
+ */
+function updateExistingTables()
+{
+    echo "Making more room for IDs in the database... ";
+    executeSQL("ALTER TABLE resource MODIFY record_id VARCHAR(60);");
+    echo "done!\n\n";
 }
 
 /**

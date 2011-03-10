@@ -21,7 +21,7 @@ CREATE TABLE `comments` (
 
 CREATE TABLE `resource` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `record_id` varchar(30) NOT NULL DEFAULT '',
+  `record_id` varchar(60) NOT NULL DEFAULT '',
   `title` varchar(200) NOT NULL DEFAULT '',
   `source` varchar(50) NOT NULL DEFAULT 'VuFind',
   PRIMARY KEY (`id`),
