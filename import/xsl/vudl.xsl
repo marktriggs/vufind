@@ -32,11 +32,17 @@
                 <field name="recordtype">vudl</field>
 
                 <!-- FULLRECORD -->
-                <!-- disabled for now; records are so large that they cause memory problems!
                 <field name="fullrecord">
-                    <xsl:copy-of select="php:function('VuFind::xmlAsText', //METS:mets)"/>
+                    &lt;root&gt;
+                    &lt;url&gt;
+                    <xsl:value-of select="//METS:dmdSec/METS:mdRef/@href"/>
+                    &lt;/url&gt;
+                    &lt;thumbnail&gt;
+                    <xsl:value-of select="//METS:fileSec/METS:fileGrp[@USE = 'THUMBNAIL']/METS:file[@ID = //METS:structMap/METS:div/METS:div[@TYPE = 'page_level']/METS:div[1]/METS:fptr/@FILEID]/METS:FLocat/@xlink:href"/>
+                    &lt;/thumbnail&gt;
+                    &lt;/root&gt;
+                    <!-- <xsl:value-of select="string(//METS:dmdSec/METS:mdRef/@href)"/> -->
                 </field>
-                  -->
 
                 <!-- ALLFIELDS -->
                 <field name="allfields">
