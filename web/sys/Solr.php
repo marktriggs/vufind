@@ -1588,6 +1588,76 @@ class Solr implements IndexEngine
         }
     }
 
+    /**
+     * Convert a terms array (where every even entry is a term and every odd entry
+     * is a count) into an associate array of terms => counts.
+     *
+     * @param array $in Input array
+     *
+     * @return array    Processed array
+     * @access private
+     */
+    private function _processTerms($in)
+    {
+        $out = array();
+
+        for ($i = 0; $i < count($in); $i += 2) {
+            $out[$in[$i]] = $in[$i + 1];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Extract terms from the Solr index.
+     *
+     * @param string $field           Field to extract terms from
+     * @param string $start           Starting term to extract (blank for beginning
+     * of list)
+     * @param int    $limit           Maximum number of terms to return (-1 for no
+     * limit)
+     * @param bool   $returnSolrError Should we fail outright on syntax error
+     * (false) or treat it as an empty result set with an error key set (true)?
+     *
+     * @return array                  Associative array parsed from Solr JSON
+     * response; meat of the response is in the ['terms'] element, which contains
+     * an index named for the requested term, which in turn contains an associative
+     * array of term => count in index.
+     * @access public
+     */
+    public function getTerms($field, $start, $limit, $returnSolrError = false)
+    {
+        $this->client->setMethod('GET');
+        $this->client->setURL($this->host . '/term');
+
+        $this->client->addQueryString('terms', 'true');
+        $this->client->addQueryString('terms.fl', $field);
+        $this->client->addQueryString('terms.lower.incl', 'false');
+        $this->client->addQueryString('terms.lower', $start);
+        $this->client->addQueryString('terms.limit', $limit);
+        $this->client->addQueryString('terms.sort', 'index');
+        $this->client->addQueryString('wt', 'json');
+
+        $result = $this->client->sendRequest();
+
+        if (!PEAR::isError($result)) {
+            // Process the JSON response:
+            $data = $this->_process(
+                $this->client->getResponseBody(), $returnSolrError
+            );
+
+            // Tidy the data into a more usable format:
+            $fixedArray = array();
+            if (isset($data['terms'])) {
+                $data['terms'] = array(
+                    $data['terms'][0] => $this->_processTerms($data['terms'][1])
+                );
+            }
+            return $data;
+        } else {
+            return $result;
+        }
+    }
 }
 
 ?>

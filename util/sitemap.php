@@ -33,6 +33,7 @@
  * Set up util environment
  */
 require_once 'util.inc.php';
+require_once 'sys/ConnectionManager.php';
 
 // Read Config file
 $base = dirname(__FILE__);
@@ -46,38 +47,37 @@ if (!$sitemapArray) {
 }
 
 $result_url = $configArray['Site']['url'] . "/" . "Record" . "/";
-$sitemap_url = $configArray['Index']['url'] . "/" .
-    $configArray['Index']['default_core'] . "/sitemap?wt=json";
 $frequency = htmlspecialchars($sitemapArray['Sitemap']['frequency']);
 $countPerPage = $sitemapArray['Sitemap']['countPerPage'];
 $fileStart = $sitemapArray['Sitemap']['fileLocation'] . "/" .
     $sitemapArray['Sitemap']['fileName'];
 
-$currentPage = 1;
-$keep_going = 1;
+$solr = ConnectionManager::connectToIndex();
 
-while ($keep_going == 1) {
+$currentPage = 1;
+$last_term = '';
+
+while (true) {
     if ($currentPage == 1) {
         $fileWhole = $fileStart . ".xml";
     } else {
         $fileWhole = $fileStart . "-" . $currentPage . ".xml";
     }
 
-    $current_url = $sitemap_url . "&currentPage=" . $currentPage .
-        "&countPerPage=" . $countPerPage;
-    $current_page_info_json = file_get_contents($current_url);
-    $current_page_info_array = json_decode($current_page_info_json, true);
-
-    if (count($current_page_info_array["sitemap"]["idSet"]) < 1) {
-        $keep_going = 0;
+    $current_page_info_array = $solr->getTerms('id', $last_term, $countPerPage);
+    if (!isset($current_page_info_array['terms']['id'])
+        || count($current_page_info_array['terms']['id']) < 1
+    ) {
+        break;
     } else {
         $smf = openSitemapFile($fileWhole, 'urlset');
-        foreach ($current_page_info_array["sitemap"]["idSet"] as $current) {
-            $loc = htmlspecialchars($result_url . urlencode($current));
+        foreach ($current_page_info_array['terms']['id'] as $item => $count) {
+            $loc = htmlspecialchars($result_url . urlencode($item));
             fwrite($smf, '<url>' . "\n");
             fwrite($smf, '  <loc>' . $loc . '</loc>' . "\n");
             fwrite($smf, '  <changefreq>' . $frequency . '</changefreq>' . "\n");
             fwrite($smf, '</url>' . "\n");
+            $last_term = $item;
         }
 
         fwrite($smf, '</urlset>');
