@@ -45,7 +45,7 @@ class VudlRecord extends IndexRecord
      * Return a URL to a thumbnail preview of the record, if available; false
      * otherwise.
      *
-     * @param array $params Size of thumbnail (small, medium or large -- small is
+     * @param array $size Size of thumbnail (small, medium or large -- small is
      * default).
      *
      * @return mixed
