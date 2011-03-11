@@ -21,7 +21,13 @@
           <br clear="All"><a href="http://{$wiki_lang}.wikipedia.org/wiki/{$info.name|escape:"url"}" target="new"><span class="note">{translate text='wiki_link'}</span></a>
         </p>
         {/if}
-  
+
+        {if $topRecommendations}
+          {foreach from=$topRecommendations item="recommendations"}
+            {include file=$recommendations}
+          {/foreach}
+        {/if}
+
         <div class="resulthead">
           {translate text="Showing"}
           <b>{$recordStart}</b> - <b>{$recordEnd}</b>

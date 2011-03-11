@@ -208,6 +208,9 @@ class Home extends Action
         $interface->assign('recordStart', $summary['startRecord']);
         $interface->assign('recordEnd',   $summary['endRecord']);
         $interface->assign(
+            'topRecommendations', $searchObject->getRecommendationsTemplates('top')
+        );
+        $interface->assign(
             'sideRecommendations', $searchObject->getRecommendationsTemplates('side')
         );
 

@@ -846,10 +846,14 @@ class SearchObject_Solr extends SearchObject_Base
      */
     protected function getRecommendationSettings()
     {
-        // Special hard-coded case for author module.  We should make this more
-        // flexible in the future!
+        // Special case for author module.  Use settings from searches.ini if
+        // present; default to old hard-coded defaults otherwise for legacy
+        // compatibility.
         if ($this->searchType == 'author') {
-            return array('side' => array('ExpandFacets:Author'));
+            $searchSettings = getExtraConfigArray('searches');
+            return isset($searchSettings['AuthorModuleRecommendations'])
+                ? $searchSettings['AuthorModuleRecommendations']
+                : array('side' => array('ExpandFacets:Author'));
         }
 
         // Use default case from parent class the rest of the time:

@@ -14,7 +14,13 @@
       <div class="clear"></div>  
     </div>
   {/if}
-  
+
+  {if $topRecommendations}
+    {foreach from=$topRecommendations item="recommendations"}
+      {include file=$recommendations}
+    {/foreach}
+  {/if}
+
   <div class="resulthead">
     {translate text="Showing"}
     <strong>{$recordStart}</strong> - <strong>{$recordEnd}</strong>

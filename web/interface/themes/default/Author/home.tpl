@@ -7,11 +7,11 @@
     <b class="btop"><b></b></b>
 
       <div class="yui-ge">
-        
+
         {if $info}
         <div class="authorbio">
         <h2>{$info.name|escape}</h2><br>
-  
+
         {if $info.image}
         <img src="{$info.image}" alt="{$info.altimage|escape}" width="150px" class="alignleft recordcover">
         {/if}
@@ -21,7 +21,13 @@
         <br clear="All">
         </div>
         {/if}
-  
+
+        {if $topRecommendations}
+          {foreach from=$topRecommendations item="recommendations"}
+            {include file=$recommendations}
+          {/foreach}
+        {/if}
+
         <div class="resulthead">
           {translate text="Showing"}
           <b>{$recordStart}</b> - <b>{$recordEnd}</b>
@@ -33,7 +39,7 @@
         {include file=Search/list-list.tpl}
 
         {if $pageLinks.all}<div class="pagination">{$pageLinks.all}</div>{/if}
-  
+
       </div>
       <div class="searchtools">
         <strong>{translate text='Search Tools'}:</strong>
@@ -45,7 +51,7 @@
 
 
   </div>
-  
+
   {* Recommendations *}
   <div class="yui-b">
     {if $sideRecommendations}
