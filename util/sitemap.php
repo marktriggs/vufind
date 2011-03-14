@@ -111,7 +111,7 @@ if (isset($sitemapArray['SitemapIndex']['indexFileName'])) {
     }
 
     // Add <sitemap /> group for each sitemap file generated.
-    for ($i = 1; $i < $currentPage - 1; $i++) {
+    for ($i = 1; $i < $currentPage; $i++) {
         $sitemapNumber = ($i == 1) ? "" : "-" . $i;
         writeSitemapIndexLine(
             $smf, $sitemapArray['Sitemap']['fileName'] . $sitemapNumber
