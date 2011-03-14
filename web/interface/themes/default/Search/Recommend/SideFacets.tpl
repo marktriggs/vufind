@@ -51,7 +51,10 @@
                     {/if}
                   {/foreach}
                 {else}
-                  {if (strpos($paramName, $title) !== 0)}
+                  {if (strpos($paramName, $title) !== 0)
+                      && (strpos($paramName, 'module') !== 0)
+                      && (strpos($paramName, 'action') !== 0)
+                      && (strpos($paramName, 'page') !== 0)}
                     <input type="hidden" name="{$paramName}" value="{$paramValue|escape}" />
                   {/if}
                 {/if}
