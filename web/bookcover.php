@@ -345,6 +345,36 @@ function syndetics($id)
 }
 
 /**
+ * Retrieve a Content Cafe cover.
+ *
+ * @param string $id Content Cafe client ID.
+ *
+ * @return bool      True if image displayed, false otherwise.
+ */
+function contentcafe($id)
+{
+    global $configArray;
+
+    switch ($_GET['size']) {
+    case 'small':
+        $size = 'S';
+        break;
+    case 'medium':
+        $size = 'M';
+        break;
+    case 'large':
+        $size = 'L';
+        break;
+    }
+    $pw = $configArray['Contentcafe']['pw'];
+    $url = isset($configArray['Contentcafe']['url'])
+        ? $configArray['Contentcafe']['url'] : 'http://contentcafe2.btol.com';
+    $url .= "/ContentCafe/Jacket.aspx?UserID={$id}&Password={$pw}&Return=1" .
+        "&Type={$size}&Value={$_GET['isn']}&erroroverride=1";
+    return processImageURL($url);
+}
+
+/**
  * Retrieve a LibraryThing cover.
  *
  * @param string $id LibraryThing client ID.
