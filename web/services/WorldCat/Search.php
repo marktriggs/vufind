@@ -57,9 +57,13 @@ class Search extends Base
         // Initialise SearchObject.
         $this->searchObject->init();
 
-        $interface->setPageTitle('Search Results');
+        $displayQuery = $this->searchObject->displayQuery();
+        $interface->setPageTitle(
+            translate('Search Results') .
+            (empty($displayQuery) ? '' : ' - ' . htmlspecialchars($displayQuery))
+        );
 
-        $interface->assign('lookfor', $this->searchObject->displayQuery());
+        $interface->assign('lookfor', $displayQuery);
         $interface->assign('searchIndex', $this->searchObject->getSearchIndex());
         $interface->assign('searchType', $this->searchObject->getSearchType());
 

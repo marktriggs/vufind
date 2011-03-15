@@ -97,7 +97,11 @@ class Results extends Action
 
         // Set Interface Variables
         //   Those we can construct BEFORE the search is executed
-        $interface->setPageTitle('Search Results');
+        $displayQuery = $searchObject->displayQuery();
+        $interface->setPageTitle(
+            translate('Search Results') .
+            (empty($displayQuery) ? '' : ' - ' . htmlspecialchars($displayQuery))
+        );
         $interface->assign('sortList',   $searchObject->getSortList());
         $interface->assign('rssLink',    $searchObject->getRSSUrl());
 
@@ -114,7 +118,7 @@ class Results extends Action
         $interface->assign(
             'spellingSuggestions', $searchObject->getSpellingSuggestions()
         );
-        $interface->assign('lookfor', $searchObject->displayQuery());
+        $interface->assign('lookfor', $displayQuery);
         $interface->assign('searchType', $searchObject->getSearchType());
         // Will assign null for an advanced search
         $interface->assign('searchIndex', $searchObject->getSearchIndex());

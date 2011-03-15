@@ -53,9 +53,13 @@ class Search extends Base
         // Initialise SearchObject.
         $this->searchObject->init();
 
-        $interface->setPageTitle('Search Results');
-        
-        $interface->assign('lookfor', $this->searchObject->displayQuery());
+        $displayQuery = $this->searchObject->displayQuery();
+        $interface->setPageTitle(
+            translate('Search Results') .
+            (empty($displayQuery) ? '' : ' - ' . htmlspecialchars($displayQuery))
+        );
+
+        $interface->assign('lookfor', $displayQuery);
         $interface->assign('searchIndex', $this->searchObject->getSearchIndex());
         $interface->assign('searchType', $this->searchObject->getSearchType());
 
@@ -104,7 +108,7 @@ class Search extends Base
             // Was the empty result set due to an error?
             $error = $this->searchObject->getIndexError();
             if ($error !== false) {
-                // If it's a parse error or the user specified an invalid field, we 
+                // If it's a parse error or the user specified an invalid field, we
                 // should display an appropriate message:
                 if (stristr($error, 'org.apache.lucene.queryParser.ParseException')
                     || preg_match('/^undefined field/', $error)
@@ -121,7 +125,7 @@ class Search extends Base
             }
             $interface->setTemplate('list-none.tpl');
         }
-        
+
         // 'Finish' the search... complete timers and log search history.
         $this->searchObject->close();
         $interface->assign('time', round($this->searchObject->getTotalSpeed(), 2));
@@ -131,10 +135,10 @@ class Search extends Base
         $interface->assign('showSaved',   true);
         $interface->assign('savedSearch', $this->searchObject->isSavedSearch());
         $interface->assign('searchId',    $this->searchObject->getSearchId());
-        
+
         // Save the URL of this search to the session so we can return to it easily:
         $_SESSION['lastSearchURL'] = $this->searchObject->renderSearchUrl();
-        
+
         $interface->display('layout.tpl');
     }
 
