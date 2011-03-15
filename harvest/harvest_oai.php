@@ -184,7 +184,13 @@ class HarvestOAI
      */
     public function launch()
     {
-        $this->_getRecordsByDate($this->_startDate, $this->_set);
+        // Start harvesting at the requested date:
+        $token = $this->_getRecordsByDate($this->_startDate, $this->_set);
+
+        // Keep harvesting as long as a resumption token is provided:
+        while ($token !== false) {
+            $token = $this->_getRecordsByToken($token);
+        }
     }
 
     /**
@@ -564,7 +570,7 @@ class HarvestOAI
      *
      * @param array $params GET parameters for ListRecords method.
      *
-     * @return void
+     * @return mixed        Resumption token if provided, false if finished
      * @access private
      */
     private function _getRecords($params)
@@ -582,12 +588,13 @@ class HarvestOAI
         if (isset($response->ListRecords->resumptionToken)
             && !empty($response->ListRecords->resumptionToken)
         ) {
-            $this->_getRecordsByToken($response->ListRecords->resumptionToken);
+            return $response->ListRecords->resumptionToken;
         } else if ($this->_endDate > 0) {
             $dateFormat = ($this->_granularity == 'YYYY-MM-DD') ?
                 'Y-m-d' : 'Y-m-d\TH:i:s\Z';
             $this->_saveLastHarvestedDate(date($dateFormat, $this->_endDate));
         }
+        return false;
     }
 
     /**
@@ -596,7 +603,7 @@ class HarvestOAI
      * @param string $date Harvest start date (null for all records).
      * @param string $set  Set to harvest (null for all records).
      *
-     * @return void
+     * @return mixed        Resumption token if provided, false if finished
      * @access private
      */
     private function _getRecordsByDate($date = null, $set = null)
@@ -608,7 +615,7 @@ class HarvestOAI
         if (!empty($set)) {
             $params['set'] = $set;
         }
-        $this->_getRecords($params);
+        return $this->_getRecords($params);
     }
 
     /**
@@ -616,12 +623,12 @@ class HarvestOAI
      *
      * @param string $token Resumption token.
      *
-     * @return void
+     * @return mixed        Resumption token if provided, false if finished
      * @access private
      */
     private function _getRecordsByToken($token)
     {
-        $this->_getRecords(array('resumptionToken' => (string)$token));
+        return $this->_getRecords(array('resumptionToken' => (string)$token));
     }
 }
 
