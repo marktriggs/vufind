@@ -16,7 +16,10 @@
 #####################################################
 # handle the -p option to override properties file
 #####################################################
-PROPERTIES_FILE="import.properties"
+if [ -z "$PROPERTIES_FILE" ]
+then
+  PROPERTIES_FILE="import.properties"
+fi
 while getopts ":p:" Option
 do
   case $Option in
