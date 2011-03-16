@@ -100,7 +100,10 @@ class SolrUtilsTest extends PHPUnit_Framework_TestCase
             array('[1900 TO 1910]', '[1900 TO 1910]'),
             array('{1900 to 1910}', '{1900 TO 1910}'),
             array('{1900 TO 1910}', '{1900 TO 1910}'),
-            array('[a      to      b]', '([a TO b] OR [A TO B])')   // handle extra spaces
+            array('[a      to      b]', '([a TO b] OR [A TO B])'),   // handle extra spaces
+            // special case for timestamps:
+            array('[1900-01-01t00:00:00z to 1900-12-31t23:59:59z]', '[1900-01-01T00:00:00Z TO 1900-12-31T23:59:59Z]'),
+            array('{1900-01-01T00:00:00Z       TO   1900-12-31T23:59:59Z}', '{1900-01-01T00:00:00Z TO 1900-12-31T23:59:59Z}')
         );
         // @codingStandardsIgnoreEnd
 

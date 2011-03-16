@@ -114,6 +114,13 @@ class VuFindSolrUtils
             // Build a uppercase version of the range:
             $upper = $open . trim(strtoupper($start)) . ' TO ' .
                 trim(strtoupper($end)) . $close;
+
+            // Special case: don't create illegal timestamps!
+            $timestamp = '/[0-9]{4}-[0-9]{2}-[0-9]{2}t[0-9]{2}:[0-9]{2}:[0-9]{2}z/i';
+            if (preg_match($timestamp, $start) || preg_match($timestamp, $end)) {
+                return $upper;
+            }
+
             // Accept results matching either range:
             return '(' . $lower . ' OR ' . $upper . ')';
         } else {
