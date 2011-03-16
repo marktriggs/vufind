@@ -29,7 +29,10 @@ rem Make sure command line parameter was included:
 if not "!%1!"=="!!" goto paramsokay
 echo This script deletes records based on files created by the OAI-PMH harvester.
 echo.
-echo Usage: %0 [%VUFIND_HOME%\harvest subdirectory]
+echo Usage: %0 [%VUFIND_HOME%\harvest subdirectory] [index type]
+echo.
+echo [index type] is optional; defaults to Solr for main bibliographic index, but
+echo can be set to SolrAuth for authority index.
 echo.
 echo Example: %0 oai_source
 goto end
@@ -51,7 +54,7 @@ rem Process all the files in the target directory:
 cd %VUFIND_HOME%\util
 for %%a in (%BASEPATH%\*.delete) do (
   echo Processing %%a...
-  php deletes.php %%a flat
+  php deletes.php %%a flat %2
   move %%a %BASEPATH%\processed\ > nul
 )
 

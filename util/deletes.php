@@ -27,10 +27,11 @@
  * @link     http://vufind.org/wiki/automation Wiki
  */
 
-// Parse the command line parameters -- see if we are in "flat file" mode and
-// find out what file we are reading in!
+// Parse the command line parameters -- see if we are in "flat file" mode,
+// find out what file we are reading in, and determine the index we are affecting!
 $filename = isset($argv[1]) ? $argv[1] : null;
 $mode = isset($argv[2]) ? $argv[2] : 'marc';
+$index = isset($argv[3]) ? $argv[3] : 'Solr';
 
 // No filename specified?  Give usage guidelines:
 if (empty($filename)) {
@@ -60,7 +61,7 @@ require_once 'sys/ConnectionManager.php';
 $configArray = parse_ini_file(dirname(__FILE__) . '/../web/conf/config.ini', true);
 
 // Setup Solr Connection
-$solr = ConnectionManager::connectToIndex('Solr');
+$solr = ConnectionManager::connectToIndex($index);
 
 // Setup Local Database Connection
 ConnectionManager::connectToDatabase();
