@@ -45,6 +45,11 @@ $includePaths[] = realpath($pathToWeb);
 $includePaths = array_unique($includePaths);
 set_include_path(implode(PATH_SEPARATOR, $includePaths));
 
+require_once 'sys/ConfigArray.php';
+require_once 'sys/Autoloader.php';
+
+spl_autoload_register('vuFindAutoloader');
+
 /**
  * Callback function to handle PEAR errors in a command-line-friendly way.
  *

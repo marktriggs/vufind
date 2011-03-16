@@ -47,36 +47,7 @@ require_once 'sys/User.php';
 require_once 'sys/Translator.php';
 require_once 'sys/SearchObject/Factory.php';
 require_once 'sys/ConnectionManager.php';
-
-/**
- * Autoloader callback function (needed for YAML)
- *
- * @param string $class Name of class to load.
- *
- * @return void
- */
-function vuFindAutoloader($class)
-{
-    $filename = str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
-    // treat as relative path to include path, root or sys folder
-    $paths = explode(PATH_SEPARATOR, get_include_path());
-    $paths[] = dirname(__FILE__);
-    $paths[] = dirname(__FILE__).DIRECTORY_SEPARATOR.'sys';
-    // go through each and look for file
-    foreach ($paths as $path) {
-        // check if we need to add the directory separator to the end
-        if (substr($path, -1) == DIRECTORY_SEPARATOR) {
-            $fullpath = $path.$filename;
-        } else {
-            $fullpath = $path.DIRECTORY_SEPARATOR.$filename;
-        }
-        // check if the file exists, load it and break out of the loop
-        if (file_exists($fullpath)) {
-            include_once $fullpath;
-            break;
-        }
-    }
-}
+require_once 'sys/Autoloader.php';
 spl_autoload_register('vuFindAutoloader');
 
 // Load local overrides file (if it exists) to pick up local class overrides.

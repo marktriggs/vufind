@@ -31,7 +31,6 @@
  */
 require_once 'util.inc.php';
 require_once 'services/MyResearch/lib/Search.php';
-require_once 'sys/ConfigArray.php';
 require_once 'sys/ConnectionManager.php';
 
 // Use command line value as expiration age, or default to 2.
