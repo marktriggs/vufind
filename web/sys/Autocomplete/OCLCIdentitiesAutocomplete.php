@@ -30,9 +30,7 @@ require_once 'sys/Autocomplete/Interface.php';
 /**
  * OCLC Identities Autocomplete Module
  *
- * This class provides suggestions by using OCLC Identities.  This is a proof of
- * concept and should probably not be used in production as it relies on an
- * experimental, unsupported OCLC service.
+ * This class provides suggestions by using OCLC Identities.
  *
  * @category VuFind
  * @package  Autocomplete
@@ -56,7 +54,7 @@ class OCLCIdentitiesAutocomplete implements AutocompleteInterface
     public function __construct($params)
     {
         // For now, incoming parameters are ignored and a hard-coded URL is used:
-        $this->url = 'http://orlabs.oclc.org/identities/AutoSuggest';
+        $this->url = 'http://worldcat.org/identities/AutoSuggest';
     }
 
     /**
