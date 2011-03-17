@@ -43,10 +43,20 @@ $progName = basename($argv[0]);
 // Process switches:
 $switchError = false;
 $testMode = false;
+$index = 'Solr';
 while (isset($argv[1]) && substr($argv[1], 0, 1) == '-') {
     switch ($argv[1]) {
     case '--test-only';
         $testMode = true;
+        break;
+    case '--index';
+        if (!isset($argv[2])) {
+            echo "Missing parameter to --index switch!\n\n";
+            $switchError = true;
+        } else {
+            $index = $argv[2];
+            array_shift($argv);
+        }
         break;
     default:
         echo "Unrecognized switch: {$argv[1]}\n\n";
@@ -58,12 +68,16 @@ while (isset($argv[1]) && substr($argv[1], 0, 1) == '-') {
 
 // Display help message if parameters missing:
 if (!isset($argv[2]) || $switchError) {
-    echo "Usage: {$progName} [--test-only] XML_file properties_file\n" .
+    echo "Usage: {$progName} [--test-only] [--index <type>] XML_file properties_file\n" .
         "\tXML_file - source file to index\n" .
         "\tproperties_file - import configuration file\n" .
         "If the optional --test-only flag is set, transformed XML will be " .
         "displayed\non screen for debugging purposes, but it will not be " .
         "indexed into VuFind.\n\n" .
+        "If the optional --index parameter is set, it must be followed by " .
+        "the name of\na class for accessing Solr; it defaults to the standard " .
+        "Solr class, but could\nbe overridden with, for example, SolrAuth to " .
+        "load authority records.\n\n" .
         "Note: See vudl.properties and ojs.properties for configuration " . 
         "examples.\n";
     exit(1);
@@ -80,7 +94,7 @@ if (!$xml) {
 
 // Save the results (or just display them, if in test mode):
 if (!$testMode) {
-    $solr = ConnectionManager::connectToIndex('Solr');
+    $solr = ConnectionManager::connectToIndex($index);
     $result = $solr->saveRecord($xml);
     if (!PEAR::isError($result)) {
         echo "Successfully imported {$argv[1]}...\n";
