@@ -1173,7 +1173,8 @@ class SearchObject_Solr extends SearchObject_Base
         //   submitting a second search for this.
 
         // Create a new search object
-        $newSearch = SearchObjectFactory::initSearchObject('Solr');
+        $type = str_replace('SearchObject_', '', get_class($this));
+        $newSearch = SearchObjectFactory::initSearchObject($type);
         $newSearch->deminify($this->minify());
 
         // Activate the basic dictionary
