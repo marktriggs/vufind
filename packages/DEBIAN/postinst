@@ -29,6 +29,6 @@ sudo /etc/init.d/apache2 force-reload
  
 # Finalize the installation 
 cd $VUFIND_HOME
-sudo sh $VUFIND_HOME/install
+sudo bash $VUFIND_HOME/install
 sudo chmod +x $VUFIND_HOME/*.sh
 
