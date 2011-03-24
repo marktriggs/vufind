@@ -154,6 +154,15 @@
   </tr>
   {/if}
 
+  {if !empty($coreRecordLinks)}
+  {foreach from=$coreRecordLinks item=coreRecordLink}
+  <tr valign="top">
+    <th>{translate text=$coreRecordLink.title}: </th>
+    <td><a href="{$coreRecordLink.link|escape}">{$coreRecordLink.value|escape}</a></td>
+  </tr>
+  {/foreach}
+  {/if}
+
   {* TODO: Remove this "if $taglist" once add tag functionality is added; for now, we want to
            completely hide tags when none are present to avoid displaying the "be the first"
            message when tagging functionality is unavailable. *}

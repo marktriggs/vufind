@@ -229,6 +229,7 @@ class IndexRecord implements RecordInterface
         $interface->assign('coreEdition', $this->getEdition());
         $interface->assign('coreSeries', $this->getSeries());
         $interface->assign('coreSubjects', $this->getAllSubjectHeadings());
+        $interface->assign('coreRecordLinks', $this->getAllRecordLinks());
         $interface->assign('coreThumbMedium', $this->getThumbnail('medium'));
         $interface->assign('coreThumbLarge', $this->getThumbnail('large'));
 
@@ -961,6 +962,30 @@ class IndexRecord implements RecordInterface
         }
 
         return $retval;
+    }
+
+    /**
+     * Get all record links related to the current record. Each link is returned as
+     * array.
+     * NB: to use this method you must override it.
+     * Format:
+     * <code>
+     * array(
+     *        array(
+     *               'title' => label_for_title
+     *               'value' => link_name
+     *               'link'  => link_URI
+     *        ),
+     *        ...
+     * )
+     * </code>
+     *
+     * @return null|array
+     * @access protected
+     */
+    protected function getAllRecordLinks()
+    {
+        return null;
     }
 
     /**

@@ -202,6 +202,15 @@
   </tr>
   {/if}
 
+  {if !empty($coreRecordLinks)}
+  {foreach from=$coreRecordLinks item=coreRecordLink}
+  <tr valign="top">
+    <th>{translate text=$coreRecordLink.title}: </th>
+    <td><a href="{$coreRecordLink.link|escape}">{$coreRecordLink.value|escape}</a></td>
+  </tr>
+  {/foreach}
+  {/if}
+
   <tr valign="top">
     <th>{translate text='Tags'}: </th>
     <td>

@@ -868,6 +868,118 @@ class MarcRecord extends IndexRecord
         header("Location: {$url}");
         die();
     }
+
+    /**
+     * Get all record links related to the current record. Each link is returned as
+     * array.
+     * Format:
+     * array(
+     *        array(
+     *               'title' => label_for_title
+     *               'value' => link_name
+     *               'link'  => link_URI
+     *        ),
+     *        ...
+     * )
+     *
+     * @return null|array
+     * @access protected
+     */
+    protected function getAllRecordLinks()
+    {
+        global $configArray;
+
+        $fieldsNames = isset($configArray['Record']['marc_links'])
+            ? explode(',', $configArray['Record']['marc_links']) : array();
+        $retVal = array();
+        foreach ($fieldsNames as $value) {
+            $value = trim($value);
+            $fields = $this->marcRecord->getFields($value);
+            if (!empty($fields)) {
+                foreach ($fields as $field) {
+                    $indicator = $field->getIndicator('2');
+                    switch ($value) {
+                    case '780':
+                        if ($indicator == '0' || $indicator == '1'
+                            || $indicator == '5'
+                        ) {
+                            $value .= '_' . $indicator;
+                        }
+                        break;
+                    case '785':
+                        if ($indicator == '0' || $indicator == '7') {
+                            $value .= '_' . $indicator;
+                        }
+                        break;
+                    }
+                    $tmp = $this->_getFieldData($field, $value);
+                    if (is_array($tmp)) {
+                        $retVal[] = $tmp;
+                    }
+                }
+            }
+        }
+        if (empty($retVal)) {
+            $retVal = null;
+        }
+        return $retVal;
+    }
+
+    /**
+     * Returns the array element for the 'getAllRecordLinks' method
+     *
+     * @param File_MARC_Data_Field $field Field to examine
+     * @param string               $value Field name for use in label
+     *
+     * @access private
+     * @return array|bool                 Array on success, boolean false if no
+     * valid link could be found in the data.
+     */
+    private function _getFieldData($field, $value)
+    {
+        global $configArray;
+
+        $labelPrfx   = 'note_';
+        $baseURI     = $configArray['Site']['url'];
+
+        // There are two possible ways we may want to link to a record -- either
+        // we will have a raw bibliographic record in subfield w, or else we will
+        // have an OCLC number prefixed by (OCoLC).  If we have both, we want to
+        // favor the bib number over the OCLC number.  If we have an unrecognized
+        // parenthetical prefix to the number, we should simply ignore it.
+        $bib = $oclc = '';
+        $linkFields = $field->getSubfields('w');
+        foreach ($linkFields as $current) {
+            $text = $current->getData();
+            // Extract parenthetical prefixes:
+            if (preg_match('/\(([^)]+)\)(.+)/', $text, $matches)) {
+                // Is it an OCLC number?
+                if ($matches[1] == 'OCoLC') {
+                    $oclc = $baseURI . '/Search/Results?lookfor=' .
+                        urlencode($matches[2]) . '&type=oclc_num&jumpto=1';
+                }
+            } else {
+                // No parenthetical prefix found -- assume raw bib number:
+                $bib = $baseURI . '/Record/' . $text;
+            }
+        }
+
+        // Check which link type we found in the code above... and fail if we
+        // found nothing!
+        if (!empty($bib)) {
+            $link = $bib;
+        } else if (!empty($oclc)) {
+            $link = $oclc;
+        } else {
+            return false;
+        }
+
+        return array(
+            'title' => $labelPrfx.$value,
+            'value' => $field->getSubfield('t')->getData(),
+            'link'  => $link
+        );
+    }
 }
 
 ?>
