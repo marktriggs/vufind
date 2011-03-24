@@ -222,21 +222,28 @@ function sendSMS(id, to, provider, module, strings)
                  "to=" + encodeURIComponent(to) + "&" +
                  "provider=" + encodeURIComponent(provider) + "&" +
                  "type=" + encodeURIComponent(module);
-    document.getElementById('popupbox').innerHTML = '<h3>' + strings.sending + '</h3>';
+    var userParagraph = '<p class="userMsg">';
+    var errorParagraph = '<p class="error">';
+    var endParagraph ='</p>';
+
+    document.getElementById('popupDetails').style.display = 'none';
+    document.getElementById('popupMessages').innerHTML = userParagraph + strings.sending + endParagraph;
 
     var callback =
     {
         success: function(transaction) {
             var value = eval('(' + transaction.responseText + ')');
             if (value && value.status == 'OK') {
-                document.getElementById('popupbox').innerHTML = '<h3>' + strings.success + '</h3>';
+                document.getElementById('popupMessages').innerHTML = userParagraph + strings.success + endParagraph;
                 setTimeout("hideLightbox();", 3000);
             } else {
-                document.getElementById('popupbox').innerHTML = strings.failure;
+                document.getElementById('popupMessages').innerHTML = errorParagraph + strings.failure + endParagraph;
+                document.getElementById('popupDetails').style.display = 'block';
             }
         },
         failure: function(transaction) {
-            document.getElementById('popupbox').innerHTML = strings.failure;
+            document.getElementById('popupMessages').innerHTML = errorParagraph + strings.failure + endParagraph;
+            document.getElementById('popupDetails').style.display = 'block';
         }
     };
     var transaction = YAHOO.util.Connect.asyncRequest('GET', url+'?'+params, callback, null);
