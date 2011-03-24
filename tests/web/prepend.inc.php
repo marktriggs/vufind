@@ -44,4 +44,9 @@ $includePaths = explode(PATH_SEPARATOR, get_include_path());
 $includePaths[] = realpath($pathToWeb);
 $includePaths = array_unique($includePaths);
 set_include_path(implode(PATH_SEPARATOR, $includePaths));
+
+// Set up autoloader
+require_once 'sys/Autoloader.php';
+spl_autoload_register('vuFindAutoloader');
+
 ?>
