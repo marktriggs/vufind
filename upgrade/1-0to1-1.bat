@@ -101,6 +101,16 @@ php upgrade\config_1-0to1-1.php %OLD_VUFIND_PATH%
 
 set /p JUNK=Hit ENTER to proceed
 
+rem Make sure the Horde/YAML library is installed properly
+echo.
+echo 3) configuring PEAR libraries
+
+@call pear channel-discover pear.horde.org
+@call pear channel-update pear.horde.org
+@call pear install Horde/Horde_Yaml-beta
+
+set /p JUNK=Hit ENTER to proceed
+
 @echo off
 rem We had to turn echo off above because the PEAR batch file turns it back on.
 

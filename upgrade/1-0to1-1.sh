@@ -102,6 +102,16 @@ rm web/conf/config.ini.tmp
 
 read -p "Hit ENTER to proceed";
 
+# Make sure the Horde/YAML library is installed properly
+echo ""
+echo "3) configuring PEAR libraries"
+
+pear channel-discover pear.horde.org
+pear channel-update pear.horde.org
+pear install Horde/Horde_Yaml-beta
+
+read -p "Hit ENTER to proceed";
+
 # display post-upgrade notes
 echo ""
 echo "--------------------------------------------------------------"
