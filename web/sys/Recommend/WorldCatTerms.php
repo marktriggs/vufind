@@ -42,7 +42,7 @@ require_once 'sys/Recommend/Interface.php';
 class WorldCatTerms implements RecommendationInterface
 {
     private $_searchObject;
-    private $_params;
+    private $_vocab;
 
     /**
      * Constructor
@@ -56,9 +56,12 @@ class WorldCatTerms implements RecommendationInterface
      */
     public function __construct($searchObject, $params)
     {
-        // Save the basic parameters:
+        // Save the search object:
         $this->_searchObject = $searchObject;
-        $this->_params = $params;
+
+        // Pick a vocabulary (either user-specified, or LCSH by default):
+        $params = trim($params);
+        $this->_vocab = empty($params) ? 'lcsh' : $params;
     }
 
     /**
@@ -96,7 +99,7 @@ class WorldCatTerms implements RecommendationInterface
 
         // Get terminology information:
         $wc = new WorldCatUtils();
-        $terms = $wc->getRelatedTerms($lookfor);
+        $terms = $wc->getRelatedTerms($lookfor, $this->_vocab);
 
         // Wipe out any empty or unexpected sections of the related terms array;
         // this will make it easier to only display content in the template if

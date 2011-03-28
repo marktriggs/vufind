@@ -392,7 +392,7 @@ class WorldCatUtils
             "&resultSetTTL=300" .
             "&recordPacking=xml" .
             "&recordXPath=" .
-            "&sortKeys=";
+            "&sortKeys=recordcount";
 
         // Get the API response:
         $data = @file_get_contents($url);
@@ -470,10 +470,14 @@ class WorldCatUtils
             }
         }
 
-        // Send back everything we found, sorted and filtered for uniqueness:
-        natcasesort($exact);
-        natcasesort($broader);
-        natcasesort($narrower);
+        // Send back everything we found, sorted and filtered for uniqueness; note
+        // that we do NOT sort FAST results since they support relevance ranking.
+        // As of this writing, other vocabularies do not support relevance.
+        if ($vocabulary !== 'fast') {
+            natcasesort($exact);
+            natcasesort($broader);
+            natcasesort($narrower);
+        }
         return array(
             'exact' => array_unique($exact),
             'broader' => array_unique($broader),
