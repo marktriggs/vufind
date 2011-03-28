@@ -55,9 +55,9 @@
           <dd>
             <form name='{$title|escape}Filter' id='{$title|escape}Filter'>
               <input type="hidden" name="daterange[]" value="{$title|escape}"/>
-              <label for="{$title|escape}from" class='yearboxlabel'>{translate text='From'}:</label>
+              <label for="{$title|escape}from" class='yearboxlabel'>{translate text='date_from'}:</label>
               <input type="text" size="4" maxlength="4" class="yearbox" name="{$title|escape}from" id="{$title|escape}from" value="{$dateFacets.$title.0|escape}" />
-              <label for="{$title|escape}to" class='yearboxlabel'>{translate text='To'}:</label>
+              <label for="{$title|escape}to" class='yearboxlabel'>{translate text='date_to'}:</label>
               <input type="text" size="4" maxlength="4" class="yearbox" name="{$title|escape}to" id="{$title|escape}to" value="{$dateFacets.$title.1|escape}" />
               {foreach from=$smarty.get item=paramValue key=paramName}
                 {if is_array($smarty.get.$paramName)}

@@ -73,9 +73,9 @@
                   <th valign="top" align="right">{translate text="adv_search_year"}:&nbsp;</th>
                   <td>
                     <input type="hidden" name="daterange[]" value="publishDate"/>
-                    <label for="publishDatefrom" class='yearboxlabel'>{translate text='From'}:</label>
+                    <label for="publishDatefrom" class='yearboxlabel'>{translate text='date_from'}:</label>
                     <input type="text" size="4" maxlength="4" class="yearbox" name="publishDatefrom" id="publishDatefrom" value="{$dateRangeLimit.0|escape}" />
-                    <label for="publishDateto" class='yearboxlabel'>{translate text='To'}:</label>
+                    <label for="publishDateto" class='yearboxlabel'>{translate text='date_to'}:</label>
                     <input type="text" size="4" maxlength="4" class="yearbox" name="publishDateto" id="publishDateto" value="{$dateRangeLimit.1|escape}" />
                     <div id="publishDateSlider" class="yui-h-slider dateSlider" title="{translate text='Range slider'}" style="display:none;">
                       <div id="publishDateslider_min_thumb" class="yui-slider-thumb"><img src="{$path}/images/yui/left-thumb.png"></div>

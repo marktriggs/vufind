@@ -95,9 +95,9 @@
         <input type="hidden" name="daterange[]" value="PublicationDate"/>
         <fieldset class="PublicationDateLimit span-5" id="PublicationDate">
           <legend>{translate text='adv_search_year'}</legend>
-          <label for="PublicationDatefrom">{translate text='From'}:</label>
+          <label for="PublicationDatefrom">{translate text='date_from'}:</label>
           <input type="text" size="4" maxlength="4" class="yearbox" name="PublicationDatefrom" id="PublicationDatefrom" value="{if $dateRangeLimit.0}{$dateRangeLimit.0|escape}{/if}" />
-          <label for="PublicationDateto">{translate text='To'}:</label>
+          <label for="PublicationDateto">{translate text='date_to'}:</label>
           <input type="text" size="4" maxlength="4" class="yearbox" name="PublicationDateto" id="PublicationDateto" value="{if $dateRangeLimit.1}{$dateRangeLimit.1|escape}{/if}" />
           <div id="PublicationDateSlider" class="dateSlider"></div>
         </fieldset>
