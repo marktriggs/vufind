@@ -8,8 +8,8 @@
   <li><a href="#Boosting a Term">Valoriser un terme</a></li>
   <li><a href="#Boolean operators">Opérateurs  booléens</a>
     <ul>
-      <li><a href="#OR">OR</a></li>
       <li><a href="#AND">AND</a></li>
+      <li><a href="#OR">OR</a></li>
       <li><a href="#+">+</a></li>
       <li><a href="#NOT">NOT</a></li>
       <li><a href="#-">-</a></li>
@@ -97,12 +97,24 @@
     </p>
     <p>Notez: Les opérateurs booléens doivent être ecrit en lettre majuscules</p>
     <dl>
+      <dt><a name="AND"></a>AND</dt>
+      <dd>
+          <p>L'oppérateur <strong>AND</strong> est l'opérateur par défaut. Ce
+           qui veut dire, que si vous faitez une recherche avec deux termes sans
+           l'opérateur AND, le moteur de recherche utilse automatiquement
+           l'opérateur AND.
+           
+           Utilisez <strong>AND</strong> pour croiser plusieurs termes de 
+             recherche. Vous obtiendrez les notices bibliographiques qui
+             contiennent tous les mots recherchés. Il permet d'affiner la
+             recherche ou de réduire le nombre de réponses.</p>
+        <p>Example, les resultats contiendront "Théodore Monod et désert si vous
+           utilisez la recherche suicante:</p>
+        <pre class="code">"Théodore Monod " AND "désert"</pre>
+      </dd>
       <dt><a name="OR"></a>OR</dt>
       <dd>
-        <p>L'oppérateur <strong>OR</strong> (OU) est l'opérateur par défaut. Ce
-           qui veut dire, que si vous faitez une recherche avec deux termes sans
-           l'opérateur OR, le moteur de recherche utilse automatiquement
-           l'opérateur OR.
+        <p>
            Au moins l'un de termes reliès par OR doit être présent dans le
            résultat.</p>
         <p>Pour rechercher un document qui présente le terme "miammiam le croissant"
@@ -112,17 +124,7 @@
         <p>ou</p>
         <pre class="code">"miammiam le croissant" OR croissant</pre>
       </dd>
-      
-      <dt><a name="AND"></a>AND</dt>
-      <dd>
-          <p>Utilisez <strong>AND</strong> pour croiser plusieurs termes de 
-             recherche. Vous obtiendrez les notices bibliographiques qui
-             contiennent tous les mots recherchés.Il permet d'affiner la
-             recherche ou de réduire le nombre de réponses.</p>
-        <p>Example, les resultats contiendront "Théodore Monod et désert si vous
-           utilisez la recherche suicante:</p>
-        <pre class="code">"Théodore Monod " AND "désert"</pre>
-      </dd>
+
       <dt><a name="+"></a>+</dt>
       <dd>
         <p>Pour obtenir des resultats avec un certain terme en utilisant plusieurs

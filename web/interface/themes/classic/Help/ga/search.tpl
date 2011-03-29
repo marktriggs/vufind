@@ -9,8 +9,8 @@
   <li><a href="#Boosting a Term">Treisiú Téarma</a></li>
   <li><a href="#Boolean operators">Oibreoir Boole</a>
     <ul>
-      <li><a href="#OR">OR</a></li>
       <li><a href="#AND">AND</a></li>
+      <li><a href="#OR">OR</a></li>
       <li><a href="#+">+</a></li>
       <li><a href="#NOT">NOT</a></li>
       <li><a href="#-">-</a></li>
@@ -74,21 +74,21 @@
     </p>
     <p>Tabhair faoi deara: Ní mór na hoibreoirí Boole a scríobh i gCEANNLITREACHA </p>
     <dl>
+      <dt><a name="AND"></a>AND</dt>
+      <dd>
+        <p>Is é an t-oibreoir <strong>AND</strong> an t-oibreoir réamhshocraithe comhcheangailte Ciallaíonn sé sin go n-úsáidfear an t-oibreoir AND mura bhfuil aon oibreoir Boole idir an dá théarma.  Meaitseálann an t-oibreoir AND na taifid ina bhfuil an dá théarma le fáil aon áit i réimse taifid. </p>
+        <p>Breac isteach an t-iarratas: </p>
+        <pre class="code">&quot;economics&quot; AND &quot;Keynes”</pre> chun taifid a chuardach ina bhfuil &quot;economics&quot; agus &quot;Keynes&quot;
+      </dd>
       <dt><a name="OR"></a>OR</dt>
       <dd>
-        <p>Is é an t-oibreoir <strong>OR</strong> an t-oibreoir réamhshocraithe comhcheangailte Ciallaíonn sé sin go n-úsáidfear an t-oibreoir OR mura bhfuil aon oibreoir Boole idir an dá théarma.  Comhnascann an t-oibreoir OR an dá théarma agus faigheann an taifead meaitseála má tá ceachtar den dá théarma i dtaifead.</p>
+        <p>Comhnascann an t-oibreoir OR an dá théarma agus faigheann an taifead meaitseála má tá ceachtar den dá théarma i dtaifead.</p>
         <p>Más mian leat doiciméid a chuardach ina bhfuil &quot;economics Keynes&quot; nó &quot;Keynes&quot; leis féin breac isteach an t-iarratas: </p>
         <pre class="code">&quot;economics Keynes&quot; Keynes</pre>
         <p>nó úsáid</p>
         <pre class="code">&quot;economics Keynes&quot; OR Keynes</pre>
       </dd>
-      
-      <dt><a name="AND"></a>AND</dt>
-      <dd>
-        <p>Meaitseálann an t-oibreoir AND na taifid ina bhfuil an dá théarma le fáil aon áit i réimse taifid. </p>
-        <p>Breac isteach an t-iarratas: </p>
-        <pre class="code">&quot;economics&quot; AND &quot;Keynes”</pre> chun taifid a chuardach ina bhfuil &quot;economics&quot; agus &quot;Keynes&quot;
-      </dd>
+
       <dt><a name="+"></a>+</dt>
       <dd>
         <p>Éilíonn &quot;+&quot; nó an t-oibreoir riachtanach go mbeadh an téarma i ndiaidh na siombaile &quot;+&quot; áit éigin i réimse taifid. </p>
