@@ -10,8 +10,8 @@
   <li><a href="#Boolean operators">Oibreoir Boole</a>
     <ul>
       <li><a href="#AND">AND</a></li>
-      <li><a href="#OR">OR</a></li>
       <li><a href="#+">+</a></li>
+      <li><a href="#OR">OR</a></li>
       <li><a href="#NOT">NOT</a></li>
       <li><a href="#-">-</a></li>
     </ul>
@@ -78,22 +78,21 @@
       <dd>
         <p>Is é an t-oibreoir <strong>AND</strong> an t-oibreoir réamhshocraithe comhcheangailte Ciallaíonn sé sin go n-úsáidfear an t-oibreoir AND mura bhfuil aon oibreoir Boole idir an dá théarma.  Meaitseálann an t-oibreoir AND na taifid ina bhfuil an dá théarma le fáil aon áit i réimse taifid. </p>
         <p>Breac isteach an t-iarratas: </p>
-        <pre class="code">&quot;economics&quot; AND &quot;Keynes”</pre> chun taifid a chuardach ina bhfuil &quot;economics&quot; agus &quot;Keynes&quot;
-      </dd>
-      <dt><a name="OR"></a>OR</dt>
-      <dd>
-        <p>Comhnascann an t-oibreoir OR an dá théarma agus faigheann an taifead meaitseála má tá ceachtar den dá théarma i dtaifead.</p>
-        <p>Más mian leat doiciméid a chuardach ina bhfuil &quot;economics Keynes&quot; nó &quot;Keynes&quot; leis féin breac isteach an t-iarratas: </p>
         <pre class="code">&quot;economics Keynes&quot; Keynes</pre>
         <p>nó úsáid</p>
-        <pre class="code">&quot;economics Keynes&quot; OR Keynes</pre>
+        <pre class="code">economics AND Keynes</pre> chun taifid a chuardach ina bhfuil &quot;economics&quot; agus &quot;Keynes&quot;
       </dd>
-
       <dt><a name="+"></a>+</dt>
       <dd>
         <p>Éilíonn &quot;+&quot; nó an t-oibreoir riachtanach go mbeadh an téarma i ndiaidh na siombaile &quot;+&quot; áit éigin i réimse taifid. </p>
         <p>Chun cuardach a dhéanamh ar thaifid nach mór &quot;economics&quot; a bheith iontu agus a d’fhéadfadh &quot;Keynes&quot; a bheith iontu freisin breac isteach an t-iarratas:</p>
         <pre class="code">+economics Keynes</pre>
+      </dd>
+      <dt><a name="OR"></a>OR</dt>
+      <dd>
+        <p>Comhnascann an t-oibreoir OR an dá théarma agus faigheann an taifead meaitseála má tá ceachtar den dá théarma i dtaifead.</p>
+        <p>Más mian leat doiciméid a chuardach ina bhfuil &quot;economics Keynes&quot; nó &quot;Keynes&quot; leis féin breac isteach an t-iarratas: </p>
+        <pre class="code">&quot;economics Keynes&quot; OR Keynes</pre>
       </dd>
       <dt><a name="NOT"></a>NOT</dt>
       <dd>
@@ -101,14 +100,14 @@
         <p>Más mian leat doiciméid a chuardach ina bhfuil an focal &quot;economics&quot; ach nach bhfuil &quot;Keynes&quot; iontu breac isteach an t-iarratas: </p>
         <pre class="code">&quot;economics&quot; NOT &quot;Keynes&quot;</pre> chun cuardach a dhéanamh ar dhoiciméid ina bhfuil &quot;economics&quot; ach nach bhfuil &quot;Keynes&quot; iontu
         <p>Tabhair faoi deara: Ní féidir an t-oibreoir NOT a úsáid le téarma aonair amháin.  Mar shampla, ní thabharfaidh an cuardach seo aon toradh duit:</p>
-        <pre class="code">NOT &quot;economics” </pre>
+        <pre class="code">NOT economics</pre>
       </dd>
       <dt><a name="-"></a>-</dt>
       <dd>
         <p>Fágann an t-oibreoir toirmiscthe <strong>-</strong> ar lár doiciméid ina bhfuil an téarma i ndiaidh na siombaile &quot;-&quot;.</p>
         <p>Más mian leat doiciméid a chuardach ina bhfuil an focal &quot;economics&quot; ach nach bhfuil &quot;Keynes&quot; iontu breac isteach an t-iarratas: </p>
-        <pre class="code">&quot;economics&quot; -&quot;Keynes&quot;</pre>
+        <pre class="code">economics -Keynes</pre>
       </dd>
     </dl>
   </dd>
-</dl> 
+</dl>

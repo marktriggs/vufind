@@ -107,9 +107,9 @@
         </p>
         <p>Beispiel: Sie suchen nach Titel, in welchen die Wörter
             "economics" und "Keynes" enthalten sind:</p>
-        <pre class="code">"economics Keynes" Keynes</pre>
+        <pre class="code">economics Keynes</pre>
         <p>oder</p>
-        <pre class="code">"economics" AND "Keynes"</pre>
+        <pre class="code">economics AND Keynes</pre>
       </dd>      
       <dt><a name="+"></a>+</dt>
       <dd>
@@ -126,7 +126,7 @@
         </p>
         <p>Beispiel: Sie suchen nach Titel, in welchen die Wörter "economics Keynes" oder
            "Keynes" enthalten sind:</p>
-        <pre class="code">"economics Keynes" OR "Keynes"</pre>
+        <pre class="code">"economics Keynes" OR Keynes</pre>
       </dd>
       <dt><a name="NOT"></a>NOT</dt>
       <dd>
@@ -134,17 +134,17 @@
            welche dieses Wort enthalten</p>
         <p>Beispiel: Sie wollen nach Titel suchen, welche das Wort "economics"
            enthalten aber nicht das Wort "Keynes":</p>
-        <pre class="code">"economics" NOT "Keynes"</pre>
+        <pre class="code">economics NOT Keynes</pre>
         <p>Hinweis: NOT muss mit mindestens zwei Wörtern verwendet werden.
            Beispielsweise liefert folgende Suche keine Treffer:</p>
-        <pre class="code">NOT "economics"</pre>
+        <pre class="code">NOT economics</pre>
       </dd>
       <dt><a name="-"></a>-</dt>
       <dd>
         <p>Wird der Operator <strong>-</strong> vor ein Wort gesetzt, so
            werden alle Treffer ausgefiltert, die dieses Wort enthalten.</p>
         <p>Beispiel:</p>
-        <pre class="code">"economics" -"Keynes"</pre>
+        <pre class="code">economics -Keynes</pre>
       </dd>
     </dl>
   </dd>
