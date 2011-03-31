@@ -67,7 +67,7 @@ class Holds extends MyResearch
                     }
                     $interface->assign('recordList', $recordList);
                 } else {
-                    $interface->assign('recordList', 'You do not have any holds');
+                    $interface->assign('recordList', false);
                 }
             }
         }
