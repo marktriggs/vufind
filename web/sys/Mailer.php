@@ -109,6 +109,19 @@ class VuFindMailer
 
         return $result;
     }
+
+    /**
+     * Get settings
+     *
+     * Returns Mail settings for use in external functions such as Logger.php
+     *
+     * @return array Settings loaded at construction from config.ini
+     * @access public
+     */
+    public function getSettings()
+    { 
+        return $this->settings;
+    }
 }
 
 /**

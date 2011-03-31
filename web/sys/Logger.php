@@ -26,7 +26,8 @@
  * @link     http://vufind.org/wiki/system_classes Wiki
  */
 require_once 'Log.php';
-
+require_once 'sys/Mailer.php';
+ 
 /**
  * VuFind Logger Class
  *
@@ -43,7 +44,7 @@ require_once 'Log.php';
 class Logger
 {
     private $_logMethods = array();
-
+    
     /**
      * Constructor
      *
@@ -54,21 +55,29 @@ class Logger
     public function __construct()
     {
         global $configArray;
-
+        
         // Activate database logging, if applicable:
         if (isset($configArray['Logging']['database'])) {
             $config = array('dsn' => $configArray['Database']['database']);
             $this->_addLogger($configArray['Logging']['database'], 'sql', $config);
         }
-
+        
         // Activate file logging, if applicable:
         if (isset($configArray['Logging']['file'])) {
             $this->_addLogger($configArray['Logging']['file'], 'file');
         }
-
+        
         // Activate email logging, if applicable:
         if (isset($configArray['Logging']['email'])) {
-            $config = array('subject' => 'VuFind Log Message');
+            // Set up the logger's mailer to behave consistently with VuFind's
+            // general mailer:
+            $mailer = new VuFindMailer();
+            $config = array(
+                'from' => $configArray['Site']['email'],
+                'subject' => 'VuFind Log Message',
+                'mailBackend' => 'smtp',
+                'mailParams' => $mailer->getSettings()
+            );
             $this->_addLogger($configArray['Logging']['email'], 'mail', $config);
         }
     }
@@ -99,16 +108,16 @@ class Logger
             if ($levels['mask'] != PEAR_LOG_NONE && $logger) {
                 // Set a mask to only log message types requested by the user:
                 $logger->setMask($levels['mask']);
-
+                
                 // Store the logger object and verbosity information:
                 $this->_logMethods[] = array(
-                    'logger' => $logger,
+                    'logger' => $logger, 
                     'verbosity' => $levels['verbosity']
                 );
             }
         }
     }
-
+    
     /**
      * Given a comma-separated level string from the config file, parse it into
      * an array containing a PEAR-style numeric level value ('mask') and a verbosity
@@ -124,7 +133,7 @@ class Logger
         // Initialize the components of the return value to assume no logging:
         $mask = PEAR_LOG_NONE;
         $verbosity = array();
-
+        
         // Loop through the individual level settings from the config file:
         $settings = explode(',', $levelStr);
         foreach ($settings as $setting) {
@@ -135,13 +144,13 @@ class Logger
             if (empty($currentVerbosity) || !is_numeric($currentVerbosity)) {
                 $currentVerbosity = 1;
             }
-
-            // Fill in the mask bits and detail level array based on the level
+            
+            // Fill in the mask bits and detail level array based on the level 
             // string provided by the user.
             //
             // Note that each config file level string actually corresponds with two
             // PEAR constants -- granularity was reduced to simplify configuration.
-            // You can easily change this and create custom logging levels by
+            // You can easily change this and create custom logging levels by 
             // modifying this switch statement.
             switch (strtolower(trim($logType))) {
             case 'alert':
@@ -170,13 +179,13 @@ class Logger
                 break;
             }
         }
-
+        
         return array('mask' => $mask, 'verbosity' => $verbosity);
     }
-
+    
     /**
-     * Given an array of possible log messages and the maximum verbosity, return
-     * the most appropriate message from the array (or false if all array entries
+     * Given an array of possible log messages and the maximum verbosity, return 
+     * the most appropriate message from the array (or false if all array entries 
      * are more verbose than the most detailed level desired).
      *
      * @param array $messages  The array of messages indexed by detail level
@@ -191,7 +200,7 @@ class Logger
         // far, and the message we have picked out.
         $bestVerb = -1;
         $chosenMessage = false;
-
+        
         // Loop through all possible messages and try to pick the best match:
         foreach ($messages as $currentVerb => $currentMessage) {
             // Save the current message if it is more verbose than the best
@@ -201,16 +210,16 @@ class Logger
                 $chosenMessage = $currentMessage;
             }
         }
-
+        
         // Send back the best match we found in our loop:
         return $chosenMessage;
     }
-
+    
     /**
      * Log a message to all active loggers.  If you pass in a string as a message,
      * this will log that string regardless of the detail level requested by the
      * user.  If you pass in an array indexed by verbosity level (a value between
-     * 1 and 5, with 5 being more detailed than 1), it will log the highest index
+     * 1 and 5, with 5 being more detailed than 1), it will log the highest index 
      * that is equal to or less than the user's requested verbosity level.
      *
      * Sample parameter sets:
@@ -244,7 +253,7 @@ class Logger
             // If $msg is an array, we need to pick the actual message to log:
             if (is_array($msg)) {
                 $msgToLog = $this->_pickMsg($msg, $method['verbosity'][$pearLevel]);
-
+                
                 // If we have no message to log, it means that no options were
                 // available within the specified verbosity limit -- move on to the
                 // next logging method:
@@ -255,7 +264,7 @@ class Logger
                 // If $msg is not an array, we just need to log it as-is:
                 $msgToLog = $msg;
             }
-
+            
             // Write the message to the log:
             $method['logger']->open();
             $method['logger']->log($msgToLog, $pearLevel);
