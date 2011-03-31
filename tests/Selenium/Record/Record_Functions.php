@@ -65,7 +65,7 @@ class Record_Functions extends SeleniumTestCase
         $this->waitForElementPresent("id=popupboxContent");
 
         //echo "\nAsserting if Cite This Lightbox was opened";
-        $this->assertElementPresent("id=popupboxContent");          //Asserting if Lightbox was opened
+        $this->assertElementPresent("id=popupboxContent");                          //Asserting if Lightbox was opened
 
         //echo "\nAsserting Lightbox Contents";
         $this->verifyTextPresent($this->apa_text);
@@ -74,9 +74,9 @@ class Record_Functions extends SeleniumTestCase
         $this->verifyTextPresent("Institute for Rational-Emotive Therapy (New York, N.Y.). Journal of Rational Emotive Therapy: The Journal of the Institute for Rational-Emotive Therapy. [New York]: The Institute, 1983. ");
         $this->verifyTextPresent("Warning: These citations may not always be 100% accurate.");
 
-        $this->click("link=close");                     // Close the light box
+        $this->click("link=close");                                                     // Close the light box
         //echo "\nAsserting if Lightbox was closed\n";
-        $this->assertNotVisible("id=popupbox");                 // Assert that the lightbox is not visible
+        $this->assertNotVisible("id=popupbox");                                         // Assert that the lightbox is not visible
 
         /* Test the Text This functionlaity */
         //echo "\nTesting Text This Functionality";
@@ -84,40 +84,48 @@ class Record_Functions extends SeleniumTestCase
         $this->waitForElementPresent("id=popupboxContent");
 
         //echo "\nAsserting if Text This Lightbox was opened";
-        $this->assertElementPresent("id=popupboxContent");          //Asserting if Lightbox was opened
+        $this->assertElementPresent("id=popupboxContent");                          //Asserting if Lightbox was opened
 
         //echo "\nSubmitting without any data";
         //$this->type("name=to","2155467886");
         $this->click("name=submit");
 
         //echo "\nAsserting Error message";
-        $jsstring = "{selenium.browserbot.getCurrentWindow().document.getElementById('popupbox').innerHTML != " . "\"<h3>" . $this->sms_sending . "</h3>\"" . ";}" ;
+        $jsstring = "{selenium.browserbot.getCurrentWindow().document.getElementById('popupDetails').style.display == \"block\";}" ;
         $this->waitForCondition($jsstring, "$this->timeout");
         $this->verifyTextPresent($this->sms_failure);
-        //$this->click("link=close");                       // Close the light box ( no close button cuurently )
+
+        $this->click("link=close");                                               // Close the light box ( no close button cuurently )
         //echo "\nAsserting if Lightbox was closed\n";
-        //$this->assertNotVisible("id=popupbox");                   // Assert that the lightbox is not visible
+        $this->assertNotVisible("id=popupbox");                                   // Assert that the lightbox is not visible
 
         /* Test the Email This functionlaity  */
         //echo "\n\nTesting Email This Functionality";
         $this->click("link=Email this");
-        $this->click("link=Email this");
         $this->waitForElementPresent("id=popupboxContent");
 
-        //echo "\nAsserting if Text This Lightbox was opened";
-        //$this->assertElementPresent("id=popupboxContent");            //Asserting if Lightbox was opened
-
+        //echo "\nAsserting if Email This Lightbox was opened";
+        $this->assertElementPresent("id=popupboxContent");                            //Asserting if Lightbox was opened
         //echo "\nSubmitting without any data";
+        $this->click("name=submit");
+        //echo "\nAsserting Error message";
+        $jsstring = "{selenium.browserbot.getCurrentWindow().document.getElementById('popupDetails').style.display == \"block\";}" ;
+        $this->waitForCondition($jsstring, "$this->timeout");
+        $this->verifyTextPresent(preg_replace('/\s\s+/', ' ', $this->email_failure . ": " . $this->email_rcpt_err));
+
+        //echo "\nSubmitting without sender data";
+        $this->type("name=to", "abc@xyz.com");       // Valid email id format
+        $this->type("name=from", "abc");             // Invalid email id format
         $this->click("name=submit");
 
         //echo "\nAsserting Error message";
-        $jsstring = "{selenium.browserbot.getCurrentWindow().document.getElementById('popupMessages').innerHTML != " . "\"<h3>" . $this->email_sending . "</h3>\"" . ";}" ;
+        $jsstring = "{selenium.browserbot.getCurrentWindow().document.getElementById('popupDetails').style.display == \"block\";}" ;
         $this->waitForCondition($jsstring, "$this->timeout");
-        $this->isTextPresent(preg_replace('/\s\s+/', ' ', $this->email_failure . ": " . $this->email_rcpt_err));
+        $this->verifyTextPresent(preg_replace('/\s\s+/', ' ', $this->email_failure . ": " . $this->email_sndr_err));
 
-        $this->click("link=close");                     // Close the light box
+        $this->click("link=close");                 // Close the light box
         //echo "\nAsserting if Lightbox was closed\n";
-        $this->assertNotVisible("id=popupbox");                 // Assert that the lightbox is not visible
+        $this->assertNotVisible("id=popupbox");     // Assert that the lightbox is not visible
     }
 }
 ?>
