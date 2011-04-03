@@ -66,7 +66,7 @@ class Cart extends Action
         $interface->assign('cart', $this->getCartAsHTML());
         $interface->assign('isEmpty', $this->cart->isEmpty());
         $interface->setTemplate('view.tpl');
-        $interface->setPageTitle('Cart');
+        $interface->setPageTitle('Book Bag');
         $interface->display('layout.tpl');
     }
 

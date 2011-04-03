@@ -85,6 +85,7 @@ class Account extends Action
                 die();
             }
         } else {
+            $interface->setPageTitle('User Account');
             $interface->setTemplate('account.tpl');
             $interface->display('layout.tpl');
         }
