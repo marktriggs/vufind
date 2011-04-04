@@ -63,7 +63,7 @@ class Fines extends MyResearch
                 // assign the "raw" fines data to the template so it can be formatted 
                 // by the smarty template instead of using DataGrid
                 // NOTE: could use foreach($result as &$row) here but it only works with PHP5
-                for($i = 0; $i < count($result); $i++) {
+                for ($i = 0; $i < count($result); $i++) {
                     $row = &$result[$i];
                     $record = $this->db->getRecord($row['id']);
                     $row['title'] = $record ? $record['title_short'] : null;

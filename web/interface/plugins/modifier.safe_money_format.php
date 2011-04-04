@@ -1,13 +1,45 @@
 <?php
-/*
+/**
+ * safe_money_format Smarty plugin
+ *
+ * PHP version 5
+ *
+ * Copyright (C) Villanova University 2010.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * @category VuFind
+ * @package  Smarty_Plugins
+ * @author   Tuan Nguyen <tuan@yorku.ca>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/building_a_plugin Wiki
+ */
+
+/**
  * Smarty plugin
  * -------------------------------------------------------------
  * Type:     modifier
  * Name:     moneyFormat
  * Purpose:  same as PHP money_format, but also works on Windows
  * -------------------------------------------------------------
- */
-function smarty_modifier_safe_money_format($number) {
+ *
+ * @param string $number Number to format
+ *
+ * @return string        Formatted number
+ */ // @codingStandardsIgnoreStart
+function smarty_modifier_safe_money_format($number)
+{   // @codingStandardsIgnoreEnd
     // money_format() does not exist on windows
     if (function_exists('money_format')) {
         return money_format('%.2n', $number);
@@ -16,15 +48,14 @@ function smarty_modifier_safe_money_format($number) {
     }
 }
 
-/**
- * Windows-compatible equivalent to built-in money_format function.
- *
- * @param string $number Number to format.
- *
- * @return string
- */
-if (!function_exists('safeMoneyFormat')) 
-{
+if (!function_exists('safeMoneyFormat')) {
+    /**
+     * Windows-compatible equivalent to built-in money_format function.
+     *
+     * @param string $number Number to format.
+     *
+     * @return string
+     */
     function safeMoneyFormat($number)
     {
         // '' or NULL gets the locale values from environment variables
@@ -96,18 +127,17 @@ if (!function_exists('safeMoneyFormat'))
     }
 }
 
-/**
- * Adapted from code at http://us.php.net/manual/en/function.utf8-encode.php
- * This is needed for Windows only as a support function for safeMoneyFormat;
- * utf8_encode by itself doesn't do the job, but this is capable of properly
- * turning currency symbols into valid UTF-8.
- *
- * @param string $instr String to convert to UTF-8
- *
- * @return string
- */
-if (!function_exists('safeMoneyFormatMakeUTF8')) 
-{
+if (!function_exists('safeMoneyFormatMakeUTF8')) {
+    /**
+     * Adapted from code at http://us.php.net/manual/en/function.utf8-encode.php
+     * This is needed for Windows only as a support function for safeMoneyFormat;
+     * utf8_encode by itself doesn't do the job, but this is capable of properly
+     * turning currency symbols into valid UTF-8.
+     *
+     * @param string $instr String to convert to UTF-8
+     *
+     * @return string
+     */
     function safeMoneyFormatMakeUTF8($instr)
     {
         static $nibble_good_chars = false;
@@ -128,7 +158,7 @@ if (!function_exists('safeMoneyFormatMakeUTF8'))
                 "\x88" => "\xCB\x86",      // MODIFIER LETTER CIRCUMFLEX ACCENT
                 "\x89" => "\xE2\x80\xB0",  // PER MILLE SIGN
                 "\x8A" => "\xC5\xA0",      // LATIN CAPITAL LETTER S WITH CARON
-                "\x8B" => "\xE2\x80\xB9",  // SINGLE LEFT-POINTING ANGLE QUOTATION MARK
+                "\x8B" => "\xE2\x80\xB9",  // SINGLE LEFT-POINTING ANGLE QUOTE
                 "\x8C" => "\xC5\x92",      // LATIN CAPITAL LIGATURE OE
                 "\x8E" => "\xC5\xBD",      // LATIN CAPITAL LETTER Z WITH CARON
                 "\x91" => "\xE2\x80\x98",  // LEFT SINGLE QUOTATION MARK
@@ -141,7 +171,7 @@ if (!function_exists('safeMoneyFormatMakeUTF8'))
                 "\x98" => "\xCB\x9C",      // SMALL TILDE
                 "\x99" => "\xE2\x84\xA2",  // TRADE MARK SIGN
                 "\x9A" => "\xC5\xA1",      // LATIN SMALL LETTER S WITH CARON
-                "\x9B" => "\xE2\x80\xBA",  // SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
+                "\x9B" => "\xE2\x80\xBA",  // SINGLE RIGHT-POINTING ANGLE QUOTE
                 "\x9C" => "\xC5\x93",      // LATIN SMALL LIGATURE OE
                 "\x9E" => "\xC5\xBE",      // LATIN SMALL LETTER Z WITH CARON
                 "\x9F" => "\xC5\xB8"       // LATIN CAPITAL LETTER Y WITH DIAERESIS
