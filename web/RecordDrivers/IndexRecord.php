@@ -413,6 +413,7 @@ class IndexRecord implements RecordInterface
         // Assign various values for display by the template; we'll prefix
         // everything with "extended" to avoid clashes with values assigned
         // elsewhere.
+        $interface->assign('extendedDescription', $this->getDescription());
         $interface->assign('extendedSummary', $this->getSummary());
         $interface->assign('extendedAccess', $this->getAccessRestrictions());
         $interface->assign('extendedRelated', $this->getRelationshipNotes());
@@ -1535,6 +1536,18 @@ class IndexRecord implements RecordInterface
     {
         return isset($this->fields['title_short']) ?
             $this->fields['title_short'] : '';
+    }
+
+    /**
+     * Get the description of the record.
+     *
+     * @return string
+     * @access protected
+     */
+    protected function getDescription()
+    {
+        return isset($this->fields['description']) ?
+            $this->fields['description'] : '';
     }
 
     /**
