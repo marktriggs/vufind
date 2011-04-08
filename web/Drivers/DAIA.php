@@ -183,24 +183,33 @@ class DAIA implements DriverInterface
                     'location.href' => '',
                     'label' => ''
                 );
-                $result['itemid'] = $itemlist->item($c)->attributes->getNamedItem('id')->nodeValue;
+                $result['itemid'] = $itemlist->item($c)->attributes
+                    ->getNamedItem('id')->nodeValue;
                 if ($itemlist->item($c)->attributes->getNamedItem('href') !== null) {
-                    $result['recallhref'] = $itemlist->item($c)->attributes->getNamedItem('href')->nodeValue;
+                    $result['recallhref'] = $itemlist->item($c)->attributes
+                        ->getNamedItem('href')->nodeValue;
                 }
-                $departmentElements = $itemlist->item($c)->getElementsByTagName('department');
+                $departmentElements = $itemlist->item($c)
+                    ->getElementsByTagName('department');
                 if ($departmentElements->length > 0) {
                     if ($departmentElements->item(0)->nodeValue) {
-                        $result['location'] = $departmentElements->item(0)->nodeValue;
-                        $result['location.id'] = $departmentElements->item(0)->attributes->getNamedItem('id')->nodeValue;
-                        $result['location.href'] = $departmentElements->item(0)->attributes->getNamedItem('href')->nodeValue;
+                        $result['location'] = $departmentElements->item(0)
+                            ->nodeValue;
+                        $result['location.id'] = $departmentElements->item(0)
+                            ->attributes->getNamedItem('id')->nodeValue;
+                        $result['location.href'] = $departmentElements->item(0)
+                            ->attributes->getNamedItem('href')->nodeValue;
                     }
                 }
-                $storageElements = $itemlist->item($c)->getElementsByTagName('storage');
+                $storageElements = $itemlist->item($c)
+                    ->getElementsByTagName('storage');
                 if ($storageElements->length > 0) {
                     if ($storageElements->item(0)->nodeValue) {
                         $result['location'] = $storageElements->item(0)->nodeValue;
-                        $result['location.id'] = $storageElements->item(0)->attributes->getNamedItem('id')->nodeValue;
-                        $result['location.href'] = $storageElements->item(0)->attributes->getNamedItem('href')->nodeValue;
+                        $result['location.id'] = $storageElements->item(0)
+                            ->attributes->getNamedItem('id')->nodeValue;
+                        $result['location.href'] = $storageElements->item(0)
+                            ->attributes->getNamedItem('href')->nodeValue;
                         $result['barcode'] = $result['location.id'];
                     }
                 }
@@ -208,7 +217,9 @@ class DAIA implements DriverInterface
                 if ($labelElements->length > 0) {
                     if ($labelElements->item(0)->nodeValue) {
                         $result['label'] = $labelElements->item(0)->nodeValue;
-                        $result['callnumber'] = urldecode($labelElements->item(0)->nodeValue);
+                        $result['callnumber'] = urldecode(
+                            $labelElements->item(0)->nodeValue
+                        );
                     }
                 }
 
@@ -217,89 +228,120 @@ class DAIA implements DriverInterface
                 //$presAvail = 0;
                 //$presExp = 0;
 
-                $unavailableElements = $itemlist->item($c)->getElementsByTagName('unavailable');
+                $unavailableElements = $itemlist->item($c)
+                    ->getElementsByTagName('unavailable');
                 if ($unavailableElements->item(0) !== null) {
                     for ($n = 0; $unavailableElements->item($n) !== null; $n++) {
-                        $service = $unavailableElements->item($n)->attributes->getNamedItem('service')->nodeValue;
+                        $service = $unavailableElements->item($n)->attributes
+                            ->getNamedItem('service')->nodeValue;
                         if ($service === 'presentation') {
                             $result['presentation.availability'] = '0';
                             if ($unavailableElements->item($n)->attributes->getNamedItem('expected') !== null) {
-                                $result['presentation.duedate'] = $unavailableElements->item($n)->attributes->getNamedItem('expected')->nodeValue;
+                                $result['presentation.duedate']
+                                    = $unavailableElements->item($n)->attributes
+                                        ->getNamedItem('expected')->nodeValue;
                             }
                             if ($unavailableElements->item($n)->attributes->getNamedItem('queue') !== null) {
-                                $result['presentation.queue'] = $unavailableElements->item($n)->attributes->getNamedItem('queue')->nodeValue;
+                                $result['presentation.queue']
+                                    = $unavailableElements->item($n)->attributes
+                                        ->getNamedItem('queue')->nodeValue;
                             }
                             $result['availability'] = '0';
                         } elseif ($service === 'loan') {
                             $result['loan.availability'] = '0';
                             if ($unavailableElements->item($n)->attributes->getNamedItem('expected') !== null) {
-                                $result['loan.duedate'] = $unavailableElements->item($n)->attributes->getNamedItem('expected')->nodeValue;
+                                $result['loan.duedate']
+                                    = $unavailableElements->item($n)->attributes
+                                        ->getNamedItem('expected')->nodeValue;
                             }
                             if ($unavailableElements->item($n)->attributes->getNamedItem('queue') !== null) {
-                                $result['loan.queue'] = $unavailableElements->item($n)->attributes->getNamedItem('queue')->nodeValue;
+                                $result['loan.queue']
+                                    = $unavailableElements->item($n)->attributes
+                                        ->getNamedItem('queue')->nodeValue;
                             }
                             $result['availability'] = '0';
                         } elseif ($service === 'interloan') {
                             $result['interloan.availability'] = '0';
                             if ($unavailableElements->item($n)->attributes->getNamedItem('expected') !== null) {
-                                $result['interloan.duedate'] = $unavailableElements->item($n)->attributes->getNamedItem('expected')->nodeValue;
+                                $result['interloan.duedate']
+                                    = $unavailableElements->item($n)->attributes
+                                        ->getNamedItem('expected')->nodeValue;
                             }
                             if ($unavailableElements->item($n)->attributes->getNamedItem('queue') !== null) {
-                                $result['interloan.queue'] = $unavailableElements->item($n)->attributes->getNamedItem('queue')->nodeValue;
+                                $result['interloan.queue']
+                                    = $unavailableElements->item($n)->attributes
+                                        ->getNamedItem('queue')->nodeValue;
                             }
                             $result['availability'] = '0';
                         } elseif ($service === 'openaccess') {
                             $result['openaccess.availability'] = '0';
                             if ($unavailableElements->item($n)->attributes->getNamedItem('expected') !== null) {
-                                $result['openaccess.duedate'] = $unavailableElements->item($n)->attributes->getNamedItem('expected')->nodeValue;
+                                $result['openaccess.duedate']
+                                    = $unavailableElements->item($n)->attributes
+                                        ->getNamedItem('expected')->nodeValue;
                             }
                             if ($unavailableElements->item($n)->attributes->getNamedItem('queue') !== null) {
-                                $result['openaccess.queue'] = $unavailableElements->item($n)->attributes->getNamedItem('queue')->nodeValue;
+                                $result['openaccess.queue']
+                                    = $unavailableElements->item($n)->attributes
+                                        ->getNamedItem('queue')->nodeValue;
                             }
                             $result['availability'] = '0';
                         }
                         // TODO: message/limitation
                         if ($unavailableElements->item($n)->attributes->getNamedItem('expected') !== null) {
-                            $result['duedate'] = $unavailableElements->item($n)->attributes->getNamedItem('expected')->nodeValue;
+                            $result['duedate'] = $unavailableElements->item($n)
+                                ->attributes->getNamedItem('expected')->nodeValue;
                         }
                         if ($unavailableElements->item($n)->attributes->getNamedItem('queue') !== null) {
-                            $result['queue'] = $unavailableElements->item($n)->attributes->getNamedItem('queue')->nodeValue;
+                            $result['queue'] = $unavailableElements->item($n)
+                                ->attributes->getNamedItem('queue')->nodeValue;
                         }
                     }
                 }
 
-                $availableElements = $itemlist->item($c)->getElementsByTagName('available');
+                $availableElements
+                    = $itemlist->item($c)->getElementsByTagName('available');
                 if ($availableElements->item(0) !== null) {
                     for ($n = 0; $availableElements->item($n) !== null; $n++) {
-                        $service = $availableElements->item($n)->attributes->getNamedItem('service')->nodeValue;
+                        $service = $availableElements->item($n)->attributes
+                            ->getNamedItem('service')->nodeValue;
                         if ($service === 'presentation') {
                             $result['presentation.availability'] = '1';
                             if ($availableElements->item($n)->attributes->getNamedItem('delay') !== null) {
-                                $result['presentation.delay'] = $availableElements->item($n)->attributes->getNamedItem('delay')->nodeValue;
+                                $result['presentation.delay']
+                                    = $availableElements->item($n)->attributes
+                                        ->getNamedItem('delay')->nodeValue;
                             }
                             $result['availability'] = '1';
                         } elseif ($service === 'loan') {
                             $result['loan.availability'] = '1';
                             if ($availableElements->item($n)->attributes->getNamedItem('delay') !== null) {
-                                $result['loan.delay'] = $availableElements->item($n)->attributes->getNamedItem('delay')->nodeValue;
+                                $result['loan.delay']
+                                    = $availableElements->item($n)->attributes
+                                        ->getNamedItem('delay')->nodeValue;
                             }
                             $result['availability'] = '1';
                         } elseif ($service === 'interloan') {
                             $result['interloan.availability'] = '1';
                             if ($availableElements->item($n)->attributes->getNamedItem('delay') !== null) {
-                                $result['interloan.delay'] = $availableElements->item($n)->attributes->getNamedItem('delay')->nodeValue;
+                                $result['interloan.delay']
+                                    = $availableElements->item($n)->attributes
+                                        ->getNamedItem('delay')->nodeValue;
                             }
                             $result['availability'] = '1';
                         } elseif ($service === 'openaccess') {
                             $result['openaccess.availability'] = '1';
                             if ($availableElements->item($n)->attributes->getNamedItem('delay') !== null) {
-                                $result['openaccess.delay'] = $availableElements->item($n)->attributes->getNamedItem('delay')->nodeValue;
+                                $result['openaccess.delay']
+                                    = $availableElements->item($n)->attributes
+                                        ->getNamedItem('delay')->nodeValue;
                             }
                             $result['availability'] = '1';
                         }
                         // TODO: message/limitation
                         if ($availableElements->item($n)->attributes->getNamedItem('delay') !== null) {
-                            $result['delay'] = $availableElements->item($n)->attributes->getNamedItem('delay')->nodeValue;
+                            $result['delay'] = $availableElements->item($n)
+                                ->attributes->getNamedItem('delay')->nodeValue;
                         }
                     }
                 }
@@ -346,12 +388,14 @@ class DAIA implements DriverInterface
             if ($labelElements->item(0)->nodeValue) {
                 $label = $labelElements->item(0)->nodeValue;
             }
-            $availableElements = $itemlist->item($c)->getElementsByTagName('available');
+            $availableElements = $itemlist->item($c)
+                ->getElementsByTagName('available');
             if ($availableElements->item(0) !== null) {
                 $availability = 1;
                 $status = 'Available';
                 //for ($n = 0; $availableElements->item($n) !== null; $n++) {
-                //    $status .= ' ' . $availableElements->item($n)->getAttribute('service');
+                //    $status .= ' ' . $availableElements->item($n)
+                //        ->getAttribute('service');
                 //}
             } else {
                 $status = 'Unavailable';
