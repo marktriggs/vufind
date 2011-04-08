@@ -29,7 +29,7 @@ require_once dirname(__FILE__) . '/../prepend.inc.php';
 require_once 'Drivers/PICA.php';
 
 /**
- * NewGenLib ILS Driver Test Class
+ * PICA ILS Driver Test Class
  *
  * @category VuFind
  * @package  Tests
