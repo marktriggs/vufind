@@ -156,7 +156,7 @@ function printLink($params)
             urlencode($record['id']) . '">' .
             htmlspecialchars($record['title_short']) . '</a>';
     } else {
-        return "n/a";
+        return translate('not_applicable');
     }
 }
 
