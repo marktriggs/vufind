@@ -28,6 +28,7 @@
  */
 require_once 'Interface.php';
 require_once 'sys/Proxy_Request.php';
+require_once 'sys/VuFindDate.php';
 
 /**
  * Voyager ILS Driver
@@ -45,16 +46,27 @@ class Voyager implements DriverInterface
     protected $dbName;
     protected $config;
     protected $statusRankings = false;        // used by pickStatus() method
+    protected $dateFormat;
 
     /**
      * Constructor
      *
+     * @param string $configFile The location of an alternative config file
+     *
      * @access public
      */
-    function __construct()
+    public function __construct($configFile = false)
     {
-        // Load Configuration for this Module
-        $this->config = parse_ini_file('conf/Voyager.ini', true);
+        if ($configFile) {
+            // Load Configuration passed in
+            $this->config = parse_ini_file('conf/'.$configFile, true);
+        } else {
+            // Hard Coded Configuration
+            $this->config = parse_ini_file('conf/Voyager.ini', true);
+        }
+
+        // Set up object for formatting dates and times:
+        $this->dateFormat = new VuFindDate();
 
         // Define Database Name
         $this->dbName = $this->config['Catalog']['database'];
@@ -78,13 +90,37 @@ class Voyager implements DriverInterface
                  ')' .
                ')';
         try {
-            $this->db = new PDO("oci:dbname=$tns",
-                                $this->config['Catalog']['user'],
-                                $this->config['Catalog']['password']);
+            $this->db = new PDO(
+                "oci:dbname=$tns",
+                $this->config['Catalog']['user'],
+                $this->config['Catalog']['password']
+            );
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
             throw $e;
         }
+    }
+
+    /**
+     * Protected support method for building sql strings.
+     *
+     * @param array $sql An array of keyed sql data
+     *
+     * @return array               An string query string and bind data
+     * @access protected
+     */
+    protected function buildSqlFromArray($sql)
+    {
+        $modifier = isset($sql['modifier']) ? $sql['modifier'] : "";
+
+        // Put String Together
+        $sqlString = "SELECT ". $modifier . implode(", ", $sql['expressions']);
+        $sqlString .= " FROM " .implode(", ", $sql['from']);
+        $sqlString .= " WHERE " .implode(" AND ", $sql['where']);
+        $sqlString .= (!empty($sql['order']))
+            ? " ORDER BY " .implode(", ", $sql['order']) : "";
+
+        return array('string' => $sqlString, 'bind' => $sql['bind']);
     }
 
     /**
@@ -188,8 +224,14 @@ class Voyager implements DriverInterface
         // The first (and most common) obtains information from a combination of
         // items and holdings records.  The second (a rare case) obtains
         // information from the holdings record when no items are available.
-        $items = "select ITEM.ITEM_ID, ITEM.ON_RESERVE, ITEM_STATUS_DESC as status, LOCATION.LOCATION_DISPLAY_NAME as location, MFHD_MASTER.DISPLAY_CALL_NO as callnumber " .
-                 "from $this->dbName.BIB_ITEM, $this->dbName.ITEM, $this->dbName.ITEM_STATUS_TYPE, $this->dbName.ITEM_STATUS, $this->dbName.LOCATION, $this->dbName.MFHD_ITEM, $this->dbName.MFHD_MASTER " .
+        $items = "select ITEM.ITEM_ID, ITEM.ON_RESERVE, " .
+                 "ITEM_STATUS_DESC as status, " .
+                 "LOCATION.LOCATION_DISPLAY_NAME as location, " .
+                 "MFHD_MASTER.DISPLAY_CALL_NO as callnumber " .
+                 "from $this->dbName.BIB_ITEM, $this->dbName.ITEM, " .
+                 "$this->dbName.ITEM_STATUS_TYPE, $this->dbName.ITEM_STATUS, " .
+                 "$this->dbName.LOCATION, $this->dbName.MFHD_ITEM, " .
+                 "$this->dbName.MFHD_MASTER " .
                  "where BIB_ITEM.BIB_ID = :id " .
                  "and BIB_ITEM.ITEM_ID = ITEM.ITEM_ID " .
                  "and ITEM.ITEM_ID = ITEM_STATUS.ITEM_ID " .
@@ -198,16 +240,20 @@ class Voyager implements DriverInterface
                  "and MFHD_ITEM.ITEM_ID = ITEM.ITEM_ID " .
                  "and MFHD_MASTER.SUPPRESS_IN_OPAC='N' " .
                  "and MFHD_MASTER.MFHD_ID = MFHD_ITEM.MFHD_ID";
-        $noItems = "select 1 as ITEM_ID, 'N' as ON_RESERVE, 'No information available' as status, LOCATION.LOCATION_DISPLAY_NAME as location, MFHD_MASTER.DISPLAY_CALL_NO as callnumber " .
-                   "from $this->dbName.BIB_MFHD, $this->dbName.LOCATION, $this->dbName.MFHD_MASTER " .
+        $noItems = "select 1 as ITEM_ID, 'N' as ON_RESERVE, " .
+                   "'No information available' as status, " .
+                   "LOCATION.LOCATION_DISPLAY_NAME as location, " .
+                   "MFHD_MASTER.DISPLAY_CALL_NO as callnumber " .
+                   "from $this->dbName.BIB_MFHD, $this->dbName.LOCATION, ".
+                   "$this->dbName.MFHD_MASTER " .
                    "where BIB_MFHD.BIB_ID = :id " .
                    "and LOCATION.LOCATION_ID = MFHD_MASTER.LOCATION_ID " .
                    "and MFHD_MASTER.SUPPRESS_IN_OPAC='N' " .
                    "and MFHD_MASTER.MFHD_ID = BIB_MFHD.MFHD_ID";
         $possibleQueries = array($items, $noItems);
 
-        // Loop through the possible queries and try each in turn -- the first one
-        // that yields results will cause the function to return.
+        // Loop through the possible queries and try each in turn --
+        // the first one that yields results will cause the function to return.
         foreach ($possibleQueries as $sql) {
             // Execute SQL
             try {
@@ -230,7 +276,9 @@ class Voyager implements DriverInterface
                         'callnumber' => $row['CALLNUMBER']
                     );
                 } else {
-                    if (!in_array($row['STATUS'], $data[$row['ITEM_ID']]['status_array'])) {
+                    if (!in_array(
+                        $row['STATUS'], $data[$row['ITEM_ID']]['status_array']
+                    )) {
                         $data[$row['ITEM_ID']]['status_array'][] = $row['STATUS'];
                     }
                 }
@@ -284,6 +332,332 @@ class Voyager implements DriverInterface
     }
 
     /**
+     * Protected support method for getHolding.
+     *
+     * @param array $id A Bibliographic id
+     *
+     * @return array Keyed data for use in an sql query
+     * @access protected
+     */
+    protected function getHoldingItemsSQL($id)
+    {
+        // Expressions
+        $sqlExpressions = array(
+            "ITEM_BARCODE.ITEM_BARCODE", "ITEM.ITEM_ID",
+            "ITEM.ON_RESERVE", "ITEM.ITEM_SEQUENCE_NUMBER",
+            "ITEM.RECALLS_PLACED", "ITEM.HOLDS_PLACED",
+            "ITEM_STATUS_TYPE.ITEM_STATUS_DESC as status",
+            "MFHD_DATA.RECORD_SEGMENT", "MFHD_ITEM.ITEM_ENUM",
+            "LOCATION.LOCATION_DISPLAY_NAME as location",
+            "MFHD_MASTER.DISPLAY_CALL_NO as callnumber",
+            "to_char(CIRC_TRANSACTIONS.CURRENT_DUE_DATE, 'MM-DD-YY') as duedate",
+            "(SELECT TO_CHAR(MAX(CIRC_TRANS_ARCHIVE.DISCHARGE_DATE), " .
+            "'MM-DD-YY HH24:MI') FROM $this->dbName.CIRC_TRANS_ARCHIVE " .
+            "WHERE CIRC_TRANS_ARCHIVE.ITEM_ID = ITEM.ITEM_ID) RETURNDATE"
+        );
+
+        // From
+        $sqlFrom = array(
+            $this->dbName.".BIB_ITEM", $this->dbName.".ITEM",
+            $this->dbName.".ITEM_STATUS_TYPE",
+            $this->dbName.".ITEM_STATUS",
+            $this->dbName.".LOCATION", $this->dbName.".MFHD_ITEM",
+            $this->dbName.".MFHD_MASTER", $this->dbName.".MFHD_DATA",
+            $this->dbName.".CIRC_TRANSACTIONS",
+            $this->dbName.".ITEM_BARCODE"
+        );
+
+        // Where
+        $sqlWhere = array(
+            "BIB_ITEM.BIB_ID = :id",
+            "BIB_ITEM.ITEM_ID = ITEM.ITEM_ID",
+            "ITEM.ITEM_ID = ITEM_STATUS.ITEM_ID",
+            "ITEM_STATUS.ITEM_STATUS = ITEM_STATUS_TYPE.ITEM_STATUS_TYPE",
+            "ITEM_BARCODE.ITEM_ID (+)= ITEM.ITEM_ID",
+            "LOCATION.LOCATION_ID = ITEM.PERM_LOCATION",
+            "CIRC_TRANSACTIONS.ITEM_ID (+)= ITEM.ITEM_ID",
+            "MFHD_ITEM.ITEM_ID = ITEM.ITEM_ID",
+            "MFHD_MASTER.MFHD_ID = MFHD_ITEM.MFHD_ID",
+            "MFHD_DATA.MFHD_ID = MFHD_ITEM.MFHD_ID",
+            "MFHD_MASTER.SUPPRESS_IN_OPAC='N'"
+        );
+
+        // Order
+        $sqlOrder = array("ITEM.ITEM_SEQUENCE_NUMBER", "MFHD_DATA.SEQNUM");
+
+        // Bind
+        $sqlBind = array(':id' => $id);
+
+        $sqlArray = array(
+            'expressions' => $sqlExpressions,
+            'from' => $sqlFrom,
+            'where' => $sqlWhere,
+            'order' => $sqlOrder,
+            'bind' => $sqlBind,
+        );
+
+        return $sqlArray;
+    }
+
+    /**
+     * Protected support method for getHolding.
+     *
+     * @param array $id A Bibliographic id
+     *
+     * @return array Keyed data for use in an sql query
+     * @access protected
+     */
+    protected function getHoldingNoItemsSQL($id)
+    {
+        // Expressions
+        $sqlExpressions = array("null as ITEM_BARCODE", "null as ITEM_ID",
+                                "MFHD_DATA.RECORD_SEGMENT", "null as ITEM_ENUM",
+                                "'N' as ON_RESERVE", "1 as ITEM_SEQUENCE_NUMBER",
+                                "'No information available' as status",
+                                "LOCATION.LOCATION_DISPLAY_NAME as location",
+                                "MFHD_MASTER.DISPLAY_CALL_NO as callnumber",
+                                "null as duedate"
+                               );
+
+        // From
+        $sqlFrom = array($this->dbName.".BIB_MFHD", $this->dbName.".LOCATION",
+                         $this->dbName.".MFHD_MASTER", $this->dbName.".MFHD_DATA"
+                        );
+
+        // Where
+        $sqlWhere = array("BIB_MFHD.BIB_ID = :id",
+                          "LOCATION.LOCATION_ID = MFHD_MASTER.LOCATION_ID",
+                          "MFHD_MASTER.MFHD_ID = BIB_MFHD.MFHD_ID",
+                          "MFHD_DATA.MFHD_ID = BIB_MFHD.MFHD_ID",
+                          "MFHD_MASTER.SUPPRESS_IN_OPAC='N'"
+                         );
+
+        // Order
+        $sqlOrder = array("MFHD_DATA.SEQNUM");
+
+        // Bind
+        $sqlBind = array(':id' => $id);
+
+        $sqlArray = array('expressions' => $sqlExpressions,
+                          'from' => $sqlFrom,
+                          'where' => $sqlWhere,
+                          'order' => $sqlOrder,
+                          'bind' => $sqlBind,
+                          );
+
+        return $sqlArray;
+    }
+
+    /**
+     * Protected support method for getHolding.
+     *
+     * @param array $sqlRows Sql Data
+     *
+     * @return array Keyed data
+     * @access protected
+     */
+    protected function getHoldingData($sqlRows)
+    {
+        $data = array();
+
+        foreach ($sqlRows as $row) {
+            // Determine Copy Number
+            $number = ($row['ITEM_ENUM'])
+                ? $row['ITEM_ENUM'] : $row['ITEM_SEQUENCE_NUMBER'];
+
+            // Concat wrapped rows (MARC data more than 300 bytes gets split
+            // into multiple rows)
+            if (isset($data[$row['ITEM_ID']]["$number"])) {
+                // We don't want to concatenate the same MARC information to
+                // itself over and over due to a record with multiple status
+                // codes -- we should only concat wrapped rows for the FIRST
+                // status code we encounter!
+                if ($data[$row['ITEM_ID']]["$number"]['STATUS_ARRAY'][0] == $row['STATUS']) {
+                    $data[$row['ITEM_ID']]["$number"]['RECORD_SEGMENT']
+                        .= $row['RECORD_SEGMENT'];
+                }
+
+                // If we've encountered a new status code, we should track it:
+                if (!in_array(
+                    $row['STATUS'], $data[$row['ITEM_ID']]["$number"]['STATUS_ARRAY']
+                )) {
+                    $data[$row['ITEM_ID']]["$number"]['STATUS_ARRAY'][]
+                        = $row['STATUS'];
+                }
+            } else {
+                // This is the first time we've encountered this row number --
+                // initialize the row and start an array of statuses.
+                $data[$row['ITEM_ID']]["$number"] = $row;
+                $data[$row['ITEM_ID']]["$number"]['STATUS_ARRAY']
+                    = array($row['STATUS']);
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * Protected support method for getHolding.
+     *
+     * @param array $recordSegment A Marc Record Segment obtained from an SQL query
+     *
+     * @return array Keyed data
+     * @access protected
+     */
+    protected function processRecordSegment($recordSegment)
+    {
+        $marcDetails = array();
+
+        try {
+            $marc = new File_MARC(
+                str_replace(array("\n", "\r"), '', $recordSegment),
+                File_MARC::SOURCE_STRING
+            );
+            if ($record = $marc->next()) {
+                // Get Notes
+                if ($fields = $record->getFields('852')) {
+                    foreach ($fields as $field) {
+                        if ($subfields = $field->getSubfields('z')) {
+                            foreach ($subfields as $subfield) {
+                                // If this is the first time through,
+                                // assume a single-line summary
+                                if (!isset($marcDetails['notes'])) {
+                                    $marcDetails['notes']
+                                        = $subfield->getData();
+                                } else {
+                                    // If we already have a summary
+                                    // line, convert it to an array and
+                                    // append more data
+                                    if (!is_array($marcDetails['notes'])) {
+                                        $marcDetails['notes']
+                                            = array($marcDetails['notes']);
+                                    }
+                                    $marcDetails['notes'][]
+                                        = $subfield->getData();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Get Summary (may be multiple lines)
+                if ($fields = $record->getFields('866')) {
+                    foreach ($fields as $field) {
+                        if ($subfield = $field->getSubfield('a')) {
+                            // If this is the first time through, assume
+                            // a single-line summary
+                            if (!isset($marcDetails['summary'])) {
+                                $marcDetails['summary']
+                                    = $subfield->getData();
+                                // If we already have a summary line,
+                                // convert it to an array and append
+                                // more data
+                            } else {
+                                if (!is_array($marcDetails['summary'])) {
+                                    $marcDetails['summary']
+                                        = array($marcDetails['summary']);
+                                }
+                                $marcDetails['summary'][] = $subfield->getData();
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            trigger_error(
+                'Poorly Formatted MFHD Record', E_USER_NOTICE
+            );
+        }
+        return $marcDetails;
+    }
+
+    /**
+     * Protected support method for getHolding.
+     *
+     * @param array $data Item Data
+     *
+     * @return array Keyed data
+     * @access protected
+     */
+    protected function processHoldingData($data)
+    {
+        $holding = array();
+
+        // Build Holdings Array
+        $i = 0;
+        foreach ($data as $item) {
+            foreach ($item as $number => $row) {
+                // Get availability/status info based on the array of status codes:
+                $availability = $this->determineAvailability($row['STATUS_ARRAY']);
+
+                // If we found other statuses, we should override the display value
+                // appropriately:
+                if (count($availability['otherStatuses']) > 0) {
+                    $row['STATUS']
+                        = $this->pickStatus($availability['otherStatuses']);
+                }
+
+                 // Convert Voyager Format to display format
+                $dueDate = false;
+                if (!empty($row['DUEDATE'])) {
+                    $dueDate = $this->dateFormat->convertToDisplayDate(
+                        "m-d-y", $row['DUEDATE']
+                    );
+                    if (PEAR::isError($dueDate)) {
+                        return $dueDate;
+                    }
+                }
+                $returnDate = false;
+                if (!empty($row['RETURNDATE'])) {
+                    $returnDate = $this->dateFormat->convertToDisplayDate(
+                        "m-d-y H:i", $row['RETURNDATE']
+                    );
+                    if (PEAR::isError($returnDate)) {
+                        return $returnDate;
+                    }
+                    $returnTime = $this->dateFormat->convertToDisplayTime(
+                        "m-d-y H:i", $row['RETURNDATE']
+                    );
+                    if (PEAR::isError($returnTime)) {
+                        return $returnTime;
+                    }
+                    $returnDate .=  " " . $returnTime;
+                }
+
+                $returnDate = (in_array("Discharged", $row['STATUS_ARRAY']))
+                    ? $returnDate : false;
+
+                $requests_placed = $row['HOLDS_PLACED'] + $row['RECALLS_PLACED'];
+
+                $holding[$i] = array(
+                    'id' => $row['BIB_ID'],
+                    'availability' => $availability['available'],
+                    'status' => $row['STATUS'],
+                    'location' => htmlentities($row['LOCATION']),
+                    'reserve' => $row['ON_RESERVE'],
+                    'callnumber' => $row['CALLNUMBER'],
+                    'duedate' => $dueDate,
+                    'number' => $number,
+                    'barcode' => $row['ITEM_BARCODE'],
+                    'requests_placed' => $requests_placed,
+                    'returnDate' => $returnDate
+                );
+
+                // Parse Holding Record
+                if ($row['RECORD_SEGMENT']) {
+                    $marcDetails
+                        = $this->processRecordSegment($row['RECORD_SEGMENT']);
+                    if (!empty($marcDetails)) {
+                        $holding[$i] = $holding[$i] + $marcDetails;
+                    }
+                }
+
+                $i++;
+            }
+        }
+        return $holding;
+    }
+
+    /**
      * Get Holding
      *
      * This is responsible for retrieving the holding information of a certain
@@ -298,81 +672,36 @@ class Voyager implements DriverInterface
      */
     public function getHolding($id)
     {
-        include_once 'File/MARC.php';
+        $possibleQueries = array();
 
         // There are two possible queries we can use to obtain status information.
         // The first (and most common) obtains information from a combination of
         // items and holdings records.  The second (a rare case) obtains
         // information from the holdings record when no items are available.
-        $items = "select ITEM_BARCODE.ITEM_BARCODE, ITEM.ITEM_ID, MFHD_DATA.RECORD_SEGMENT, MFHD_ITEM.ITEM_ENUM, ITEM.ON_RESERVE, ITEM.ITEM_SEQUENCE_NUMBER, ITEM_STATUS_DESC as status, LOCATION.LOCATION_DISPLAY_NAME as location, MFHD_MASTER.DISPLAY_CALL_NO as callnumber, CIRC_TRANSACTIONS.CURRENT_DUE_DATE as duedate " .
-                 "from $this->dbName.BIB_ITEM, $this->dbName.ITEM, $this->dbName.ITEM_STATUS_TYPE, $this->dbName.ITEM_STATUS, $this->dbName.LOCATION, $this->dbName.MFHD_ITEM, $this->dbName.MFHD_MASTER, $this->dbName.MFHD_DATA, $this->dbName.CIRC_TRANSACTIONS, $this->dbName.ITEM_BARCODE " .
-                 "where BIB_ITEM.BIB_ID = :id " .
-                 "and BIB_ITEM.ITEM_ID = ITEM.ITEM_ID " .
-                 "and ITEM.ITEM_ID = ITEM_STATUS.ITEM_ID " .
-                 "and ITEM_STATUS.ITEM_STATUS = ITEM_STATUS_TYPE.ITEM_STATUS_TYPE " .
-                 "and ITEM_BARCODE.ITEM_ID (+)= ITEM.ITEM_ID " .
-                 "and LOCATION.LOCATION_ID = ITEM.PERM_LOCATION " .
-                 "and CIRC_TRANSACTIONS.ITEM_ID (+)= ITEM.ITEM_ID " .
-                 "and MFHD_ITEM.ITEM_ID = ITEM.ITEM_ID " .
-                 "and MFHD_MASTER.MFHD_ID = MFHD_ITEM.MFHD_ID " .
-                 "and MFHD_DATA.MFHD_ID = MFHD_ITEM.MFHD_ID " .
-                 "and MFHD_MASTER.SUPPRESS_IN_OPAC='N' " .
-                 "order by ITEM.ITEM_SEQUENCE_NUMBER, MFHD_DATA.SEQNUM";
-        $noItems = "select null as ITEM_BARCODE, null as ITEM_ID, MFHD_DATA.RECORD_SEGMENT, null as ITEM_ENUM, 'N' as ON_RESERVE, 1 as ITEM_SEQUENCE_NUMBER, 'No information available' as status, LOCATION.LOCATION_DISPLAY_NAME as location, MFHD_MASTER.DISPLAY_CALL_NO as callnumber, null as duedate " .
-                   "from $this->dbName.BIB_MFHD, $this->dbName.LOCATION, $this->dbName.MFHD_MASTER, $this->dbName.MFHD_DATA " .
-                   "where BIB_MFHD.BIB_ID = :id " .
-                   "and LOCATION.LOCATION_ID = MFHD_MASTER.LOCATION_ID " .
-                   "and MFHD_MASTER.MFHD_ID = BIB_MFHD.MFHD_ID " .
-                   "and MFHD_DATA.MFHD_ID = BIB_MFHD.MFHD_ID " .
-                   "and MFHD_MASTER.SUPPRESS_IN_OPAC='N' " .
-                   "order by MFHD_DATA.SEQNUM";
-        $possibleQueries = array($items, $noItems);
+
+        $sqlArrayItems = $this->getHoldingItemsSQL($id);
+        $possibleQueries[] = $this->buildSqlFromArray($sqlArrayItems);
+
+        $sqlArrayNoItems = $this->getHoldingNoItemsSQL($id);
+        $possibleQueries[] = $this->buildSqlFromArray($sqlArrayNoItems);
 
         // Loop through the possible queries and try each in turn -- the first one
         // that yields results will cause us to break out of the loop.
         foreach ($possibleQueries as $sql) {
             // Execute SQL
             try {
-                $holding = array();
-                $sqlStmt = $this->db->prepare($sql);
-                $sqlStmt->execute(array(':id' => $id));
+                $sqlStmt = $this->db->prepare($sql['string']);
+                $sqlStmt->execute($sql['bind']);
             } catch (PDOException $e) {
                 return new PEAR_Error($e->getMessage());
             }
 
-            // Build Holdings Array
-            $i = 0;
-            $data = array();
+            $sqlRows = array();
             while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
-                // Determine Copy Number
-                $number = ($row['ITEM_ENUM'])
-                    ? $row['ITEM_ENUM'] : $row['ITEM_SEQUENCE_NUMBER'];
-
-                // Concat wrapped rows (MARC data more than 300 bytes gets split
-                // into multiple rows)
-                if (isset($data[$row['ITEM_ID']]["$number"])) {
-                    // We don't want to concatenate the same MARC information to
-                    // itself over and over due to a record with multiple status
-                    // codes -- we should only concat wrapped rows for the FIRST
-                    // status code we encounter!
-                    if ($data[$row['ITEM_ID']]["$number"]['STATUS_ARRAY'][0] == $row['STATUS']) {
-                        $data[$row['ITEM_ID']]["$number"]['RECORD_SEGMENT']
-                            .= $row['RECORD_SEGMENT'];
-                    }
-
-                    // If we've encountered a new status code, we should track it:
-                    if (!in_array($row['STATUS'], $data[$row['ITEM_ID']]["$number"]['STATUS_ARRAY'])) {
-                        $data[$row['ITEM_ID']]["$number"]['STATUS_ARRAY'][]
-                            = $row['STATUS'];
-                    }
-                } else {
-                    // This is the first time we've encountered this row number --
-                    // initialize the row and start an array of statuses.
-                    $data[$row['ITEM_ID']]["$number"] = $row;
-                    $data[$row['ITEM_ID']]["$number"]['STATUS_ARRAY']
-                        = array($row['STATUS']);
-                }
+                $sqlRows[] = $row;
             }
+
+            $data = $this->getHoldingData($sqlRows);
 
             // If we found data, we can leave the foreach loop -- we don't need to
             // try any more queries.
@@ -380,152 +709,8 @@ class Voyager implements DriverInterface
                 break;
             }
         }
-
-        foreach ($data as $item) {
-            foreach ($item as $number => $row) {
-                // Get availability/status info based on the array of status codes:
-                $availability = $this->determineAvailability($row['STATUS_ARRAY']);
-
-                // If we found other statuses, we should override the display value
-                // appropriately:
-                if (count($availability['otherStatuses']) > 0) {
-                    $row['STATUS']
-                        = $this->pickStatus($availability['otherStatuses']);
-                }
-
-                $holding[$i] = array(
-                    'id' => $id,
-                    'availability' => $availability['available'],
-                    'status' => $row['STATUS'],
-                    'location' => htmlentities($row['LOCATION']),
-                    'reserve' => $row['ON_RESERVE'],
-                    'callnumber' => $row['CALLNUMBER'],
-                    'duedate' => $row['DUEDATE'],
-                    'number' => $number,
-                    'barcode' => $row['ITEM_BARCODE']
-                );
-
-                // Parse Holding Record
-                if ($row['RECORD_SEGMENT']) {
-                    try {
-                        $marc = new File_MARC(
-                            str_replace(array("\n", "\r"), '', $row['RECORD_SEGMENT']),
-                            File_MARC::SOURCE_STRING
-                        );
-                        if ($record = $marc->next()) {
-                            // Get Notes
-                            if ($fields = $record->getFields('852')) {
-                                foreach ($fields as $field) {
-                                    if ($subfields = $field->getSubfields('z')) {
-                                        foreach ($subfields as $subfield) {
-                                            // If this is the first time through,
-                                            // assume a single-line summary
-                                            if (!isset($holding[$i]['notes'])) {
-                                                $holding[$i]['notes']
-                                                    = $subfield->getData();
-                                            } else {
-                                                // If we already have a summary
-                                                // line, convert it to an array and
-                                                // append more data
-                                                if (!is_array($holding[$i]['notes'])) {
-                                                    $holding[$i]['notes'] = array($holding[$i]['notes']);
-                                                }
-                                                $holding[$i]['notes'][]
-                                                    = $subfield->getData();
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Get Summary (may be multiple lines)
-                            if ($fields = $record->getFields('866')) {
-                                foreach ($fields as $field) {
-                                    if ($subfield = $field->getSubfield('a')) {
-                                        // If this is the first time through, assume
-                                        // a single-line summary
-                                        if (!isset($holding[$i]['summary'])) {
-                                            $holding[$i]['summary']
-                                                = $subfield->getData();
-                                            // If we already have a summary line,
-                                            // convert it to an array and append
-                                            // more data
-                                        } else {
-                                            if (!is_array($holding[$i]['summary'])) {
-                                                $holding[$i]['summary'] = array($holding[$i]['summary']);
-                                            }
-                                            $holding[$i]['summary'][] = $subfield->getData();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } catch (Exception $e) {
-                        trigger_error(
-                            'Poorly Formatted MFHD Record', E_USER_NOTICE
-                        );
-                    }
-                }
-
-                $i++;
-            }
-        }
-
-        return $holding;
+        return $this->processHoldingData($data);
     }
-
-    /*
-    public function getHoldings($idList)
-    {
-        $sql = "select ITEM.ON_RESERVE, ITEM.ITEM_SEQUENCE_NUMBER, ITEM_STATUS_DESC as status, LOCATION.LOCATION_DISPLAY_NAME as location, MFHD_MASTER.DISPLAY_CALL_NO as callnumber, CIRC_TRANSACTIONS.CURRENT_DUE_DATE as duedate " .
-               "from $this->dbName.BIB_ITEM, $this->dbName.ITEM, $this->dbName.ITEM_STATUS_TYPE, $this->dbName.ITEM_STATUS, $this->dbName.LOCATION, $this->dbName.MFHD_ITEM, $this->dbName.MFHD_MASTER, $this->dbName.CIRC_TRANSACTIONS " .
-               "where BIB_ITEM.ITEM_ID = ITEM.ITEM_ID " .
-               "and ITEM.ITEM_ID = ITEM_STATUS.ITEM_ID " .
-               "and ITEM_STATUS.ITEM_STATUS = ITEM_STATUS_TYPE.ITEM_STATUS_TYPE " .
-               "and LOCATION.LOCATION_ID = ITEM.PERM_LOCATION " .
-               "and CIRC_TRANSACTIONS.ITEM_ID (+)= ITEM.ITEM_ID " .
-               "and MFHD_ITEM.ITEM_ID = ITEM.ITEM_ID " .
-               "and MFHD_MASTER.MFHD_ID = MFHD_ITEM.MFHD_ID " .
-               "and (";
-        for ($i=0; $i<count($idList); $i++) {
-            if ($i > 0) {
-                $sql .= ' OR ';
-            }
-            $sql .= "BIB_ITEM.BIB_ID = '$idList[$i]'";
-        }
-        $sql .= ')';
-        echo $sql;
-
-        try {
-            $holding = array();
-            $sqlStmt = $this->db->prepare($sql);
-            $sqlStmt->execute();
-            while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
-                switch ($row['STATUS']) {
-                case 'Not Charged':
-                case 'Cataloging Review':
-                case 'Circulation Review':
-                    $available = true;
-                    break;
-                default:
-                    $available = false;
-                    break;
-                }
-
-                $holding[] = array('availability' => $available,
-                                   'status' => $row['STATUS'],
-                                   'location' => $row['LOCATION'],
-                                   'reserve' => $row['ON_RESERVE'],
-                                   'callnumber' => $row['CALLNUMBER'],
-                                   'duedate' => $row['DUEDATE'],
-                                   'number' => $row['ITEM_SEQUENCE_NUMBER']);
-            }
-            return $holding;
-        } catch (PDOException $e) {
-            return new PEAR_Error($e->getMessage());
-        }
-    }
-    */
 
     /**
      * Get Purchase History
@@ -535,14 +720,16 @@ class Voyager implements DriverInterface
      *
      * @param string $id The record id to retrieve the info for
      *
-     * @return mixed     An array with the acquisitions data on success, PEAR_Error
+     * @return mixed An array with the acquisitions data on success, PEAR_Error
      * on failure
      * @access public
      */
     public function getPurchaseHistory($id)
     {
         $sql = "select SERIAL_ISSUES.ENUMCHRON " .
-               "from $this->dbName.SERIAL_ISSUES, $this->dbName.COMPONENT, $this->dbName.ISSUES_RECEIVED, $this->dbName.SUBSCRIPTION, $this->dbName.LINE_ITEM " .
+               "from $this->dbName.SERIAL_ISSUES, $this->dbName.COMPONENT, ".
+               "$this->dbName.ISSUES_RECEIVED, $this->dbName.SUBSCRIPTION, ".
+               "$this->dbName.LINE_ITEM " .
                "where SERIAL_ISSUES.COMPONENT_ID = COMPONENT.COMPONENT_ID " .
                "and ISSUES_RECEIVED.ISSUE_ID = SERIAL_ISSUES.ISSUE_ID " .
                "and ISSUES_RECEIVED.COMPONENT_ID = COMPONENT.COMPONENT_ID " .
@@ -612,6 +799,103 @@ class Voyager implements DriverInterface
     }
 
     /**
+     * Protected support method for getMyTransactions.
+     *
+     * @param array $patron Patron data for use in an sql query
+     *
+     * @return array Keyed data for use in an sql query
+     * @access protected
+     */
+    protected function getMyTransactionsSQL($patron)
+    {
+        // Expressions
+        $sqlExpressions = array(
+            "to_char(CIRC_TRANSACTIONS.CURRENT_DUE_DATE, 'MM-DD-YY HH24:MI')" .
+            " as DUEDATE",
+            "to_char(CURRENT_DUE_DATE, 'YYYYMMDD HH24:MI') as FULLDATE",
+            "BIB_ITEM.BIB_ID"
+        );
+
+        // From
+        $sqlFrom = array(
+            $this->dbName.".CIRC_TRANSACTIONS",
+            $this->dbName.".BIB_ITEM"
+        );
+
+        // Where
+        $sqlWhere = array(
+            "CIRC_TRANSACTIONS.PATRON_ID = :id",
+            "BIB_ITEM.ITEM_ID = CIRC_TRANSACTIONS.ITEM_ID"
+        );
+
+        // Order
+        $sqlOrder = array("FULLDATE ASC");
+
+        // Bind
+        $sqlBind = array(':id' => $patron['id']);
+
+        $sqlArray = array(
+            'expressions' => $sqlExpressions,
+            'from' => $sqlFrom,
+            'where' => $sqlWhere,
+            'order' => $sqlOrder,
+            'bind' => $sqlBind,
+        );
+
+        return $sqlArray;
+    }
+
+    /**
+     * Protected support method for getMyTransactions.
+     *
+     * @param array $sqlRow An array of keyed data
+     *
+     * @return array Keyed data for display by template files
+     * @access protected
+     */
+    protected function processMyTransactionsData($sqlRow)
+    {
+        // Convert Voyager Format to display format
+        if (!empty($sqlRow['DUEDATE'])) {
+            $dueDate = $this->dateFormat->convertToDisplayDate(
+                "m-d-y H:i", $sqlRow['DUEDATE']
+            );
+            if (PEAR::isError($dueDate)) {
+                return $dueDate;
+            }
+            $dueTime = $this->dateFormat->convertToDisplayTime(
+                "m-d-y H:i", $sqlRow['DUEDATE']
+            );
+            if (PEAR::isError($dueTime)) {
+                return $dueTime;
+            }
+            $dueDate .= " " . $dueTime;
+        }
+
+        $dueStatus = 0;
+        if (!empty($sqlRow['FULLDATE'])) {
+            // Due Date Status 0 = Not Due, 1 = Due Today, 2 = Overdue
+            $now = time();
+            $dueTimeStamp = strtotime($sqlRow['FULLDATE']);
+
+            if ($now > $dueTimeStamp) {
+                $dueStatus = 2;
+            } else if ($now > $dueTimeStamp-(1*24*60*60)) {
+                $dueStatus = 1;
+            } else {
+                $dueStatus = 0;
+            }
+        }
+
+        return array(
+            'id' => $sqlRow['BIB_ID'],
+            'duedate' => $dueDate,
+            'dueTime' => $dueTime,
+            'dueStatus' => $dueStatus
+        );
+    }
+
+    /**
      * Get Patron Transactions
      *
      * This is responsible for retrieving all transactions (i.e. checked out items)
@@ -627,21 +911,129 @@ class Voyager implements DriverInterface
     {
         $transList = array();
 
-        $sql = "SELECT CHARGE_DUE_DATE as DUEDATE, BIB_ITEM.BIB_ID " .
-               "FROM $this->dbName.CIRC_TRANSACTIONS, $this->dbName.BIB_ITEM " .
-               "WHERE BIB_ITEM.ITEM_ID = CIRC_TRANSACTIONS.ITEM_ID " .
-               "AND CIRC_TRANSACTIONS.PATRON_ID = :id";
+        $sqlArray = $this->getMyTransactionsSQL($patron);
+
+        $sql = $this->buildSqlFromArray($sqlArray);
+
         try {
-            $sqlStmt = $this->db->prepare($sql);
-            $sqlStmt->execute(array(':id' => $patron['id']));
+            $sqlStmt = $this->db->prepare($sql['string']);
+            $sqlStmt->execute($sql['bind']);
             while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
-                $transList[] = array('duedate' => $row['DUEDATE'],
-                                     'id' => $row['BIB_ID']);
+                $processRow = $this->processMyTransactionsData($row);
+                if (PEAR::isError($processRow)) {
+                    return $processRow;
+                }
+                $transList[] = $processRow;
             }
             return $transList;
         } catch (PDOException $e) {
             return new PEAR_Error($e->getMessage());
         }
+    }
+
+    /**
+     * Protected support method for getMyFines.
+     *
+     * @param array $patron Patron data for use in an sql query
+     *
+     * @return array Keyed data for use in an sql query
+     * @access protected
+     */
+    protected function getFineSQL($patron)
+    {
+        // Modifier
+        $sqlSelectModifier = "distinct";
+
+        // Expressions
+        $sqlExpressions = array(
+            "FINE_FEE_TYPE.FINE_FEE_DESC",
+            "PATRON.PATRON_ID", "FINE_FEE.FINE_FEE_AMOUNT",
+            "FINE_FEE.FINE_FEE_BALANCE",
+            "to_char(FINE_FEE.CREATE_DATE, 'MM-DD-YY') as CREATEDATE",
+            "to_char(FINE_FEE.ORIG_CHARGE_DATE, 'MM-DD-YY') as CHARGEDATE",
+            "to_char(FINE_FEE.DUE_DATE, 'MM-DD-YY') as DUEDATE",
+            "BIB_ITEM.BIB_ID"
+        );
+
+        // From
+        $sqlFrom = array(
+            $this->dbName.".FINE_FEE", $this->dbName.".FINE_FEE_TYPE",
+            $this->dbName.".PATRON", $this->dbName.".BIB_ITEM"
+        );
+
+        // Where
+        $sqlWhere = array(
+            "PATRON.PATRON_ID = :id",
+            "FINE_FEE.FINE_FEE_TYPE = FINE_FEE_TYPE.FINE_FEE_TYPE",
+            "FINE_FEE.PATRON_ID  = PATRON.PATRON_ID",
+            "FINE_FEE.ITEM_ID = BIB_ITEM.ITEM_ID(+)",
+            "FINE_FEE.FINE_FEE_BALANCE > 0"
+        );
+
+        // Bind
+        $sqlBind = array(':id' => $patron['id']);
+
+        $sqlArray = array(
+            'modifier' => $sqlSelectModifer,
+            'expressions' => $sqlExpressions,
+            'from' => $sqlFrom,
+            'where' => $sqlWhere,
+            'bind' => $sqlBind
+        );
+
+        return $sqlArray;
+    }
+
+    /**
+     * Protected support method for getMyFines.
+     *
+     * @param array $sqlRow An array of keyed data
+     *
+     * @return array Keyed data for display by template files
+     * @access protected
+     */
+    protected function processFinesData($sqlRow)
+    {
+        $dueDate = translate("not_applicable");
+        // Convert Voyager Format to display format
+        if (!empty($sqlRow['DUEDATE'])) {
+            $dueDate = $this->dateFormat->convertToDisplayDate(
+                "m-d-y", $sqlRow['DUEDATE']
+            );
+            if (PEAR::isError($dueDate)) {
+                return $dueDate;
+            }
+        }
+
+        $createDate = translate("not_applicable");
+        // Convert Voyager Format to display format
+        if (!empty($sqlRow['CREATEDATE'])) {
+            $createDate = $this->dateFormat->convertToDisplayDate(
+                "m-d-y", $sqlRow['CREATEDATE']
+            );
+            if (PEAR::isError($createDate)) {
+                return $createDate;
+            }
+        }
+
+        $chargeDate = translate("not_applicable");
+        // Convert Voyager Format to display format
+        if (!empty($sqlRow['CHARGEDATE'])) {
+            $chargeDate = $this->dateFormat->convertToDisplayDate(
+                "m-d-y", $sqlRow['CHARGEDATE']
+            );
+            if (PEAR::isError($chargeDate)) {
+                return $chargeDate;
+            }
+        }
+
+        return array('amount' => $sqlRow['FINE_FEE_AMOUNT'],
+              'fine' => $sqlRow['FINE_FEE_DESC'],
+              'balance' => $sqlRow['FINE_FEE_BALANCE'],
+              'createdate' => $createDate,
+              'checkout' => $chargeDate,
+              'duedate' => $dueDate,
+              'id' => $sqlRow['BIB_ID']);
     }
 
     /**
@@ -659,25 +1051,160 @@ class Voyager implements DriverInterface
     {
         $fineList = array();
 
-        $sql = "SELECT unique FINE_FEE_TYPE.FINE_FEE_DESC, FINE_FEE.FINE_FEE_AMOUNT, FINE_FEE.FINE_FEE_BALANCE, FINE_FEE.ORIG_CHARGE_DATE, FINE_FEE.DUE_DATE, BIB_ITEM.BIB_ID " .
-               "FROM (($this->dbName.FINE_FEE INNER JOIN $this->dbName.FINE_FEE_TYPE ON FINE_FEE.FINE_FEE_TYPE = FINE_FEE_TYPE.FINE_FEE_TYPE) INNER JOIN $this->dbName.PATRON ON FINE_FEE.PATRON_ID = PATRON.PATRON_ID) INNER JOIN $this->dbName.BIB_ITEM ON FINE_FEE.ITEM_ID = BIB_ITEM.ITEM_ID ".
-               "WHERE PATRON.PATRON_ID=:id";
+        $sqlArray = $this->getFineSQL($patron);
+
+        $sql = $this->buildSqlFromArray($sqlArray);
 
         try {
-            $sqlStmt = $this->db->prepare($sql);
-            $sqlStmt->execute(array(':id' => $patron['id']));
+            $sqlStmt = $this->db->prepare($sql['string']);
+            $sqlStmt->execute($sql['bind']);
             while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
-                $fineList[] = array('amount' => $row['FINE_FEE_AMOUNT'],
-                                    'fine' => $row['FINE_FEE_DESC'],
-                                    'balance' => $row['FINE_FEE_BALANCE'],
-                                    'checkout' => $row['ORIG_CHARGE_DATE'],
-                                    'duedate' => $row['DUE_DATE'],
-                                    'id' => $row['BIB_ID']);
+                $processFine= $this->processFinesData($row);
+                if (PEAR::isError($processFine)) {
+                    return $processFine;
+                }
+                $fineList[] = $processFine;
             }
             return $fineList;
         } catch (PDOException $e) {
             return new PEAR_Error($e->getMessage());
         }
+    }
+
+    /**
+     * Protected support method for getMyHolds.
+     *
+     * @param array $patron Patron data for use in an sql query
+     *
+     * @return array Keyed data for use in an sql query
+     * @access protected
+     */
+    protected function getMyHoldsSQL($patron)
+    {
+        // Modifier
+        $sqlSelectModifier = "distinct";
+
+        // Expressions
+        $sqlExpressions = array(
+            "HOLD_RECALL.HOLD_RECALL_ID", "HOLD_RECALL.BIB_ID",
+            "HOLD_RECALL.PICKUP_LOCATION",
+            "HOLD_RECALL.HOLD_RECALL_TYPE",
+            "to_char(HOLD_RECALL.EXPIRE_DATE, 'MM-DD-YY') as EXPIRE_DATE",
+            "to_char(HOLD_RECALL.CREATE_DATE, 'MM-DD-YY') as CREATE_DATE",
+            "HOLD_RECALL_ITEMS.ITEM_ID",
+            "HOLD_RECALL_ITEMS.HOLD_RECALL_STATUS",
+            "HOLD_RECALL_ITEMS.QUEUE_POSITION",
+            "MFHD_ITEM.ITEM_ENUM",
+            "MFHD_ITEM.YEAR"
+        );
+
+        // From
+        $sqlFrom = array(
+            $this->dbName.".HOLD_RECALL",
+            $this->dbName.".HOLD_RECALL_ITEMS",
+            $this->dbName.".MFHD_ITEM"
+        );
+
+        // Where
+        $sqlWhere = array(
+            "HOLD_RECALL.PATRON_ID = :id",
+            "HOLD_RECALL.HOLD_RECALL_ID = HOLD_RECALL_ITEMS.HOLD_RECALL_ID(+)",
+            "HOLD_RECALL_ITEMS.ITEM_ID = MFHD_ITEM.ITEM_ID(+)",
+            "(HOLD_RECALL_ITEMS.HOLD_RECALL_STATUS IS NULL OR " .
+            "HOLD_RECALL_ITEMS.HOLD_RECALL_STATUS < 3)"
+        );
+
+        // Bind
+        $sqlBind = array(':id' => $patron['id']);
+
+        $sqlArray = array(
+            'modifier' => $sqlSelectModifer,
+            'expressions' => $sqlExpressions,
+            'from' => $sqlFrom,
+            'where' => $sqlWhere,
+            'bind' => $sqlBind
+        );
+
+        return $sqlArray;
+    }
+
+    /**
+     * Protected support method for getMyHolds.
+     *
+     * @param array $sqlRow An array of keyed data
+     *
+     * @return array Keyed data for display by template files
+     * @access protected
+     */
+    protected function processMyHoldsData($sqlRow)
+    {
+        $available = ($sqlRow['HOLD_RECALL_STATUS'] == 2) ? true : false;
+        $expireDate = translate("Unknown");
+        // Convert Voyager Format to display format
+        if (!empty($sqlRow['EXPIRE_DATE'])) {
+            $expireDate = $this->dateFormat->convertToDisplayDate(
+                "m-d-y", $sqlRow['EXPIRE_DATE']
+            );
+            if (PEAR::isError($expireDate)) {
+                return $expireDate;
+            }
+        }
+
+        $createDate = translate("Unknown");
+        // Convert Voyager Format to display format
+        if (!empty($sqlRow['CREATE_DATE'])) {
+            $createDate = $this->dateFormat->convertToDisplayDate(
+                "m-d-y", $sqlRow['CREATE_DATE']
+            );
+            if (PEAR::isError($createDate)) {
+                return $createDate;
+            }
+        }
+
+        return array(
+            'id' => $sqlRow['BIB_ID'],
+            'type' => $sqlRow['HOLD_RECALL_TYPE'],
+            'location' => $sqlRow['PICKUP_LOCATION'],
+            'expire' => $expireDate,
+            'create' => $createDate,
+            'position' => $sqlRow['QUEUE_POSITION'],
+            'available' => $available,
+            'recall_id' => $sqlRow['HOLD_RECALL_ID'],
+            'item_id' => $sqlRow['ITEM_ID'],
+            'volume' => str_replace("v.", "", $sqlRow['ITEM_ENUM']),
+            'publication_year' => $sqlRow['YEAR']
+        );
+    }
+
+    /**
+     * Process Holds List
+     *
+     * This is responsible for processing holds to ensure only one record is shown
+     * for each hold.
+     *
+     * @param array $holdList The Hold List Array
+     *
+     * @return mixed Array of the patron's holds.
+     * @access private
+     */
+    protected function processHoldsList($holdList)
+    {
+        $returnList = array();
+
+        if (!empty($holdList)) {
+
+            $sortHoldList = array();
+            // Get a unique List of Bib Ids
+            foreach ($holdList as $holdItem) {
+                $sortHoldList[$holdItem['id']][] = $holdItem;
+            }
+
+            // Use the first copy hold only
+            foreach ($sortHoldList as $bibHold) {
+                $returnList[] = $bibHold[0];
+            }
+        }
+        return $returnList;
     }
 
     /**
@@ -694,21 +1221,24 @@ class Voyager implements DriverInterface
     public function getMyHolds($patron)
     {
         $holdList = array();
+        $returnList = array();
 
-        $sql = "SELECT HOLD_RECALL.BIB_ID, HOLD_RECALL.PICKUP_LOCATION, HOLD_RECALL.HOLD_RECALL_TYPE, HOLD_RECALL.EXPIRE_DATE, HOLD_RECALL.CREATE_DATE " .
-               "FROM $this->dbName.HOLD_RECALL " .
-               "WHERE HOLD_RECALL.PATRON_ID = :id";
+        $sqlArray = $this->getMyHoldsSQL($patron);
+
+        $sql = $this->buildSqlFromArray($sqlArray);
+
         try {
-            $sqlStmt = $this->db->prepare($sql);
-            $sqlStmt->execute(array(':id' => $patron['id']));
-            while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
-                $holdList[] = array('type' => $row['HOLD_RECALL_TYPE'],
-                                    'id' => $row['BIB_ID'],
-                                    'location' => $row['PICKUP_LOCATION'],
-                                    'expire' => $row['EXPIRE_DATE'],
-                                    'create' => $row['CREATE_DATE']);
+            $sqlStmt = $this->db->prepare($sql['string']);
+            $sqlStmt->execute($sql['bind']);
+            while ($sqlRow = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
+                $holds = $this->processMyHoldsData($sqlRow);
+                if (PEAR::isError($holds)) {
+                    return $holds;
+                }
+                $holdList[] = $holds;
             }
-            return $holdList;
+            $returnList = $this->processHoldsList($holdList);
+            return $returnList;
         } catch (PDOException $e) {
             return new PEAR_Error($e->getMessage());
         }
@@ -727,8 +1257,13 @@ class Voyager implements DriverInterface
      */
     public function getMyProfile($patron)
     {
-        $sql = "SELECT PATRON.LAST_NAME, PATRON.FIRST_NAME, PATRON.HISTORICAL_CHARGES, PATRON_ADDRESS.ADDRESS_LINE1, PATRON_ADDRESS.ADDRESS_LINE2, PATRON_ADDRESS.ZIP_POSTAL, PATRON_PHONE.PHONE_NUMBER, PATRON_GROUP.PATRON_GROUP_NAME " .
-               "FROM $this->dbName.PATRON, $this->dbName.PATRON_ADDRESS, $this->dbName.PATRON_PHONE, $this->dbName.PATRON_BARCODE, $this->dbName.PATRON_GROUP " .
+        $sql = "SELECT PATRON.LAST_NAME, PATRON.FIRST_NAME, " .
+               "PATRON.HISTORICAL_CHARGES, PATRON_ADDRESS.ADDRESS_LINE1, " .
+               "PATRON_ADDRESS.ADDRESS_LINE2, PATRON_ADDRESS.ZIP_POSTAL, ".
+               "PATRON_PHONE.PHONE_NUMBER, PATRON_GROUP.PATRON_GROUP_NAME " .
+               "FROM $this->dbName.PATRON, $this->dbName.PATRON_ADDRESS, ".
+               "$this->dbName.PATRON_PHONE, $this->dbName.PATRON_BARCODE, " .
+               "$this->dbName.PATRON_GROUP " .
                "WHERE PATRON.PATRON_ID = PATRON_ADDRESS.PATRON_ID " .
                "AND PATRON_ADDRESS.ADDRESS_ID = PATRON_PHONE.ADDRESS_ID " .
                "AND PATRON.PATRON_ID = PATRON_BARCODE.PATRON_ID " .
@@ -844,7 +1379,9 @@ class Voyager implements DriverInterface
         );
 
         $sql = "select count(distinct LINE_ITEM.BIB_ID) as count " .
-               "from $this->dbName.LINE_ITEM, $this->dbName.LINE_ITEM_COPY_STATUS, $this->dbName.LINE_ITEM_FUNDS, $this->dbName.FUND " .
+               "from $this->dbName.LINE_ITEM, " .
+               "$this->dbName.LINE_ITEM_COPY_STATUS, " .
+               "$this->dbName.LINE_ITEM_FUNDS, $this->dbName.FUND " .
                "where LINE_ITEM.LINE_ITEM_ID = LINE_ITEM_COPY_STATUS.LINE_ITEM_ID " .
                "and LINE_ITEM_COPY_STATUS.COPY_ID = LINE_ITEM_FUNDS.COPY_ID " .
                "and LINE_ITEM_FUNDS.FUND_ID = FUND.FUND_ID ";
@@ -873,21 +1410,30 @@ class Voyager implements DriverInterface
         /*
         $sql = "select * from " .
                "(select a.*, rownum rnum from " .
-               "(select LINE_ITEM.BIB_ID, BIB_TEXT.TITLE, FUND.FUND_NAME, LINE_ITEM.CREATE_DATE, LINE_ITEM_STATUS.LINE_ITEM_STATUS_DESC " .
-               "from $this->dbName.BIB_TEXT, $this->dbName.LINE_ITEM, $this->dbName.LINE_ITEM_COPY_STATUS, $this->dbName.LINE_ITEM_STATUS, $this->dbName.LINE_ITEM_FUNDS, $this->dbName.FUND " .
+               "(select LINE_ITEM.BIB_ID, BIB_TEXT.TITLE, FUND.FUND_NAME, " .
+               "LINE_ITEM.CREATE_DATE, LINE_ITEM_STATUS.LINE_ITEM_STATUS_DESC " .
+               "from $this->dbName.BIB_TEXT, $this->dbName.LINE_ITEM, " .
+               "$this->dbName.LINE_ITEM_COPY_STATUS, " .
+               "$this->dbName.LINE_ITEM_STATUS, $this->dbName.LINE_ITEM_FUNDS, " .
+               "$this->dbName.FUND " .
                "where BIB_TEXT.BIB_ID = LINE_ITEM.BIB_ID " .
                "and LINE_ITEM.LINE_ITEM_ID = LINE_ITEM_COPY_STATUS.LINE_ITEM_ID " .
                "and LINE_ITEM_COPY_STATUS.COPY_ID = LINE_ITEM_FUNDS.COPY_ID " .
-               "and LINE_ITEM_STATUS.LINE_ITEM_STATUS = LINE_ITEM_COPY_STATUS.LINE_ITEM_STATUS " .
+               "and LINE_ITEM_STATUS.LINE_ITEM_STATUS = " .
+               "LINE_ITEM_COPY_STATUS.LINE_ITEM_STATUS " .
                "and LINE_ITEM_FUNDS.FUND_ID = FUND.FUND_ID ";
         */
         $sql = "select * from " .
                "(select a.*, rownum rnum from " .
                "(select LINE_ITEM.BIB_ID, LINE_ITEM.CREATE_DATE " .
-               "from $this->dbName.LINE_ITEM, $this->dbName.LINE_ITEM_COPY_STATUS, $this->dbName.LINE_ITEM_STATUS, $this->dbName.LINE_ITEM_FUNDS, $this->dbName.FUND " .
+               "from $this->dbName.LINE_ITEM, " .
+               "$this->dbName.LINE_ITEM_COPY_STATUS, " .
+               "$this->dbName.LINE_ITEM_STATUS, $this->dbName.LINE_ITEM_FUNDS, " .
+               "$this->dbName.FUND " .
                "where LINE_ITEM.LINE_ITEM_ID = LINE_ITEM_COPY_STATUS.LINE_ITEM_ID " .
                "and LINE_ITEM_COPY_STATUS.COPY_ID = LINE_ITEM_FUNDS.COPY_ID " .
-               "and LINE_ITEM_STATUS.LINE_ITEM_STATUS = LINE_ITEM_COPY_STATUS.LINE_ITEM_STATUS " .
+               "and LINE_ITEM_STATUS.LINE_ITEM_STATUS = " .
+               "LINE_ITEM_COPY_STATUS.LINE_ITEM_STATUS " .
                "and LINE_ITEM_FUNDS.FUND_ID = FUND.FUND_ID ";
         if ($fundId) {
             $sql .= "and lower(FUND.FUND_NAME) = :fund ";
@@ -1010,9 +1556,11 @@ class Voyager implements DriverInterface
         $deptList = array();
 
         $sql = "select DEPARTMENT.DEPARTMENT_ID, DEPARTMENT.DEPARTMENT_NAME " .
-               "from $this->dbName.RESERVE_LIST, $this->dbName.RESERVE_LIST_COURSES, $this->dbName.DEPARTMENT " .
+               "from $this->dbName.RESERVE_LIST, " .
+               "$this->dbName.RESERVE_LIST_COURSES, $this->dbName.DEPARTMENT " .
                "where " .
-               "RESERVE_LIST.RESERVE_LIST_ID = RESERVE_LIST_COURSES.RESERVE_LIST_ID and " .
+               "RESERVE_LIST.RESERVE_LIST_ID = " .
+               "RESERVE_LIST_COURSES.RESERVE_LIST_ID and " .
                "RESERVE_LIST_COURSES.DEPARTMENT_ID = DEPARTMENT.DEPARTMENT_ID " .
                "group by DEPARTMENT.DEPARTMENT_ID, DEPARTMENT_NAME " .
                "order by DEPARTMENT_NAME";
@@ -1043,9 +1591,12 @@ class Voyager implements DriverInterface
 
         $bindParams = array();
 
-        $sql = "select INSTRUCTOR.INSTRUCTOR_ID, INSTRUCTOR.LAST_NAME || ', ' || INSTRUCTOR.FIRST_NAME as NAME " .
-               "from $this->dbName.RESERVE_LIST, $this->dbName.RESERVE_LIST_COURSES, $this->dbName.INSTRUCTOR " .
-               "where RESERVE_LIST.RESERVE_LIST_ID = RESERVE_LIST_COURSES.RESERVE_LIST_ID and " .
+        $sql = "select INSTRUCTOR.INSTRUCTOR_ID, " .
+               "INSTRUCTOR.LAST_NAME || ', ' || INSTRUCTOR.FIRST_NAME as NAME " .
+               "from $this->dbName.RESERVE_LIST, " .
+               "$this->dbName.RESERVE_LIST_COURSES, $this->dbName.INSTRUCTOR " .
+               "where RESERVE_LIST.RESERVE_LIST_ID = " .
+               "RESERVE_LIST_COURSES.RESERVE_LIST_ID and " .
                "RESERVE_LIST_COURSES.INSTRUCTOR_ID = INSTRUCTOR.INSTRUCTOR_ID " .
                "group by INSTRUCTOR.INSTRUCTOR_ID, LAST_NAME, FIRST_NAME " .
                "order by LAST_NAME";
@@ -1076,9 +1627,12 @@ class Voyager implements DriverInterface
 
         $bindParams = array();
 
-        $sql = "select COURSE.COURSE_NUMBER || ': ' || COURSE.COURSE_NAME as NAME, COURSE.COURSE_ID " .
-               "from $this->dbName.RESERVE_LIST, $this->dbName.RESERVE_LIST_COURSES, $this->dbName.COURSE " .
-               "where RESERVE_LIST.RESERVE_LIST_ID = RESERVE_LIST_COURSES.RESERVE_LIST_ID and " .
+        $sql = "select COURSE.COURSE_NUMBER || ': ' || COURSE.COURSE_NAME as NAME," .
+               " COURSE.COURSE_ID " .
+               "from $this->dbName.RESERVE_LIST, " .
+               "$this->dbName.RESERVE_LIST_COURSES, $this->dbName.COURSE " .
+               "where RESERVE_LIST.RESERVE_LIST_ID = " .
+               "RESERVE_LIST_COURSES.RESERVE_LIST_ID and " .
                "RESERVE_LIST_COURSES.COURSE_ID = COURSE.COURSE_ID " .
                "group by COURSE.COURSE_ID, COURSE_NUMBER, COURSE_NAME " .
                "order by COURSE_NUMBER";
@@ -1094,47 +1648,6 @@ class Voyager implements DriverInterface
 
         return $courseList;
     }
-    /*
-    // This is the original findReserves function -- it is retained here for
-    // historical reasons, in case it needs to be restored in place of the
-    // more advanced version below.
-    function findReserves($course, $inst, $dept)
-    {
-        $recordList = array();
-        $bindParams = array();
-
-        $sql = "select MFHD_MASTER.DISPLAY_CALL_NO, BIB_TEXT.BIB_ID, BIB_TEXT.AUTHOR, BIB_TEXT.TITLE, BIB_TEXT.PUBLISHER, BIB_TEXT.PUBLISHER_DATE " .
-               "from $this->dbName.MFHD_ITEM, $this->dbName.MFHD_MASTER, $this->dbName.BIB_TEXT, $this->dbName.BIB_ITEM, $this->dbName.RESERVE_LIST_COURSES, $this->dbName.RESERVE_LIST_ITEMS " .
-               "where RESERVE_LIST_ITEMS.RESERVE_LIST_ID = RESERVE_LIST_COURSES.RESERVE_LIST_ID and " .
-               "RESERVE_LIST_ITEMS.ITEM_ID = BIB_ITEM.ITEM_ID and " .
-               "BIB_ITEM.BIB_ID = BIB_TEXT.BIB_ID and " .
-               "MFHD_ITEM.ITEM_ID = BIB_ITEM.ITEM_ID and " .
-               "MFHD_MASTER.MFHD_ID = MFHD_ITEM.MFHD_ID";
-        if ($course != '') {
-            $sql .= " and RESERVE_LIST_COURSES.COURSE_ID = :course";
-            $bindParams[':course'] = $course;
-        }
-        if ($inst != '') {
-            $sql .= " and RESERVE_LIST_COURSES.INSTRUCTOR_ID = :inst";
-            $bindParams[':inst'] = $inst;
-        }
-        if ($dept != '') {
-            $sql .= " and RESERVE_LIST_COURSES.DEPARTMENT_ID = :dept";
-            $bindParams[':dept'] = $dept;
-        }
-        try {
-            $sqlStmt = $this->db->prepare($sql);
-            $sqlStmt->execute($bindParams);
-            while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
-                $recordList[] = $row;
-            }
-        } catch (PDOException $e) {
-            return new PEAR_Error($e->getMessage());
-        }
-
-        return $recordList;
-    }
-     */
 
     /**
      * Find Reserves
@@ -1176,22 +1689,28 @@ class Voyager implements DriverInterface
         $reserveWhere = empty($reserveWhere) ?
             "" : "where (" . implode(' AND ', $reserveWhere) . ")";
 
-        $sql = " select MFHD_MASTER.DISPLAY_CALL_NO, BIB_TEXT.BIB_ID, BIB_TEXT.AUTHOR, BIB_TEXT.TITLE, " .
-               " BIB_TEXT.PUBLISHER, BIB_TEXT.PUBLISHER_DATE FROM $this->dbName.BIB_TEXT, $this->dbName.MFHD_MASTER where " .
-               " bib_text.bib_id = (select bib_mfhd.bib_id from $this->dbName.bib_mfhd where bib_mfhd.mfhd_id = mfhd_master.mfhd_id) " .
+        $sql = " select MFHD_MASTER.DISPLAY_CALL_NO, BIB_TEXT.BIB_ID, " .
+               " BIB_TEXT.AUTHOR, BIB_TEXT.TITLE, " .
+               " BIB_TEXT.PUBLISHER, BIB_TEXT.PUBLISHER_DATE " .
+               " FROM $this->dbName.BIB_TEXT, $this->dbName.MFHD_MASTER where " .
+               " bib_text.bib_id = (select bib_mfhd.bib_id " .
+               " from $this->dbName.bib_mfhd " .
+               " where bib_mfhd.mfhd_id = mfhd_master.mfhd_id) " .
                " and " .
                "  mfhd_master.mfhd_id in ( ".
                "  ((select distinct eitem.mfhd_id from $this->dbName.eitem where " .
                "    eitem.eitem_id in " .
                "    (select distinct reserve_list_eitems.eitem_id from " .
-               "     $this->dbName.reserve_list_eitems where reserve_list_eitems.reserve_list_id in " .
+               "     $this->dbName.reserve_list_eitems" .
+               "     where reserve_list_eitems.reserve_list_id in " .
                "     (select distinct reserve_list_courses.reserve_list_id from " .
                "      $this->dbName.reserve_list_courses " .
                "      $reserveWhere )) )) union " .
-               "  ((select distinct mfhd_item.mfhd_id from $this->dbName.mfhd_item where " .
-               "    mfhd_item.item_id in " .
+               "  ((select distinct mfhd_item.mfhd_id from $this->dbName.mfhd_item" .
+               "    where mfhd_item.item_id in " .
                "    (select distinct reserve_list_items.item_id from " .
-               "    $this->dbName.reserve_list_items where reserve_list_items.reserve_list_id in " .
+               "    $this->dbName.reserve_list_items" .
+               "    where reserve_list_items.reserve_list_id in " .
                "    (select distinct reserve_list_courses.reserve_list_id from " .
                "      $this->dbName.reserve_list_courses $reserveWhere )) )) " .
                "  ) ";
@@ -1215,7 +1734,7 @@ class Voyager implements DriverInterface
      * @return array ID numbers of suppressed records in the system.
      * @access public
      */
-    function getSuppressedRecords()
+    public function getSuppressedRecords()
     {
         $list = array();
 
