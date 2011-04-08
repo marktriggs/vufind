@@ -383,7 +383,9 @@ class Voyager implements DriverInterface
         );
 
         // Order
-        $sqlOrder = array("ITEM.ITEM_SEQUENCE_NUMBER", "MFHD_DATA.SEQNUM");
+        $sqlOrder = array(
+            "ITEM.ITEM_SEQUENCE_NUMBER", "MFHD_DATA.MFHD_ID", "MFHD_DATA.SEQNUM"
+        );
 
         // Bind
         $sqlBind = array(':id' => $id);
@@ -433,7 +435,7 @@ class Voyager implements DriverInterface
                          );
 
         // Order
-        $sqlOrder = array("MFHD_DATA.SEQNUM");
+        $sqlOrder = array("MFHD_DATA.MFHD_ID", "MFHD_DATA.SEQNUM");
 
         // Bind
         $sqlBind = array(':id' => $id);
