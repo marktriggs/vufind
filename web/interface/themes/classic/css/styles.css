@@ -195,10 +195,13 @@ li.result input.ui_checkboxes {
     background-color:#fff;
 }
 .toggle {
+    float: right;
+    margin-bottom: 1px;
     text-align:right;
 }
 .toggle img {
     vertical-align:text-bottom;
+    margin: 0px 0px 3px 2px;
 }
 .resultitem {
     margin-left:100px;
@@ -207,7 +210,9 @@ li.result input.ui_checkboxes {
     padding:10px 10px 5px 10px;
     margin-bottom:1.5em;
     border-bottom: 1px solid #eee;
+    position: relative;
 }
+
 .searchbox {
     padding:15px 20px;
 }
@@ -625,7 +630,7 @@ strong {
 
 .pagination {
     font-size:90%;
-    padding:1.5em 0 1.5em 0;
+    padding:0.5em 0 1.5em 0;
     margin:1.5em 0;
     text-align:center;
     border-top: 1px solid #eee;
@@ -1227,4 +1232,40 @@ legend {
 .olSubjectMore {
     text-align:right;
     text-decoration:none;
+}
+
+/* Grid View */
+.gridRecordBox {
+    margin: 0px 3px 3px 3px; 
+    padding: 5px 1px 3px 3px
+}
+
+.gridImageBox {
+    text-align:center; 
+    width:155px; 
+    height:130px; 
+    overflow:hidden; 
+    display:block; 
+}
+
+.gridImage{
+    height:130px;
+}
+
+.gridTitleBox {
+    height:55px; 
+    display:block; 
+    text-align:center; 
+    font-size:86%;
+    width:155px;
+}
+
+.gridTitle {
+    display:block;
+    height:40px;
+    overflow:hidden;
+}
+
+.gridMouseOver {
+    background-color:#f5f5f5;
 }

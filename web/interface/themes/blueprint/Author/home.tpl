@@ -21,15 +21,45 @@
     {/foreach}
   {/if}
 
+  {* Listing Options *}
   <div class="resulthead">
-    {translate text="Showing"}
-    <strong>{$recordStart}</strong> - <strong>{$recordEnd}</strong>
-    {translate text='of'} <strong>{$recordCount}</strong>
-    {translate text='for search'}: <strong>'{$authorName|escape:"html"}'</strong>,
-    {translate text='query time'}: {$qtime}s
-  </div>
+    <div class="floatleft hitCount">
+      {if $recordCount}
+        {translate text="Showing"}
+        <strong>{$recordStart}</strong> - <strong>{$recordEnd}</strong>
+        {translate text='of'} <strong>{$recordCount}</strong>
+        {translate text='for search'}: <strong>'{$authorName|escape:"html"}'</strong>,
+      {/if}
+      {translate text='query time'}: {$qtime}s
 
-  {include file=Search/list-list.tpl}
+    </div>
+
+    <div class="floatright">
+      <div class="viewButtons">
+      {if $viewList|@count gt 1}
+        {foreach from=$viewList item=viewData key=viewLabel}
+          {if !$viewData.selected}<a href="{$viewData.viewUrl|escape}" title="{translate text='Switch view to'} {translate text=$viewData.desc}" >{/if}<img src="{$path}/images/view_{$viewData.viewType}.png" {if $viewData.selected}title="{translate text=$viewData.desc} {translate text='view already selected'}"{/if}/>{if !$viewData.selected}</a>{/if}
+        {/foreach}
+      {/if}</div>
+      <form action="{$path}/Search/SortResults" method="post">
+        <label for="sort_options_1">{translate text='Sort'}</label>
+        <select id="sort_options_1" name="sort" class="jumpMenu">
+          {foreach from=$sortList item=sortData key=sortLabel}
+            <option value="{$sortData.sortUrl|escape}"{if $sortData.selected} selected="selected"{/if}>{translate text=$sortData.desc}</option>
+          {/foreach}
+        </select>
+        <noscript><input type="submit" value="{translate text="Set"}" /></noscript>
+      </form>
+    </div>
+    <div class="clear"></div>
+  </div>
+  {* End Listing Options *}
+
+  {if $subpage}
+    {include file=$subpage}
+  {else}
+    {$pageContent}
+  {/if}
 
   {if $pageLinks.all}<div class="pagination">{$pageLinks.all}</div>{/if}
 

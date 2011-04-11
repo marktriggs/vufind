@@ -46,6 +46,7 @@ abstract class SearchObject_Base
     // SEARCH PARAMETERS
     // RSS feed?
     protected $view = null;
+    protected $defaultView = 'list';
     // Search terms
     protected $searchTerms = array();
     // Sorting
@@ -77,6 +78,8 @@ abstract class SearchObject_Base
     protected $defaultIndex = null;
     // Available sort options
     protected $sortOptions = array();
+    // Available view options
+    protected $viewOptions = array();
     // An ID number for saving/retrieving search
     protected $searchId    = null;
     protected $savedSearch = false;
@@ -551,10 +554,28 @@ abstract class SearchObject_Base
      */
     protected function initView()
     {
-        //********************
-        // RSS feed? We should only see this in GET from a url.
-        if (isset($_REQUEST['view']) && ($_REQUEST['view'] == 'rss')) {
-            $this->view = 'rss';
+        // Check for a view parameter in the url.
+        if (isset($_REQUEST['view'])) {
+            if ($_REQUEST['view'] == 'rss') {
+                // we don't want to store rss in the Session variable
+                $this->view = 'rss';
+            } else {
+                // store non-rss views in Session for persistence
+                $validViews = $this->getViewOptions();
+                // make sure the url parameter is a valid view
+                if (in_array($_REQUEST['view'], array_keys($validViews))) {
+                    $this->view = $_REQUEST['view'];
+                    $_SESSION['lastView'] = $this->view;	
+                } else {
+                    $this->view = $this->defaultView;
+                }
+            }
+        } else if (isset($_SESSION['lastView'])) {
+            // if there is nothing in the URL, check the Session variable
+            $this->view = $_SESSION['lastView'];
+        } else {
+            // otherwise load the default
+            $this->view = $this->defaultView;
         }
     }
 
@@ -815,7 +836,50 @@ abstract class SearchObject_Base
         }
         return $list;
     }
+    /**
+     * Return a url for the current search with a new view
+     *
+     * @param string $newView The new view
+     * 
+     * @return string         URL of a new search
+     * @access public
+     */
+    public function renderLinkWithView($newView)
+    {
+        // Stash our old data for a minute
+        $oldView = $this->view;
+        // Add the new sort
+        $this->view = $newView;
+        // Get the new url
+        $url = $this->renderSearchUrl();
+        // Restore the old data
+        $this->view = $oldView;
+        // Return the URL
+        return $url;
+    }
 
+    /**
+     * Return a list of urls for possible views, along with which option
+     *    should be currently selected.
+     *
+     * @return array View urls, descriptions and selected flags
+     * @access public
+     */
+    public function getViewList()
+    {
+        // Loop through all the current views
+        $valid = $this->getViewOptions();
+        $list = array();
+        foreach ($valid as $view => $desc) {
+            $list[$view] = array(
+                'viewType' => $view,
+                'viewUrl'  => $this->renderLinkWithView($view),
+                'desc' => $desc,
+                'selected' => ($view == $this->view)
+            );
+        }
+        return $list;
+    }
     /**
      * Basic 'getter' for advanced types.
      *
@@ -1003,7 +1067,18 @@ abstract class SearchObject_Base
     {
         return $this->sortOptions;
     }
-
+    /**
+     * Get an array of view options; protected since this should not be used
+     * outside of the class.
+     *
+     * @access protected
+     * @return array
+     */
+    protected function getViewOptions()
+    {
+        return $this->viewOptions;
+    }
+       
     /**
      * Reset a simple query against the default index.
      *

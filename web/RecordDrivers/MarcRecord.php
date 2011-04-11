@@ -190,21 +190,23 @@ class MarcRecord extends IndexRecord
     }
 
     /**
-     * Assign necessary Smarty variables and return a template name to
+     * Assign necessary Smarty variables and return a template name for the current view to
      * load in order to display a summary of the item suitable for use in
      * search results.
      *
-     * @return string Name of Smarty template file to display.
+     * @param string $view The current view.
+     * 
+     * @return string      Name of Smarty template file to display.
      * @access public
      */
-    public function getSearchResult()
+    public function getSearchResult($view = 'list')
     {
         global $interface;
 
         // MARC results work just like index results, except that we want to
         // enable the AJAX status display since we assume that MARC records
         // come from the ILS:
-        $template = parent::getSearchResult();
+        $template = parent::getSearchResult($view);
         $interface->assign('summAjaxStatus', true);
         return $template;
     }

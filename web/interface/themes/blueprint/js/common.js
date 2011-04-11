@@ -53,6 +53,16 @@ $(document).ready(function(){
     $('input[type="checkbox"].selectAllCheckboxes').change(function(){
         $(this.form).find('input[type="checkbox"]').attr('checked', $(this).attr('checked'));
     });
+    
+    // attach mouseover event to grid view records
+    $('.gridCellHover').mouseover(function() {
+        $(this).addClass('gridMouseOver')
+    });
+    
+    // attach mouseout event to grid view records
+    $('.gridCellHover').mouseout(function() {
+        $(this).removeClass('gridMouseOver')
+    });  
 });
 
 function toggleMenu(elemId) {

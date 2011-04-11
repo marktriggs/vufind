@@ -662,10 +662,12 @@ class IndexRecord implements RecordInterface
      * load in order to display a summary of the item suitable for use in
      * search results.
      *
-     * @return string Name of Smarty template file to display.
+     * @param string $view The current view.
+     * 
+     * @return string      Name of Smarty template file to display.
      * @access public
      */
-    public function getSearchResult()
+    public function getSearchResult($view = 'list')
     {
         global $configArray;
         global $interface;
@@ -679,6 +681,7 @@ class IndexRecord implements RecordInterface
         $interface->assign('summDate', $this->getPublicationDates());
         $interface->assign('summISBN', $this->getCleanISBN());
         $interface->assign('summThumb', $this->getThumbnail());
+        $interface->assign('summThumbLarge', $this->getThumbnail('large'));
         $issn = $this->getCleanISSN();
         $interface->assign('summISSN', $issn);
         $interface->assign('summLCCN', $this->getLCCN());
@@ -719,7 +722,7 @@ class IndexRecord implements RecordInterface
         $interface->assign('summAjaxStatus', false);
 
         // Send back the template to display:
-        return 'RecordDrivers/Index/result.tpl';
+        return 'RecordDrivers/Index/result-' . $view . '.tpl';
     }
 
     /**

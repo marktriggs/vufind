@@ -336,9 +336,9 @@ ul.recordSet .addToFavLink {
     font-size: 90%;
 }
 .resulthead {
-    padding:.4em;
-    margin-bottom:.5em;
+    padding:.4em .4em 0em .4em;
     border-bottom: 1px #eee solid;
+    position: relative;
 }
 .savedLists { 
     margin-top: .4em; 
@@ -1149,4 +1149,57 @@ div.debug code {
 .olSubjectMore {
     text-align:right;
     text-decoration:none;
+}
+
+/* Grid View */
+
+.hitCount {
+    position: absolute;
+    bottom: 0px;
+}
+
+.viewButtons {
+     text-align: right;
+}
+
+.gridImageBox {
+    text-align:center; 
+    width:155px; 
+    height:130px; 
+    overflow:hidden; 
+    display:block;
+}
+
+.gridImage{
+    height:130px;
+}
+
+.gridTitleBox {
+    height:55px; 
+    display:block; 
+    text-align:center; 
+    font-size:86%;
+    width:155px;
+}
+
+.gridTitle {
+    display:block;
+    height:40px;
+    overflow:hidden;
+    line-height:1.2em;
+}
+
+td.gridCell {
+    width: 25%;
+}
+
+tr:nth-child(even) td.gridCell {background-color:white;}
+
+/* These two separate styles cannot be combined; they are both needed for
+   cross-browser support. */
+tr:nth-child(even) td.gridMouseOver {
+    background-color:#f5f5f5;
+}
+.gridMouseOver {
+    background-color:#f5f5f5;
 }

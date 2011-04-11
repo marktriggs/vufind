@@ -9,7 +9,7 @@
 
   {* Listing Options *}
   <div class="resulthead">
-    <div class="floatleft">
+    <div class="floatleft hitCount">
       {if $recordCount}
         {translate text="Showing"}
         <strong>{$recordStart}</strong> - <strong>{$recordEnd}</strong>
@@ -28,6 +28,12 @@
     </div>
 
     <div class="floatright">
+      <div class="viewButtons">
+      {if $viewList|@count gt 1}
+        {foreach from=$viewList item=viewData key=viewLabel}
+          {if !$viewData.selected}<a href="{$viewData.viewUrl|escape}" title="{translate text='Switch view to'} {translate text=$viewData.desc}" >{/if}<img src="{$path}/images/view_{$viewData.viewType}.png" {if $viewData.selected}title="{translate text=$viewData.desc} {translate text='view already selected'}"{/if}/>{if !$viewData.selected}</a>{/if}
+        {/foreach}
+      {/if}</div>
       <form action="{$path}/Search/SortResults" method="post">
         <label for="sort_options_1">{translate text='Sort'}</label>
         <select id="sort_options_1" name="sort" class="jumpMenu">

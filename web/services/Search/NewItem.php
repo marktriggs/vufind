@@ -82,6 +82,10 @@ class NewItem extends Action
             // Must have atleast Action and Module set to continue
             $interface->setPageTitle('New Item Search Results');
             $interface->setTemplate('newitem-list.tpl');
+            //Get view & load template
+            $currentView  = $searchObject->getView();
+            $interface->assign('subpage', 'Search/list-' . $currentView .'.tpl');
+            $interface->assign('viewList',   $searchObject->getViewList());
             $interface->assign('sortList', $searchObject->getSortList());
             $interface->assign('rssLink', $searchObject->getRSSUrl());
 

@@ -39,7 +39,11 @@
         </div>
         {* End Listing Options *}
 
-        {include file="Search/list-list.tpl"}
+        {if $subpage}
+          {include file=$subpage}
+        {else}
+          {$pageContent}
+        {/if}
 
       {if $pageLinks.all}<div class="pagination">{$pageLinks.all}</div>{/if}
       

@@ -115,9 +115,11 @@ class SearchObject_Solr extends SearchObject_Base
         if (isset($searchSettings['General']['default_sort'])) {
             $this->defaultSort = $searchSettings['General']['default_sort'];
         }
-        if (isset($searchSettings['DefaultSortingByType'])
-            && is_array($searchSettings['DefaultSortingByType'])
-        ) {
+        if (isset($searchSettings['General']['default_view'])) {
+            $this->defaultView = $searchSettings['General']['default_view'];
+        }
+        if (isset($searchSettings['DefaultSortingByType']) && 
+            is_array($searchSettings['DefaultSortingByType'])) {
             $this->defaultSortByType = $searchSettings['DefaultSortingByType'];
         }
         if (isset($searchSettings['Basic_Searches'])) {
@@ -138,6 +140,15 @@ class SearchObject_Solr extends SearchObject_Base
                 'year' => 'sort_year', 'year asc' => 'sort_year asc',
                 'callnumber' => 'sort_callnumber', 'author' => 'sort_author',
                 'title' => 'sort_title');
+        }
+        
+        // Load view preferences (or defaults if none in .ini file):
+        if (isset($searchSettings['Views'])) {
+            $this->viewOptions = $searchSettings['Views'];
+        } elseif (isset($searchSettings['General']['default_view'])) {
+            $this->viewOptions = array($this->defaultView => $this->defaultView);
+        } else {
+            $this->viewOptions = array('list' => 'List');
         }
 
         // Load Spelling preferences
@@ -476,12 +487,13 @@ class SearchObject_Solr extends SearchObject_Base
     public function getResultRecordHTML()
     {
         global $interface;
-
+        
+        $currentView = $this->getView();
         $html = array();
         for ($x = 0; $x < count($this->indexResult['response']['docs']); $x++) {
             $current = & $this->indexResult['response']['docs'][$x];
             $record = RecordDriverFactory::initRecordDriver($current);
-            $html[] = $interface->fetch($record->getSearchResult());
+            $html[] = $interface->fetch($record->getSearchResult($currentView));
         }
         return $html;
     }

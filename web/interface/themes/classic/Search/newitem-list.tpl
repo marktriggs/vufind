@@ -38,7 +38,7 @@
         </div>
         {* End Listing Options *}
 
-        {include file="Search/list-list.tpl"}
+        {include file=$subpage}
 
       {if $pageLinks.all}<div class="pagination">{$pageLinks.all}</div>{/if}
       

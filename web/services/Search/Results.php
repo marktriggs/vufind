@@ -103,6 +103,7 @@ class Results extends Action
             (empty($displayQuery) ? '' : ' - ' . htmlspecialchars($displayQuery))
         );
         $interface->assign('sortList',   $searchObject->getSortList());
+        $interface->assign('viewList',   $searchObject->getViewList());
         $interface->assign('rssLink',    $searchObject->getRSSUrl());
 
         // Process Search
@@ -180,7 +181,10 @@ class Results extends Action
             $interface->assign('recordSet', $searchObject->getResultRecordHTML());
 
             // Setup Display
-            $interface->assign('subpage', 'Search/list-list.tpl');
+            
+            //Get view & load template
+            $currentView  = $searchObject->getView();
+            $interface->assign('subpage', 'Search/list-' . $currentView .'.tpl');
             $interface->setTemplate('list.tpl');
 
             // Process Paging

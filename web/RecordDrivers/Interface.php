@@ -210,14 +210,16 @@ interface RecordInterface
     public function getReviews();
 
     /**
-     * Assign necessary Smarty variables and return a template name to
+     * Assign necessary Smarty variables and return a template name for the current view to
      * load in order to display a summary of the item suitable for use in
      * search results.
      *
-     * @return string Name of Smarty template file to display.
+     * @param string $view The current view.
+     * 
+     * @return string      Name of Smarty template file to display.
      * @access public
      */
-    public function getSearchResult();
+    public function getSearchResult($view = 'list');
 
     /**
      * Assign necessary Smarty variables and return a template name to 
