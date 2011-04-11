@@ -62,8 +62,8 @@ class HorizonTest extends PHPUnit_Framework_TestCase
     public function testConstructor()
     {
         // Construct object to ensure that everything parses correctly:
-        $virtua = new Horizon();
-        $this->assertEquals(is_object($virtua), true);
+        $driver = new Horizon();
+        $this->assertEquals(is_object($driver), true);
     }
 
     /**

@@ -81,15 +81,19 @@ class Horizon implements DriverInterface
      */
     public function getHolding($id)
     {
-        // Query holding information based on id field defined in import/marc.properties
-        $sql = "select item.item# as ITEM_NUM, item.item_status as STATUS_CODE, item_status.descr as STATUS, " .
-             "location.name as LOCATION, item.call_reconstructed as CALLNUMBER, " .
-             "item.ibarcode as ITEM_BARCODE, convert(varchar(12), " .
-             "dateadd(dd,item.due_date,'jan 1 1970')) as DUEDATE, item.copy_reconstructed as ITEM_SEQUENCE_NUMBER, ".
-             "substring(collection.pac_descr,5,40) as COLLECTION from item " .
-             "inner join item_status on item.item_status = item_status.item_status " .
-             "inner join location on item.location = location.location " .
-             "inner join collection on item.collection = collection.collection where item.bib# = $id";
+        // Query holding information based on id field defined in
+        // import/marc.properties
+        $sql = "select item.item# as ITEM_NUM, item.item_status as STATUS_CODE, " .
+            "item_status.descr as STATUS, " .
+            "location.name as LOCATION, item.call_reconstructed as CALLNUMBER, " .
+            "item.ibarcode as ITEM_BARCODE, convert(varchar(12), " .
+            "dateadd(dd,item.due_date,'jan 1 1970')) as DUEDATE, " .
+            "item.copy_reconstructed as ITEM_SEQUENCE_NUMBER, ".
+            "substring(collection.pac_descr,5,40) as COLLECTION from item " .
+            "inner join item_status on item.item_status = item_status.item_status " .
+            "inner join location on item.location = location.location " .
+            "inner join collection on item.collection = " .
+            "collection.collection where item.bib# = " . addslashes($id);
 
         try {
             $holding = array();
@@ -213,10 +217,14 @@ class Horizon implements DriverInterface
      */
     public function patronLogin($username, $password)
     {
-        $sql = "select name_reconstructed as FULLNAME, email_address as EMAIL from borrower " .
-               "left outer join borrower_address on borrower_address.borrower#=borrower.borrower# " .
-               "inner join borrower_barcode on borrower.borrower#=borrower_barcode.borrower# " .
-               "where borrower_barcode.bbarcode=\"$username\" and pin# = \"$password\"";
+        $sql = "select name_reconstructed as FULLNAME, " .
+            "email_address as EMAIL from borrower " .
+            "left outer join borrower_address on " .
+            "borrower_address.borrower#=borrower.borrower# " .
+            "inner join borrower_barcode on " .
+            "borrower.borrower#=borrower_barcode.borrower# " .
+            "where borrower_barcode.bbarcode=\"" . addslashes($username) .
+            "\" and pin# = \"" . addslashes($password) . "\"";
 
         try {
             $user = array();
@@ -256,10 +264,14 @@ class Horizon implements DriverInterface
     public function getMyHolds($patron)
     {
         $sql = "select bib# as BIB_NUM, request_location as LOCATION, " .
-               "convert(varchar(12),dateadd(dd, hold_exp_date, '1 jan 1970')) as EXPIRE, " .
-               "convert(varchar(12),dateadd(dd, request_date, '1 jan 1970')) as CREATED from request " .
-               "join borrower_barcode on borrower_barcode.borrower#=request.borrower# " .
-               "where borrower_barcode.bbarcode=\"" . $patron['id'] . "\"";
+               "convert(varchar(12),dateadd(dd, hold_exp_date, '1 jan 1970')) " .
+               "as EXPIRE, " .
+               "convert(varchar(12),dateadd(dd, request_date, '1 jan 1970')) " .
+               "as CREATED from request " .
+               "join borrower_barcode on " .
+               "borrower_barcode.borrower#=request.borrower# " .
+               "where borrower_barcode.bbarcode=\"" .
+               addslashes($patron['id']) . "\"";
 
         try {
             $sqlStmt = mssql_query($sql);
@@ -294,12 +306,15 @@ class Horizon implements DriverInterface
     {
         $sql = "select item.bib# as BIB_NUM, item.item# as ITEM_NUM, " .
                "burb.borrower# as BORROWER_NUM, burb.amount as AMOUNT, " .
-               "convert(varchar(12),dateadd(dd, burb.date, '01 jan 1970')) as DUEDATE, " .
+               "convert(varchar(12),dateadd(dd, burb.date, '01 jan 1970')) " .
+               "as DUEDATE, " .
                "burb.block as FINE, burb.amount as BALANCE from burb " .
                "join item on item.item#=burb.item# " .
                "join borrower on borrower.borrower#=burb.borrower# " .
-               "join borrower_barcode on borrower_barcode.borrower#=burb.borrower# " .
-               "where borrower_barcode.bbarcode=\"" . $patron['id'] . "\" and amount != 0";
+               "join borrower_barcode on " .
+               "borrower_barcode.borrower#=burb.borrower# " .
+               "where borrower_barcode.bbarcode=\"" . addslashes($patron['id']) .
+               "\" and amount != 0";
 
         try {
             $sqlStmt = mssql_query($sql);
@@ -314,18 +329,22 @@ class Horizon implements DriverInterface
                 $balance += $amount;
 
                 if (isset($bib_num) && isset($item_num)) {
-                    $cko = "select convert(varchar(12),dateadd(dd, date, '01 jan 1970')) as CHECKOUT " .
-                           "from burb where borrower#=" . $borrower_num . " " .
-                           "and item#=" . $item_num . " and block=\"infocko\"";
+                    $cko = "select convert(varchar(12)," .
+                        "dateadd(dd, date, '01 jan 1970')) as CHECKOUT " .
+                        "from burb where borrower#=" . addslashes($borrower_num) .
+                        " and item#=" . addslashes($item_num) .
+                        " and block=\"infocko\"";
                     $sqlStmt_cko = mssql_query($cko);
 
                     if ($row_cko = mssql_fetch_assoc($sqlStmt_cko)) {
                         $checkout = $row_cko['CHECKOUT'];
                     }
 
-                    $due = "select convert(varchar(12),dateadd(dd, date, '01 jan 1970')) as DUEDATE " .
-                           "from burb where borrower#=" . $borrower_num . " " .
-                           "and item#=" . $item_num . " and block=\"infodue\"";
+                    $due = "select convert(varchar(12)," .
+                        "dateadd(dd, date, '01 jan 1970')) as DUEDATE " .
+                        "from burb where borrower#=" . addslashes($borrower_num) .
+                        " and item#=" . addslashes($item_num) .
+                        " and block=\"infodue\"";
                     $sqlStmt_due = mssql_query($due);
 
                     if ($row_due = mssql_fetch_assoc($sqlStmt_due)) {
@@ -360,13 +379,17 @@ class Horizon implements DriverInterface
      */
     public function getMyProfile($patron)
     {
-        $sql = "select name_reconstructed as FULLNAME, address1 as ADDRESS1, city_st.descr as ADDRESS2, " .
-               "postal_code as ZIP, phone_no as PHONE from borrower " .
-               "left outer join borrower_phone on borrower_phone.borrower#=borrower.borrower# " .
-               "inner join borrower_address on borrower_address.borrower#=borrower.borrower# " .
-               "inner join city_st on city_st.city_st=borrower_address.city_st " .
-               "inner join borrower_barcode on borrower_barcode.borrower#=borrower.borrower# " .
-               "where borrower_barcode.bbarcode=\"" . $patron['id'] . "\"";
+        $sql = "select name_reconstructed as FULLNAME, address1 as ADDRESS1, " .
+            "city_st.descr as ADDRESS2, postal_code as ZIP, phone_no as PHONE " .
+            "from borrower " .
+            "left outer join borrower_phone on " .
+            "borrower_phone.borrower#=borrower.borrower# " .
+            "inner join borrower_address on " .
+            "borrower_address.borrower#=borrower.borrower# " .
+            "inner join city_st on city_st.city_st=borrower_address.city_st " .
+            "inner join borrower_barcode on " .
+            "borrower_barcode.borrower#=borrower.borrower# " .
+            "where borrower_barcode.bbarcode=\"" . addslashes($patron['id']) . "\"";
 
         try {
             $sqlStmt = mssql_query($sql);
@@ -405,13 +428,16 @@ class Horizon implements DriverInterface
     public function getMyTransactions($patron)
     {
         $sql = "select item.bib# as BIB_NUM, item.ibarcode as ITEM_BARCODE, " .
-               "convert(varchar(12), dateadd(dd, item.due_date, '01 jan 1970')) as DUEDATE, " .
-               "item.n_renewals as RENEW, request.bib_queue_ord as REQUEST from circ " .
+               "convert(varchar(12), dateadd(dd, item.due_date, '01 jan 1970')) " .
+               "as DUEDATE, " .
+               "item.n_renewals as RENEW, request.bib_queue_ord as REQUEST " .
+               "from circ " .
                "join item on item.item#=circ.item# " .
                "join borrower on borrower.borrower#=circ.borrower# " .
-               "join borrower_barcode on borrower_barcode.borrower#=circ.borrower# " .
-               "left outer join request on request.item#=circ.item# " .
-               "where borrower_barcode.bbarcode=\"" . $patron['id'] . "\"";
+               "join borrower_barcode on borrower_barcode.borrower#=circ.borrower#" .
+               " left outer join request on request.item#=circ.item# " .
+               "where borrower_barcode.bbarcode=\"" . addslashes($patron['id']) .
+               "\"";
 
         try {
             $sqlStmt = mssql_query($sql);
