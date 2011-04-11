@@ -68,7 +68,8 @@ while (isset($argv[1]) && substr($argv[1], 0, 1) == '-') {
 
 // Display help message if parameters missing:
 if (!isset($argv[2]) || $switchError) {
-    echo "Usage: {$progName} [--test-only] [--index <type>] XML_file properties_file\n" .
+    echo "Usage: {$progName} [--test-only] [--index <type>] XML_file " .
+        "properties_file\n" .
         "\tXML_file - source file to index\n" .
         "\tproperties_file - import configuration file\n" .
         "If the optional --test-only flag is set, transformed XML will be " .
