@@ -118,8 +118,9 @@ class SearchObject_Solr extends SearchObject_Base
         if (isset($searchSettings['General']['default_view'])) {
             $this->defaultView = $searchSettings['General']['default_view'];
         }
-        if (isset($searchSettings['DefaultSortingByType']) && 
-            is_array($searchSettings['DefaultSortingByType'])) {
+        if (isset($searchSettings['DefaultSortingByType'])
+            && is_array($searchSettings['DefaultSortingByType'])
+        ) {
             $this->defaultSortByType = $searchSettings['DefaultSortingByType'];
         }
         if (isset($searchSettings['Basic_Searches'])) {
