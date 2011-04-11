@@ -275,8 +275,9 @@ function translate($params)
     if (!is_object($translator)) {
         global $configArray;
 
-        $translator = new I18N_Translator('lang', $configArray['Site']['language'],
-            $configArray['System']['debug']);
+        $translator = new I18N_Translator(
+            'lang', $configArray['Site']['language'], $configArray['System']['debug']
+        );
     }
     if (is_array($params)) {
         return $translator->translate($params['text']);

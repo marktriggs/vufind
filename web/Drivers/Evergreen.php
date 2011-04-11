@@ -50,7 +50,7 @@ class Evergreen implements DriverInterface
      *
      * @access public
      */
-    function __construct()
+    public function __construct()
     {
         // Load Configuration for this Module
         $this->_config = parse_ini_file('conf/Evergreen.ini', true);
@@ -59,16 +59,18 @@ class Evergreen implements DriverInterface
         $this->_dbName = $this->_config['Catalog']['database'];
 
         try {
-            $this->_db = new PDO('pgsql:host='
-                                .$this->_config['Catalog']['hostname']
-                                .' user='
-                                .$this->_config['Catalog']['user']
-                                .' dbname='
-                                .$this->_config['Catalog']['database']
-                                .' password='
-                                .$this->_config['Catalog']['password']
-                                .' port='
-                                .$this->_config['Catalog']['port']);
+            $this->_db = new PDO(
+                'pgsql:host='
+                .$this->_config['Catalog']['hostname']
+                .' user='
+                .$this->_config['Catalog']['user']
+                .' dbname='
+                .$this->_config['Catalog']['database']
+                .' password='
+                .$this->_config['Catalog']['password']
+                .' port='
+                .$this->_config['Catalog']['port']
+            );
         } catch (PDOException $e) {
             throw $e;
         }
@@ -690,7 +692,7 @@ class Evergreen implements DriverInterface
      * @return array ID numbers of suppressed records in the system.
      * @access public
      */
-    function getSuppressedRecords()
+    public function getSuppressedRecords()
     {
         $list = array();
 

@@ -148,7 +148,7 @@ class ConfigurationReader
     private function _checkIfSectionExists()
     {
         if (empty($this->_configurationFileContent[$this->_sectionName])) {
-            throw new UnexpectedValueException (
+            throw new UnexpectedValueException(
                 "Section {$this->_sectionName} does not exist! Could not proceed."
             );
         }
