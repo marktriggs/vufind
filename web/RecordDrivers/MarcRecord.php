@@ -190,8 +190,8 @@ class MarcRecord extends IndexRecord
     }
 
     /**
-     * Assign necessary Smarty variables and return a template name for the current view to
-     * load in order to display a summary of the item suitable for use in
+     * Assign necessary Smarty variables and return a template name for the current
+     * view to load in order to display a summary of the item suitable for use in
      * search results.
      *
      * @param string $view The current view.
