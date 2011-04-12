@@ -140,7 +140,7 @@ class Logger
             // Each section of the config string may have a detail level on the
             // end following a dash -- parse this out and default to 1 if no valid
             // setting is found:
-            list($logType, $currentVerbosity) = explode('-', $setting);
+            @list($logType, $currentVerbosity) = explode('-', $setting);
             if (empty($currentVerbosity) || !is_numeric($currentVerbosity)) {
                 $currentVerbosity = 1;
             }
