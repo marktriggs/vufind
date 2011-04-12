@@ -57,8 +57,8 @@
           </div>
 
           <div class="resultItemLine4">
-            {if $record.URI && (!$openUrlBase || !$record.hasFullText)}
-            <a href="{$record.URI.0|escape}" class="fulltext">{translate text='Get full text'}</a>
+            {if $record.url && (!$openUrlBase || !$record.hasFullText)}
+            <a href="{$record.url.0|escape}" class="fulltext">{translate text='Get full text'}</a>
             {elseif $openUrlBase}
             {include file="Search/openurl.tpl" openUrl=$record.openUrl}
             {/if}
