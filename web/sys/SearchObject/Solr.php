@@ -755,8 +755,10 @@ class SearchObject_Solr extends SearchObject_Base
         // Author Home screen
         case "author":
             if ($this->searchSubType == 'home') {
+                // Reverse query manipulation from init() for consistent paging:
+                $term = str_replace('\"', '"', $this->searchTerms[0]['lookfor']);
                 $params[] = "author="  .
-                    urlencode($this->searchTerms[0]['lookfor']);
+                    urlencode(substr($term, 1, strlen($term) - 2));
             }
             if ($this->searchSubType == 'search') {
                 $params[] = "lookfor=" .
