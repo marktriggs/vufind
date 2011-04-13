@@ -245,12 +245,12 @@ class SearchObject_Solr extends SearchObject_Base
                 $this->searchSubType = 'home';
                 // Remove our empty basic search (default)
                 $this->searchTerms = array();
-                // Prepare the search as a normal author search
-                $unquotedAuthor = str_replace('"', '', $_REQUEST['author']);
+                // Prepare the search as a normal author search (with escaped quotes)
+                $escapedAuthor = str_replace('"', '\"', $_REQUEST['author']);
                 $this->searchTerms[] = array(
                     'index'   => 'Author',
                     // Force phrase search for improved accuracy:
-                    'lookfor' => '"' . $unquotedAuthor . '"'
+                    'lookfor' => '"' . $escapedAuthor . '"'
                 );
             }
 
