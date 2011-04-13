@@ -9,7 +9,7 @@
  *
  * Copyright (C) Markus Fischer, info@flyingfischer.ch
  *
- * last update: 2010-11-17
+ * last update: 2011-04-13
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2,
