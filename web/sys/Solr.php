@@ -578,13 +578,22 @@ class Solr implements IndexEngine
             return $field . ':(' . $lookfor . ')';
         }
 
-        // Munge the user query in a few different ways:
-        $customMunge = isset($ss['CustomMunge']) ? $ss['CustomMunge'] : null;
-        $values
-            = $this->_buildMungeValues($field, $lookfor, $customMunge, $basic);
+        // If this is a basic query and we have Dismax settings, let's build
+        // a Dismax subquery to avoid some of the ugly side effects of our Lucene
+        // query generation logic.
+        if ($basic && isset($ss['DismaxFields'])) {
+            $qf = implode(' ', $ss['DismaxFields']);
+            $dismaxQuery = '{!dismax qf="' . $qf . '"}' . $lookfor;
+            $baseQuery = '_query_:"' . addslashes($dismaxQuery) . '"';
+        } else {
+            // Munge the user query in a few different ways:
+            $customMunge = isset($ss['CustomMunge']) ? $ss['CustomMunge'] : null;
+            $values
+                = $this->_buildMungeValues($field, $lookfor, $customMunge, $basic);
 
-        // Apply the $searchSpecs property to the data:
-        $baseQuery = $this->_applySearchSpecs($ss['QueryFields'], $values);
+            // Apply the $searchSpecs property to the data:
+            $baseQuery = $this->_applySearchSpecs($ss['QueryFields'], $values);
+        }
 
         // Apply filter query if applicable:
         if (isset($ss['FilterQuery'])) {
