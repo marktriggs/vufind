@@ -838,13 +838,11 @@ class Solr implements IndexEngine
                     }
                 }
             } else {
-                // Not DisMax... but do we need to format the query based on
-                // a setting in the YAML search specs?  If $ss is an array
-                // at this point, it indicates that we found YAML details.
-                if (is_array($ss)) {
+                // Not DisMax... but if we have a handler set, we may still need
+                // to build a query using a setting in the YAML search specs or a
+                // simple field name:
+                if (!empty($handler)) {
                     $options['q'] = $this->_buildQueryComponent($handler, $query);
-                } else if (!empty($handler)) {
-                    $options['q'] = "({$handler}:{$query})";
                 }
             }
         } else {
