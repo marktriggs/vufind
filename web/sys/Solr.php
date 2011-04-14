@@ -488,15 +488,16 @@ class Solr implements IndexEngine
      * @param string $field    The YAML search spec field name to search
      * @param string $lookfor  The string to search for in the field
      * @param array  $custom   Custom munge settings from YAML search specs
-     * @param bool   $tokenize Should we tokenize $lookfor or pass it through?
+     * @param bool   $basic    Is $lookfor a basic (true) or advanced (false) query?
      *
      * @return  array          Array for use as _applySearchSpecs() values param
      * @access  private
      */
     private function _buildMungeValues($field, $lookfor, $custom = null,
-        $tokenize = true
+        $basic = true
     ) {
-        if ($tokenize) {
+        // Only tokenize basic queries:
+        if ($basic) {
             // Tokenize Input
             $tokenized = $this->tokenizeInput($lookfor);
 
@@ -528,8 +529,8 @@ class Solr implements IndexEngine
             foreach ($custom as $mungeName => $mungeOps) {
                 $values[$mungeName] = $lookfor;
 
-                // Skip munging if tokenization is disabled.
-                if ($tokenize) {
+                // Skip munging of advanced queries:
+                if ($basic) {
                     foreach ($mungeOps as $operation) {
                         switch($operation[0]) {
                         case 'append':
@@ -561,12 +562,12 @@ class Solr implements IndexEngine
      *
      * @param string $field    The YAML search spec field name to search
      * @param string $lookfor  The string to search for in the field
-     * @param bool   $tokenize Should we tokenize $lookfor or pass it through?
+     * @param bool   $basic    Is $lookfor a basic (true) or advanced (false) query?
      *
      * @return string          The query
      * @access private
      */
-    private function _buildQueryComponent($field, $lookfor, $tokenize = true)
+    private function _buildQueryComponent($field, $lookfor, $basic = true)
     {
         // Load the YAML search specifications:
         $ss = $this->_getSearchSpecs($field);
@@ -580,7 +581,7 @@ class Solr implements IndexEngine
         // Munge the user query in a few different ways:
         $customMunge = isset($ss['CustomMunge']) ? $ss['CustomMunge'] : null;
         $values
-            = $this->_buildMungeValues($field, $lookfor, $customMunge, $tokenize);
+            = $this->_buildMungeValues($field, $lookfor, $customMunge, $basic);
 
         // Apply the $searchSpecs property to the data:
         $baseQuery = $this->_applySearchSpecs($ss['QueryFields'], $values);
@@ -637,7 +638,7 @@ class Solr implements IndexEngine
         }
 
         // We're now ready to use the regular YAML query handler but with the
-        // $tokenize parameter set to false so that we leave the advanced query
+        // $basic parameter set to false so that we leave the advanced query
         // features unmolested.
         return $this->_buildQueryComponent($handler, $query, false);
     }
