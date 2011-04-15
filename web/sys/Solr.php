@@ -485,12 +485,12 @@ class Solr implements IndexEngine
      * Given a field name and search string, return an array containing munged
      * versions of the search string for use in _applySearchSpecs().
      *
-     * @param string $field    The YAML search spec field name to search
-     * @param string $lookfor  The string to search for in the field
-     * @param array  $custom   Custom munge settings from YAML search specs
-     * @param bool   $basic    Is $lookfor a basic (true) or advanced (false) query?
+     * @param string $field   The YAML search spec field name to search
+     * @param string $lookfor The string to search for in the field
+     * @param array  $custom  Custom munge settings from YAML search specs
+     * @param bool   $basic   Is $lookfor a basic (true) or advanced (false) query?
      *
-     * @return  array          Array for use as _applySearchSpecs() values param
+     * @return  array         Array for use as _applySearchSpecs() values param
      * @access  private
      */
     private function _buildMungeValues($field, $lookfor, $custom = null,
@@ -560,11 +560,11 @@ class Solr implements IndexEngine
      * Given a field name and search string, expand this into the necessary Lucene
      * query to perform the specified search on the specified field(s).
      *
-     * @param string $field    The YAML search spec field name to search
-     * @param string $lookfor  The string to search for in the field
-     * @param bool   $basic    Is $lookfor a basic (true) or advanced (false) query?
+     * @param string $field   The YAML search spec field name to search
+     * @param string $lookfor The string to search for in the field
+     * @param bool   $basic   Is $lookfor a basic (true) or advanced (false) query?
      *
-     * @return string          The query
+     * @return string         The query
      * @access private
      */
     private function _buildQueryComponent($field, $lookfor, $basic = true)
@@ -583,7 +583,13 @@ class Solr implements IndexEngine
         // query generation logic.
         if ($basic && isset($ss['DismaxFields'])) {
             $qf = implode(' ', $ss['DismaxFields']);
-            $dismaxQuery = '{!dismax qf="' . $qf . '"}' . $lookfor;
+            $dmParams = '';
+            if (isset($ss['DismaxParams']) && is_array($ss['DismaxParams'])) {
+                foreach ($ss['DismaxParams'] as $current) {
+                    $dmParams .= ' ' . $current[0] . '="' . $current[1] . '"';
+                }
+            }
+            $dismaxQuery = '{!dismax qf="' . $qf . '"' . $dmParams . '}' . $lookfor;
             $baseQuery = '_query_:"' . addslashes($dismaxQuery) . '"';
         } else {
             // Munge the user query in a few different ways:
