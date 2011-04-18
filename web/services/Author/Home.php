@@ -55,7 +55,6 @@ class Home extends Action
     {
         global $configArray;
         global $interface;
-        global $user;
 
         // Initialise from the current search globals
         $searchObject = SearchObjectFactory::initSearchObject();
