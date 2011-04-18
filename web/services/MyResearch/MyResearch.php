@@ -74,22 +74,15 @@ class MyResearch extends Action
         $this->catalog = ConnectionManager::connectToCatalog();
 
         // Register Library Catalog Account
-        if (isset($_POST['submit']) && !empty($_POST['submit'])) {
-            if ($this->catalog && isset($_POST['cat_username'])
-                && isset($_POST['cat_password'])
-            ) {
-                $result = $this->catalog->patronLogin(
-                    $_POST['cat_username'], $_POST['cat_password']
-                );
-                if ($result && !PEAR::isError($result)) {
-                    $user->cat_username = $_POST['cat_username'];
-                    $user->cat_password = $_POST['cat_password'];
-                    $user->update();
-                    UserAccount::updateSession($user);
-                    $interface->assign('user', $user);
-                } else {
-                    $interface->assign('loginError', 'Invalid Patron Login');
-                }
+        if (isset($_POST['submit']) && !empty($_POST['submit']) && $this->catalog
+            && isset($_POST['cat_username']) && isset($_POST['cat_password'])
+        ) {
+            if (UserAccount::processCatalogLogin(
+                $_POST['cat_username'], $_POST['cat_password']
+            )) {
+                $interface->assign('user', $user);
+            } else {
+                $interface->assign('loginError', 'Invalid Patron Login');
             }
         }
 
@@ -109,38 +102,6 @@ class MyResearch extends Action
         $this->errorMsg = isset($_GET['errorMsg']) ? $_GET['errorMsg'] : false;
         $this->showExport = isset($_GET['showExport']) ? $_GET['showExport'] : false;
         $this->followUpUrl = false;
-    }
-
-    /**
-     * Log the current user into the catalog using stored credentials; if this
-     * fails, clear the user's stored credentials so they can enter new, corrected
-     * ones.
-     *
-     * @return mixed $user array (on success) or false (on failure)
-     * @access protected
-     */
-    protected function catalogLogin()
-    {
-        global $user;
-
-        if ($this->catalog->status) {
-            if ($user->cat_username) {
-                $patron = $this->catalog->patronLogin(
-                    $user->cat_username, $user->cat_password
-                );
-                if (empty($patron) || PEAR::isError($patron)) {
-                    // Problem logging in -- clear user credentials so they can be
-                    // prompted again; perhaps their password has changed in the
-                    // system!
-                    unset($user->cat_username);
-                    unset($user->cat_password);
-                } else {
-                    return $patron;
-                }
-            }
-        }
-
-        return false;
     }
 }
 

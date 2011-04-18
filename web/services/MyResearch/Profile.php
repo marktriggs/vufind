@@ -52,7 +52,7 @@ class Profile extends MyResearch
         global $interface;
 
         // Get My Profile
-        if ($patron = $this->catalogLogin()) {
+        if ($patron = UserAccount::catalogLogin()) {
             $result = $this->catalog->getMyProfile($patron);
             if (!PEAR::isError($result)) {
                 $interface->assign('profile', $result);

@@ -54,15 +54,16 @@ class Fines extends MyResearch
         global $finesIndexEngine;
 
         // Get My Fines
-        if ($patron = $this->catalogLogin()) {
+        if ($patron = UserAccount::catalogLogin()) {
             if (PEAR::isError($patron)) {
                 PEAR::raiseError($patron);
             }
             $result = $this->catalog->getMyFines($patron);
             if (!PEAR::isError($result)) {
-                // assign the "raw" fines data to the template so it can be formatted 
+                // assign the "raw" fines data to the template so it can be formatted
                 // by the smarty template instead of using DataGrid
-                // NOTE: could use foreach($result as &$row) here but it only works with PHP5
+                // NOTE: could use foreach($result as &$row) here but it only works
+                // with PHP5
                 for ($i = 0; $i < count($result); $i++) {
                     $row = &$result[$i];
                     $record = $this->db->getRecord($row['id']);

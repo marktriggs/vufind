@@ -51,7 +51,7 @@ class Holds extends MyResearch
         global $interface;
 
         // Get My Holds
-        if ($patron = $this->catalogLogin()) {
+        if ($patron = UserAccount::catalogLogin()) {
             if (PEAR::isError($patron)) {
                 PEAR::raiseError($patron);
             }

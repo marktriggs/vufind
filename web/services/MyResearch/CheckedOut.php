@@ -51,7 +51,7 @@ class CheckedOut extends MyResearch
         global $interface;
 
         // Get My Transactions
-        if ($patron = $this->catalogLogin()) {
+        if ($patron = UserAccount::catalogLogin()) {
             $result = $this->catalog->getMyTransactions($patron);
             if (!PEAR::isError($result)) {
                 $transList = array();
