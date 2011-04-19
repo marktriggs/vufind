@@ -726,11 +726,12 @@ class MarcRecord extends IndexRecord
         $matches = array();
         $currentLine = '';
 
-        // Loop through all specified subfields, collecting results:
-        foreach ($subfields as $subfield) {
-            $subfieldsResult = $currentField->getSubfields($subfield);
-            if (is_array($subfieldsResult)) {
-                foreach ($subfieldsResult as $currentSubfield) {
+        // Loop through all subfields, collecting results that match the whitelist;
+        // note that it is important to retain the original MARC order here!
+        $allSubfields = $currentField->getSubfields();
+        if (count($allSubfields) > 0) {
+            foreach ($allSubfields as $currentSubfield) {
+                if (in_array($currentSubfield->getCode(), $subfields)) {
                     // Grab the current subfield value and act on it if it is
                     // non-empty:
                     $data = trim($currentSubfield->getData());
