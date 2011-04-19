@@ -62,6 +62,12 @@ class SeleniumTestCase extends PHPUnit_Extensions_SeleniumTestCase
     protected $apa_text;            // APA citation text title
     protected $mla_test;            // MLA citation text title
 
+    /* Record section table column names */
+    protected $rec_row0,$rec_row1,$rec_row3,$rec_row4,$rec_row5,$rec_row6,$rec_row7;
+
+    protected $def_rec_tab;            // Default record tab
+    protected $debug =  false;            // Debug Flag
+
     /**
      * Standard setup method.
      *
@@ -70,6 +76,11 @@ class SeleniumTestCase extends PHPUnit_Extensions_SeleniumTestCase
      */
     public function setUp()
     {
+        $this->debug = getenv('TEST_DEBUG');
+        $debStatus = $this->debug
+            ? "SET" : "NOT SET (set it by setting env variable TEST_DEBUG to 1)";
+        $this->debugPrint("Debug Flag is $debStatus\n");
+
         //echo "\nCalling Setup\n";
         $configArray = parse_ini_file(
             dirname(__FILE__) . '/../../../web/conf/config.ini', true
@@ -87,7 +98,15 @@ class SeleniumTestCase extends PHPUnit_Extensions_SeleniumTestCase
         preg_match('/https?:\/\/([^\/]*).*/', $this->baseUrl, $matches);
         $this->hostname = $matches[1];
 
+        // Set the debug flag value
+         /*if ($configArray['System']['debug'])
+         {
+                 $this->debug = true;
+         }*/
+
         // Extract the variables from en.ini file
+
+        /*  CITE,EMAIL,TEXT functionality constants BEGIN */
         $this->sms_sending = $iniArray['sms_sending'];
         $this->sms_failure = preg_replace('/\s\s+/', ' ', $iniArray['sms_failure']);
         $this->sms_success = preg_replace('/\s\s+/', ' ', $iniArray['sms_success']);
@@ -107,9 +126,24 @@ class SeleniumTestCase extends PHPUnit_Extensions_SeleniumTestCase
         $this->email_sndr_err = preg_replace(
             '/\s\s+/', ' ', $iniArray['Invalid Sender Email Address']
         );
-
         $this->apa_text    = preg_replace('/\s\s+/', ' ', $iniArray['APA Citation']);
         $this->mla_text    = preg_replace('/\s\s+/', ' ', $iniArray['MLA Citation']);
+
+        /*  CITE,EMAIL,TEXT functionality constants END */
+
+        /*  Bibliographic Details constants BEGIN */
+        $this->rec_row0 = $iniArray['New Title'];
+        $this->rec_row1 = $iniArray['Previous Title'];
+        $this->rec_row2 = $iniArray['Other Authors'];
+        $this->rec_row3 = $iniArray['Format'];
+        $this->rec_row4 = $iniArray['Language'];
+        $this->rec_row5 = $iniArray['Published'];
+        $this->rec_row6 = $iniArray['Subjects'];
+        $this->rec_row7 = $iniArray['Tags'];
+
+        /*  Bibliographic Details constants END */
+
+        $this->def_rec_tab = $configArray['Site']['defaultRecordTab'];
 
         $this->setBrowser('*firefox');
         $this->setBrowserUrl($this->baseUrl);
@@ -124,6 +158,70 @@ class SeleniumTestCase extends PHPUnit_Extensions_SeleniumTestCase
     public function tearDown()
     {
         $this->stop();
+    }
+
+    /**
+     * Common function to verify that a given table contents are correct
+     * Output : Message stating the matching rows and unmatched rows
+     *
+     * @param string $tablename Class of table to read
+     * @param string $parentdiv Class of div containing table to read
+     * @param array  $tablearr  Associative array of key=> value pair where "key"
+     * is the column1 value and "value" is column2 value of table
+     *
+     * @return void
+     * @access public
+     */
+    public function validateTable($tablename, $parentdiv, $tablearr)
+    {
+        $tablecnt = $this->getXpathCount(
+            "//div[@class='$parentdiv']/table[@class='$tablename']/tbody/tr"
+        );
+
+        if (count($tablearr)) {
+            $this->debugPrint(
+                "\nValidating table class $tablename under class $parentdiv\n"
+            );
+
+            try {
+                // Scan through the table
+                for ($i = 1;$i <= $tablecnt;$i++) {
+                    $baseXpath = "css=div.$parentdiv table.$tablename" .
+                        ">tbody>tr:nth-child($i)";
+                    $table_key = chop($this->getText($baseXpath . ">th"), ":");
+                    if (array_key_exists($table_key, $tablearr)) {
+                        $this->debugPrint(
+                            "\n$i Test Key:$table_key\t " .
+                            "Test Value:$tablearr[$table_key]" .
+                            "\n   Table Key:" . $this->getText($baseXpath . ">th").
+                            "\t Table Value:" . $this->getText($baseXpath . ">td")
+                        );
+                        $this->assertElementContainsText(
+                            $baseXpath . ">td", $tablearr[$table_key], "Matched"
+                        );
+                    }
+                }
+            } catch (PHPUnit_Framework_Exception $e) {
+                 $this->debugPrint("Mismatch in record # $i");
+            }
+        } else {
+            $this->debugPrint("\nNo input records to validate\n");
+        }
+    }
+
+    /**
+     * Echo a message if debug is enabled.
+     *
+     * @param string $msg Message to print
+     *
+     * @return void
+     * @access private
+     */
+    protected function debugPrint($msg)
+    {
+        if ($this->debug) {
+            echo $msg;
+        }
     }
 }
 ?>
