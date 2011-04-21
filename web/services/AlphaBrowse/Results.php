@@ -64,15 +64,14 @@ class Results extends Home
         if ($source && $from) {
             // Load Solr data or die trying:
             $result = $db->alphabeticBrowse($source, $from, $page, $limit, true);
-            if (isset($result['error'])) {
-                // Special case --  missing alphabrowse index probably means the
-                // user could use a tip about how to build the index.
-                if (strstr($result['error'], 'does not exist')) {
-                    $result['error'] = "Alphabetic Browse index missing.  See " .
-                        "http://vufind.org/wiki/alphabetical_heading_browse for " .
-                        "details on generating the index.";
-                }
-                PEAR::raiseError(new PEAR_Error($result['error']));
+            $this->_checkError($result);
+
+            // No results?  Try the previous page just in case we've gone past the
+            // end of the list....
+            if ($result['Browse']['totalCount'] == 0) {
+                $page--;
+                $result = $db->alphabeticBrowse($source, $from, $page, $limit, true);
+                $this->_checkError($result);
             }
 
             // Only display next/previous page links when applicable:
@@ -91,6 +90,30 @@ class Results extends Home
 
         // We also need to load all the same details as the basic Home action:
         parent::launch();
+    }
+    
+    /**
+     * Given an alphabrowse response, die with an error if necessary.
+     *
+     * @param array $result Result to check.
+     *
+     * @return void
+     * @access private
+     */
+    private function _checkError($result)
+    {
+        if (isset($result['error'])) {
+            // Special case --  missing alphabrowse index probably means the
+            // user could use a tip about how to build the index.
+            if (strstr($result['error'], 'does not exist')
+                || strstr($result['error'], 'no such table')
+            ) {
+                $result['error'] = "Alphabetic Browse index missing.  See " .
+                    "http://vufind.org/wiki/alphabetical_heading_browse for " .
+                    "details on generating the index.";
+            }
+            PEAR::raiseError(new PEAR_Error($result['error']));
+        }
     }
 }
 
