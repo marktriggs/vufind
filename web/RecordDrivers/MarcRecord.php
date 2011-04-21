@@ -98,7 +98,12 @@ class MarcRecord extends IndexRecord
         case 'endnote':
             // This makes use of core metadata fields in addition to the
             // assignment below:
+            header("Pragma: public");
+            header("Expires: 0");
+            header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+            header("Cache-Control: private", false);
             header('Content-type: application/x-endnote-refer');
+            header("Content-Disposition: attachment; filename=\"vufind.enw\";");
             $interface->assign('marc', $this->marcRecord);
             return 'RecordDrivers/Marc/export-endnote.tpl';
         case 'marc':

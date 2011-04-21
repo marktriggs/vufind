@@ -162,7 +162,7 @@ class Export extends MyResearch
                 switch(strtolower($format)) {
                 case 'endnote':
                     $this->_exportHeaders(
-                        'application/x-endnote-refer', 'VuFindExport.txt'
+                        'application/x-endnote-refer', 'VuFindExport.enw'
                     );
                     break;
                 case 'marc':
