@@ -197,19 +197,21 @@ class Resolver_Ezb implements ResolverInterface
             "/OpenURLResponseXML/Full/ElectronicData/ResultList/Result[@state=" .
             $state . "]"
         );
+        $i = 0;
         foreach ($results as $result) {
             $record = array();
             $titleXP = "/OpenURLResponseXML/Full/ElectronicData/ResultList/" .
                 "Result[@state={$state}]/Title";
             $record['title'] = strip_tags(
-                $xpath->query($titleXP, $result)->item(0)->nodeValue
+                $xpath->query($titleXP, $result)->item($i)->nodeValue
             );
             $record['coverage'] = $coverage;
             $urlXP = "/OpenURLResponseXML/Full/ElectronicData/ResultList/" .
                 "Result[@state={$state}]/AccessURL";
-            $record['href'] = $xpath->query($urlXP, $result)->item(0)->nodeValue;
+            $record['href'] = $xpath->query($urlXP, $result)->item($i)->nodeValue;
             $record['service_type'] = 'getFullTxt';
             array_push($records, $record);
+            $i++;
         }
     }
 
@@ -230,13 +232,15 @@ class Resolver_Ezb implements ResolverInterface
         $results = $xpath->query(
             "/OpenURLResponseXML/Full/PrintData/ResultList/Result[@state={$state}]"
         );
+        $i = 0;
         foreach ($results as $result) {
             $record = array();
             $record['title'] = $coverage;
             $urlXP = "/OpenURLResponseXML/Full/PrintData/References/Reference/URL";
-            $record['href'] = $xpath->query($urlXP, $result)->item(0)->nodeValue;
+            $record['href'] = $xpath->query($urlXP, $result)->item($i)->nodeValue;
             $record['service_type'] = 'getHolding';
             array_push($records, $record);
+            $i++;
         }
     }
 }
