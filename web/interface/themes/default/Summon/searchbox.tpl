@@ -44,6 +44,7 @@
           </div>
         </div>
       {/if}
+      {if $lastSort}<input type="hidden" name="sort" value="{$lastSort|escape}" />{/if}
     </form>
   {/if}
 </div>

@@ -282,6 +282,17 @@ class UInterface extends Smarty
         } else if (isset($_SESSION['lastUserLimit'])) {
             $this->assign('lastLimit', $_SESSION['lastUserLimit']);
         }
+
+        // Load the last sort from the request or session for initializing default
+        // in search box.  Note that this is not entirely ideal, since sort settings
+        // will carry over from one module to another (i.e. WorldCat vs. Summon);
+        // however, this is okay since the validation code will prevent errors and
+        // simply revert to default sort when switching between modules.
+        if (isset($_REQUEST['sort'])) {
+            $this->assign('lastSort', $_REQUEST['sort']);
+        } else if (isset($_SESSION['lastUserSort'])) {
+            $this->assign('lastSort', $_SESSION['lastUserSort']);
+        }
     }
 }
 

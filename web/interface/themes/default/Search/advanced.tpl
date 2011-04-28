@@ -77,6 +77,7 @@
                   </select>
                 </div>
               {/if}
+              {if $lastSort}<input type="hidden" name="sort" value="{$lastSort|escape}" />{/if}
               {if $dateRangeLimit}
               {* Load the publication date slider UI widget *}
               {js filename="yui/slider-min.js"}

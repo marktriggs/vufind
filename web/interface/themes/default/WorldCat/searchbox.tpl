@@ -16,6 +16,7 @@
       </select>
       <input type="submit" name="submit" value="{translate text="Find"}">
       <a href="{$path}/WorldCat/Advanced" class="small">{translate text="Advanced"}</a>
+      {if $lastSort}<input type="hidden" name="sort" value="{$lastSort|escape}" />{/if}
     </form>
   {/if}
 </div>

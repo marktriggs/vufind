@@ -53,6 +53,7 @@
       {/if}
       {* Load hidden limit preference from Session *}
       {if $lastLimit}<input type="hidden" name="limit" value="{$lastLimit|escape}" />{/if}
+      {if $lastSort}<input type="hidden" name="sort" value="{$lastSort|escape}" />{/if}
     </form>
     <script type="text/javascript">$("#searchForm_lookfor").focus()</script>
   {/if}

@@ -649,8 +649,15 @@ abstract class SearchObject_Base
      */
     protected function initSort()
     {
-        $this->sort = isset($_REQUEST['sort']) ?
-            $_REQUEST['sort'] : $this->getDefaultSort();
+        // Validate and assign the sort value:
+        $valid = array_keys($this->getSortOptions());
+        if (isset($_REQUEST['sort']) && in_array($_REQUEST['sort'], $valid)) {
+            $this->sort = $_REQUEST['sort'];
+            $_SESSION['lastUserSort'] = $this->sort;
+        } else {
+            $this->sort = $this->getDefaultSort();
+            $_SESSION['lastUserSort'] = null;
+        }
     }
 
     /**
