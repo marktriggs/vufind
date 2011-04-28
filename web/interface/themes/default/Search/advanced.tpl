@@ -62,6 +62,21 @@
                 </tr>
               </table>
               {/if}
+              {if $limitList|@count gt 1}
+                <div id="advSearchLimit">
+                  <label for="limit">{translate text='Results per page'}:</label>
+                  <select id="limit" name="limit">
+                    {foreach from=$limitList item=limitData key=limitLabel}
+                      {* If a previous limit was used, make that the default; otherwise, use the "default default" *}
+                      {if $lastLimit}
+                        <option value="{$limitData.desc|escape}"{if $limitData.desc == $lastLimit} selected="selected"{/if}>{$limitData.desc|escape}</option>
+                      {else}
+                        <option value="{$limitData.desc|escape}"{if $limitData.selected} selected="selected"{/if}>{$limitData.desc|escape}</option>
+                      {/if}
+                    {/foreach}
+                  </select>
+                </div>
+              {/if}
               {if $dateRangeLimit}
               {* Load the publication date slider UI widget *}
               {js filename="yui/slider-min.js"}

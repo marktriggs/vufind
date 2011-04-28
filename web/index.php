@@ -145,10 +145,8 @@ $loggedOutModule = isset($configArray['Site']['defaultModule'])
 $module = ($user = UserAccount::isLoggedIn()) ? $loggedInModule : $loggedOutModule;
 $module = (isset($_GET['module'])) ? $_GET['module'] : $module;
 $module = preg_replace('/[^\w]/', '', $module);
-$interface->assign('module', $module);
 $action = (isset($_GET['action'])) ? $_GET['action'] : 'Home';
 $action = preg_replace('/[^\w]/', '', $action);
-$interface->assign('action', $action);
 
 // Process Authentication
 if (!$user) {
@@ -169,7 +167,9 @@ if (!$user) {
         }
     }
 }
-$interface->assign('user', $user);
+
+// Assign global interface values now that the environment is all set up:
+$interface->initGlobals();
 
 // Process Login Followup
 if (isset($_REQUEST['followup'])) {

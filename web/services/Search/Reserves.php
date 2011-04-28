@@ -71,6 +71,7 @@ class Reserves extends Action
             $interface->assign('subpage', 'Search/list-' . $currentView .'.tpl');
             $interface->assign('viewList',   $searchObject->getViewList());
             $interface->assign('sortList', $searchObject->getSortList());
+            $interface->assign('limitList', $searchObject->getLimitList());
             $interface->assign('rssLink', $searchObject->getRSSUrl());
 
             // Get reserve info from the catalog and catch any fatal errors:

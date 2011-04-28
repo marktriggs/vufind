@@ -1103,6 +1103,9 @@ alignleft {
 .facetsTop th span {
     font-weight: normal;
 }
+#advSearchLimit {
+    padding: 10px 0px 10px 0px;
+}
 
 /* Browse Lists */
 .browseNav {
@@ -1340,4 +1343,9 @@ alignleft {
 
 .gridMouseOver {
     background-color:#f5f5f5;
+}
+
+/* Result Limit */
+#limit {
+    margin-bottom: 2px;
 }

@@ -62,6 +62,8 @@
           </div>
         </div>
       {/if}
+      {* Load hidden limit preference from Session *}
+      {if $lastLimit}<input type="hidden" name="limit" value="{$lastLimit|escape}" />{/if}
     </form>
   {/if}
   </div>

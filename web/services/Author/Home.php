@@ -187,9 +187,10 @@ class Home extends Action
         // Set Interface Variables
         //   Those we can construct BEFORE the search is executed
         $interface->setPageTitle('Author Search Results');
-        $interface->assign('sortList',   $searchObject->getSortList());
-        $interface->assign('viewList',   $searchObject->getViewList());
-        $interface->assign('rssLink',    $searchObject->getRSSUrl());
+        $interface->assign('sortList',  $searchObject->getSortList());
+        $interface->assign('limitList', $searchObject->getLimitList());
+        $interface->assign('viewList',  $searchObject->getViewList());
+        $interface->assign('rssLink',   $searchObject->getRSSUrl());
 
         // Process Search
         $result = $searchObject->processSearch(false, true);

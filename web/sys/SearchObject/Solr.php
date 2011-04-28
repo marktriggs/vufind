@@ -118,6 +118,9 @@ class SearchObject_Solr extends SearchObject_Base
         if (isset($searchSettings['General']['default_view'])) {
             $this->defaultView = $searchSettings['General']['default_view'];
         }
+        if (isset($searchSettings['General']['default_limit'])) {
+            $this->defaultLimit = $searchSettings['General']['default_limit'];
+        }
         if (isset($searchSettings['DefaultSortingByType'])
             && is_array($searchSettings['DefaultSortingByType'])
         ) {
@@ -142,7 +145,7 @@ class SearchObject_Solr extends SearchObject_Base
                 'callnumber' => 'sort_callnumber', 'author' => 'sort_author',
                 'title' => 'sort_title');
         }
-        
+
         // Load view preferences (or defaults if none in .ini file):
         if (isset($searchSettings['Views'])) {
             $this->viewOptions = $searchSettings['Views'];
@@ -150,6 +153,15 @@ class SearchObject_Solr extends SearchObject_Base
             $this->viewOptions = array($this->defaultView => $this->defaultView);
         } else {
             $this->viewOptions = array('list' => 'List');
+        }
+
+        // Load limit preferences (or defaults if none in .ini file):
+        if (isset($searchSettings['General']['limit_options'])) {
+            $this->limitOptions = explode(",", $searchSettings['General']['limit_options']);
+        } elseif (isset($searchSettings['General']['default_limit'])) {
+            $this->limitOptions = array($this->defaultLimit);
+        } else {
+            $this->limitOptions = array(20);
         }
 
         // Load Spelling preferences
@@ -212,6 +224,7 @@ class SearchObject_Solr extends SearchObject_Base
         $this->initPage();
         $this->initSort();
         $this->initFilters();
+        $this->initLimit();
 
         //********************
         // Basic Search logic
@@ -488,7 +501,7 @@ class SearchObject_Solr extends SearchObject_Base
     public function getResultRecordHTML()
     {
         global $interface;
-        
+
         $currentView = $this->getView();
         $html = array();
         for ($x = 0; $x < count($this->indexResult['response']['docs']); $x++) {

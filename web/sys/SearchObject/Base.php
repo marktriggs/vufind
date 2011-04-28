@@ -60,7 +60,7 @@ abstract class SearchObject_Base
     protected $page = 1;
     // Result limit
     protected $limit = 20;
-
+    protected $defaultLimit = 20;
     // STATS
     protected $resultsTotal = 0;
 
@@ -80,6 +80,8 @@ abstract class SearchObject_Base
     protected $sortOptions = array();
     // Available view options
     protected $viewOptions = array();
+    // Available limit options
+    protected $limitOptions = array();
     // An ID number for saving/retrieving search
     protected $searchId    = null;
     protected $savedSearch = false;
@@ -127,6 +129,9 @@ abstract class SearchObject_Base
 
         // Set appropriate debug mode:
         $this->debug = $configArray['System']['debug'];
+
+        // Set the $limitOptions
+        $limitOptions = array($this->defaultLimit);
     }
 
     /**
@@ -565,7 +570,7 @@ abstract class SearchObject_Base
                 // make sure the url parameter is a valid view
                 if (in_array($_REQUEST['view'], array_keys($validViews))) {
                     $this->view = $_REQUEST['view'];
-                    $_SESSION['lastView'] = $this->view;	
+                    $_SESSION['lastView'] = $this->view;
                 } else {
                     $this->view = $this->defaultView;
                 }
@@ -577,6 +582,29 @@ abstract class SearchObject_Base
             // otherwise load the default
             $this->view = $this->defaultView;
         }
+    }
+
+    /**
+     * Add limit to the object based on the $_REQUEST superglobal.
+     *
+     * @return void
+     * @access protected
+     */
+    protected function initLimit()
+    {
+        // Check for a limit parameter in the url.
+        if (isset($_REQUEST['limit']) && $_REQUEST['limit'] != $this->defaultLimit) {
+            // make sure the url parameter is a valid limit
+            $validLimits = $this->getLimitOptions();
+            if (in_array($_REQUEST['limit'], $validLimits)) {
+                $this->limit = $_REQUEST['limit'];
+                $_SESSION['lastUserLimit'] = $this->limit;
+                return;
+            }
+        }
+        // If we got this far, setting was missing or invalid; load the default
+        $this->limit = $this->defaultLimit;
+        $_SESSION['lastUserLimit'] = null;
     }
 
     /**
@@ -768,6 +796,11 @@ abstract class SearchObject_Base
             $params[] = "view=" . urlencode($this->view);
         }
 
+        // Limit
+        if ($this->limit != null && $this->limit != $this->defaultLimit) {
+            $params[] = "limit=" . urlencode($this->limit);
+        }
+
         // Join all parameters with an escaped ampersand,
         //   add to the base url and return
         return $url . join("&", $params);
@@ -840,7 +873,7 @@ abstract class SearchObject_Base
      * Return a url for the current search with a new view
      *
      * @param string $newView The new view
-     * 
+     *
      * @return string         URL of a new search
      * @access public
      */
@@ -848,7 +881,7 @@ abstract class SearchObject_Base
     {
         // Stash our old data for a minute
         $oldView = $this->view;
-        // Add the new sort
+        // Add the new view
         $this->view = $newView;
         // Get the new url
         $url = $this->renderSearchUrl();
@@ -876,6 +909,53 @@ abstract class SearchObject_Base
                 'viewUrl'  => $this->renderLinkWithView($view),
                 'desc' => $desc,
                 'selected' => ($view == $this->view)
+            );
+        }
+        return $list;
+    }
+    /**
+     * Return a url for the current search with a new limit
+     *
+     * @param string $newLimit The new limit
+     *
+     * @return string         URL of a new search
+     * @access public
+     */
+    public function renderLinkWithLimit($newLimit)
+    {
+        // Stash our old data for a minute
+        $oldLimit = $this->limit;
+        $oldPage = $this->page;
+        // Add the new limit
+        $this->limit = $newLimit;
+        // Remove page number
+        $this->page = 1;
+        // Get the new url
+        $url = $this->renderSearchUrl();
+        // Restore the old data
+        $this->limit = $oldLimit;
+        $this->page = $oldPage;
+        // Return the URL
+        return $url;
+    }
+
+    /**
+     * Return a list of urls for possible limits, along with which option
+     *    should be currently selected.
+     *
+     * @return array Limit urls, descriptions and selected flags
+     * @access public
+     */
+    public function getLimitList()
+    {
+        // Loop through all the current limits
+        $valid = $this->getLimitOptions();
+        $list = array();
+        foreach ($valid as $limit) {
+            $list[$limit] = array(
+                'limitUrl' => $this->renderLinkWithLimit($limit),
+                'desc' => $limit,
+                'selected' => ($limit == $this->limit)
             );
         }
         return $list;
@@ -1067,6 +1147,7 @@ abstract class SearchObject_Base
     {
         return $this->sortOptions;
     }
+
     /**
      * Get an array of view options; protected since this should not be used
      * outside of the class.
@@ -1078,7 +1159,19 @@ abstract class SearchObject_Base
     {
         return $this->viewOptions;
     }
-       
+
+    /**
+     * Get an array of limit options; protected since this should not be used
+     * outside of the class.
+     *
+     * @access protected
+     * @return array
+     */
+    protected function getLimitOptions()
+    {
+        return $this->limitOptions;
+    }
+
     /**
      * Reset a simple query against the default index.
      *

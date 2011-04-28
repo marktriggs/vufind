@@ -1203,3 +1203,12 @@ tr:nth-child(even) td.gridMouseOver {
 .gridMouseOver {
     background-color:#f5f5f5;
 }
+
+/* Result Limit */
+#limit {
+    margin-bottom: 2px;
+}
+
+.limitSelect {
+    text-align: right;
+}

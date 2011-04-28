@@ -256,6 +256,33 @@ class UInterface extends Smarty
         $this->assign('userLang', $lang);
         $this->assign('allLangs', $configArray['Languages']);
     }
+    
+    /**
+     * Initialize global interface variables (part of standard VuFind startup
+     * process).  This method is designed for initializations that can't happen
+     * in the constructor because they rely on session initialization and other
+     * processing that happens subsequently in the front controller.
+     *
+     * @return void
+     * @access public
+     */
+    public function initGlobals()
+    {
+        global $module, $action, $user;
+
+        // Pass along module and action to the templates.
+        $this->assign('module', $module);
+        $this->assign('action', $action);
+        $this->assign('user', $user);
+
+        // Load the last limit from the request or session for initializing default
+        // in search box:
+        if (isset($_REQUEST['limit'])) {
+            $this->assign('lastLimit', $_REQUEST['limit']);
+        } else if (isset($_SESSION['lastUserLimit'])) {
+            $this->assign('lastLimit', $_SESSION['lastUserLimit']);
+        }
+    }
 }
 
 /**

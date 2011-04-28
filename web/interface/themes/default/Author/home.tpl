@@ -49,6 +49,17 @@
             {/foreach}
             <br />
           {/if}
+          {if $limitList|@count gt 1}
+           <form action="{$path}/Search/LimitResults" method="post">
+            <label for="limit">{translate text='Results per page'}</label>
+            <select id="limit" name="limit" onChange="document.location.href = this.options[this.selectedIndex].value;">
+              {foreach from=$limitList item=limitData key=limitLabel}
+                <option value="{$limitData.limitUrl|escape}"{if $limitData.selected} selected="selected"{/if}>{$limitData.desc|escape}</option>
+              {/foreach}
+            </select>
+            <noscript><input type="submit" value="{translate text="Set"}" /></noscript>
+          </form>
+          {/if}
           <form action="{$path}/Search/SortResults" method="post">
             <label for="sort">{translate text='Sort'}</label>
             <select id="sort" name="sort" onChange="document.location.href = this.options[this.selectedIndex].value;">

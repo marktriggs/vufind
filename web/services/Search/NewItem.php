@@ -87,6 +87,7 @@ class NewItem extends Action
             $interface->assign('subpage', 'Search/list-' . $currentView .'.tpl');
             $interface->assign('viewList',   $searchObject->getViewList());
             $interface->assign('sortList', $searchObject->getSortList());
+            $interface->assign('limitList', $searchObject->getLimitList());
             $interface->assign('rssLink', $searchObject->getRSSUrl());
 
             // This code was originally designed to page through the results

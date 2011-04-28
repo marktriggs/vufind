@@ -1101,6 +1101,10 @@ legend {
     width: 490px;
 }
 
+#advSearchLimit {
+    padding: 10px 0px 10px 0px;
+}
+
 /* Tag cloud */
 .cloud1 {
     font-size: .8em;
@@ -1268,4 +1272,9 @@ legend {
 
 .gridMouseOver {
     background-color:#f5f5f5;
+}
+
+/* Result Limit */
+#limit {
+    margin-bottom: 2px;
 }

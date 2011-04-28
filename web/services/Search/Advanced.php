@@ -60,6 +60,8 @@ class Advanced extends Action
         // Go get the facets
         $searchObject->processSearch();
         $facetList = $searchObject->getFacetList();
+        //Assign page limit options & last limit from session
+        $interface->assign('limitList',  $searchObject->getLimitList());
         // Shutdown the search object
         $searchObject->close();
 

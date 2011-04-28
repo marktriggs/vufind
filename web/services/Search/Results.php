@@ -105,7 +105,7 @@ class Results extends Action
         $interface->assign('sortList',   $searchObject->getSortList());
         $interface->assign('viewList',   $searchObject->getViewList());
         $interface->assign('rssLink',    $searchObject->getRSSUrl());
-
+        $interface->assign('limitList',  $searchObject->getLimitList());
         // Process Search
         $result = $searchObject->processSearch(true, true);
         if (PEAR::isError($result)) {

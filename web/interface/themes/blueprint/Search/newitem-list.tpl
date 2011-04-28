@@ -22,15 +22,28 @@
       </div>
 
       <div class="span-5 last">
-        <form action="{$path}/Search/SortResults" method="post">
-          {translate text='Sort'}
-          <select name="sort" class="jumpMenu">
-            {foreach from=$sortList item=sortData key=sortLabel}
-              <option value="{$sortData.sortUrl|escape}"{if $sortData.selected} selected="selected"{/if}>{translate text=$sortData.desc}</option>
-            {/foreach}
-          </select>
-          <noscript><input type="submit" value="{translate text="Set"}" /></noscript>
-        </form>
+        <div class="limitSelect"> 
+          {if $limitList|@count gt 1}
+            <form action="{$path}/Search/LimitResults" method="post">
+              <label for="limit">{translate text='Results per page'}</label>
+              <select id="limit" name="limit" onChange="document.location.href = this.options[this.selectedIndex].value;">
+                {foreach from=$limitList item=limitData key=limitLabel}
+                  <option value="{$limitData.limitUrl|escape}"{if $limitData.selected} selected="selected"{/if}>{$limitData.desc|escape}</option>
+                {/foreach}
+              </select>
+              <noscript><input type="submit" value="{translate text="Set"}" /></noscript>
+            </form>
+          {/if}
+          <form action="{$path}/Search/SortResults" method="post">
+            <label for="sort_options_1">{translate text='Sort'}</label>
+            <select id="sort_options_1" name="sort" class="jumpMenu">
+              {foreach from=$sortList item=sortData key=sortLabel}
+                <option value="{$sortData.sortUrl|escape}"{if $sortData.selected} selected="selected"{/if}>{translate text=$sortData.desc}</option>
+              {/foreach}
+            </select>
+            <noscript><input type="submit" value="{translate text="Set"}" /></noscript>
+          </form>
+        </div>
       </div>
       <div class="clear"></div>
     </div>
