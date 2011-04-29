@@ -55,7 +55,9 @@ class Home extends Action
         $interface->caching = 1; 
         $cacheId = 'homepage|' . $interface->lang . '|' .
             (UserAccount::isLoggedIn() ? '1' : '0') . '|' .
-            (isset($_SESSION['lastUserLimit']) ? $_SESSION['lastUserLimit'] : '');
+            (isset($_SESSION['lastUserLimit']) ? $_SESSION['lastUserLimit'] : '') .
+            '|' .
+            (isset($_SESSION['lastUserSort']) ? $_SESSION['lastUserSort'] : '');
         if (!$interface->is_cached('layout.tpl', $cacheId)) {
             $interface->setPageTitle('Search Home');
             $interface->assign('searchTemplate', 'search.tpl');

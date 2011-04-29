@@ -77,6 +77,7 @@
 
       <input type="submit" name="submit" value="{translate text="Find"}"/>
     </div>
+    {if $lastSort}<input type="hidden" name="sort" value="{$lastSort|escape}" />{/if}
   </form>
 </div>
 

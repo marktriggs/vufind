@@ -52,7 +52,10 @@ class Home extends Base
         // Cache homepage
         $interface->caching = 1;
         $cacheId = 'summon-homepage|' . $interface->lang . '|' .
-            (UserAccount::isLoggedIn() ? '1' : '0');
+            (UserAccount::isLoggedIn() ? '1' : '0') . '|' .
+            (isset($_SESSION['lastUserLimit']) ? $_SESSION['lastUserLimit'] : '') .
+            '|' .
+            (isset($_SESSION['lastUserSort']) ? $_SESSION['lastUserSort'] : '');
         if (!$interface->is_cached('layout.tpl', $cacheId)) {
             $interface->setPageTitle('Search Home');
             $interface->setTemplate('home.tpl');
