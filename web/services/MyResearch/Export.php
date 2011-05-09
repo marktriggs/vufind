@@ -160,6 +160,11 @@ class Export extends MyResearch
             ) {
                 $export = true;
                 switch(strtolower($format)) {
+                case 'bibtex':
+                    $this->_exportHeaders(
+                        'application/x-bibtex', 'VuFindExport.bibtex'
+                    );
+                    break;
                 case 'endnote':
                     $this->_exportHeaders(
                         'application/x-endnote-refer', 'VuFindExport.enw'
