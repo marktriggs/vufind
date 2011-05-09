@@ -107,7 +107,21 @@ function fetchFromISBN($isn, $size)
     if (empty($isn)) {
         return false;
     }
-    $localFile = 'images/covers/' . $size . '/' . $isn . '.jpg';
+    
+    // We should check whether we have cached images for the 13- or 10-digit ISBNs.
+    // If no file exists, we'll favor the 10-digit number if available for the sake
+    // of brevity.
+    $isbn = new ISBN($isn);
+    if ($isbn->get13()) {
+        $localFile = 'images/covers/' . $size . '/' . $isbn->get13() . '.jpg';
+    } else {
+        // Invalid ISBN?  Keep it as-is to avoid a bad file path; the error will
+        // be caught later down the line anyway.
+        $localFile = 'images/covers/' . $size . '/' . $isn . '.jpg';
+    }
+    if (!is_readable($localFile) && $isbn->get10()) {
+        $localFile = 'images/covers/' . $size . '/' . $isbn->get10() . '.jpg';
+    }
     if (is_readable($localFile)) {
         // Load local cache if available
         header('Content-type: image/jpeg');
