@@ -161,6 +161,7 @@ if (!$user) {
     if ($shibLoginNeeded || $standardLoginNeeded) {
         $user = UserAccount::login();
         if (PEAR::isError($user)) {
+            $interface->initGlobals();
             include_once 'services/MyResearch/Login.php';
             Login::launch($user->getMessage());
             exit();
