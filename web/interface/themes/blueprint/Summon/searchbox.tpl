@@ -28,16 +28,16 @@
       {/if}
       {if $filterList || $hasCheckboxFilters}
         <div class="keepFilters">
-          <input type="checkbox" checked="checked" id="searchFormKeepFilters"/> <label for="searchFormKeepFilters">{translate text="basic_search_keep_filters"}</label>
+          <input type="checkbox" {if $retainFiltersByDefault}checked="checked" {/if} id="searchFormKeepFilters"/> <label for="searchFormKeepFilters">{translate text="basic_search_keep_filters"}</label>
           <div class="offscreen">
             {foreach from=$filterList item=data key=field}
               {foreach from=$data item=value}
-                <input type="checkbox" checked="checked" name="filter[]" value='{$value.field|escape}:"{$value.value|escape}"' />
+                <input type="checkbox" {if $retainFiltersByDefault}checked="checked" {/if} name="filter[]" value='{$value.field|escape}:"{$value.value|escape}"' />
               {/foreach}
             {/foreach}
             {foreach from=$checkboxFilters item=current}
               {if $current.selected}
-                <input type="checkbox" checked="checked" name="filter[]" value="{$current.filter|escape}" />
+                <input type="checkbox" {if $retainFiltersByDefault}checked="checked" {/if} name="filter[]" value="{$current.filter|escape}" />
               {/if}
             {/foreach}
           </div>

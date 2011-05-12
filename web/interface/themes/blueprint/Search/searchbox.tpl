@@ -34,17 +34,17 @@
       {/if}
       {if $filterList || $hasCheckboxFilters}
         <div class="keepFilters">
-          <input type="checkbox" checked="checked" id="searchFormKeepFilters"/> <label for="searchFormKeepFilters">{translate text="basic_search_keep_filters"}</label>
+          <input type="checkbox" {if $retainFiltersByDefault}checked="checked" {/if} id="searchFormKeepFilters"/> <label for="searchFormKeepFilters">{translate text="basic_search_keep_filters"}</label>
           <div class="offscreen">
             {foreach from=$filterList item=data key=field name=filterLoop}
               {foreach from=$data item=value}
-                <input id="applied_filter_{$smarty.foreach.filterLoop.iteration}" type="checkbox" checked="checked" name="filter[]" value="{$value.field|escape}:&quot;{$value.value|escape}&quot;" />
+                <input id="applied_filter_{$smarty.foreach.filterLoop.iteration}" type="checkbox" {if $retainFiltersByDefault}checked="checked" {/if} name="filter[]" value="{$value.field|escape}:&quot;{$value.value|escape}&quot;" />
                 <label for="applied_filter_{$smarty.foreach.filterLoop.iteration}">{$value.field|escape}:&quot;{$value.value|escape}&quot;</label>
               {/foreach}
             {/foreach}
             {foreach from=$checkboxFilters item=current name=filterLoop}
               {if $current.selected}
-                <input id="applied_checkbox_filter_{$smarty.foreach.filterLoop.iteration}" type="checkbox" checked="checked" name="filter[]" value="{$current.filter|escape}" />
+                <input id="applied_checkbox_filter_{$smarty.foreach.filterLoop.iteration}" type="checkbox" {if $retainFiltersByDefault}checked="checked" {/if} name="filter[]" value="{$current.filter|escape}" />
                 <label for="applied_checkbox_filter_{$smarty.foreach.filterLoop.iteration}">{$current.filter|escape}</label>
               {/if}
             {/foreach}

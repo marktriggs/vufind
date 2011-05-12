@@ -105,6 +105,8 @@ abstract class SearchObject_Base
     protected $recommendIni = 'searches';
     // Is autocomplete active?
     protected $autocompleteStatus = false;
+    // Should filter settings be retained across searches by default?
+    protected $retainFiltersByDefault = true;
 
     // STATS
     protected $initTime = null;
@@ -1141,6 +1143,17 @@ abstract class SearchObject_Base
     public function getAutocompleteStatus()
     {
         return $this->autocompleteStatus;
+    }
+    
+    /**
+     * Should filter settings be retained across searches by default?
+     *
+     * @return bool
+     * @access public
+     */
+    public function getRetainFilterSetting()
+    {
+        return $this->retainFiltersByDefault;
     }
 
     /**

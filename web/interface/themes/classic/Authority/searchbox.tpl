@@ -18,12 +18,12 @@
       {* Not yet supported: <a href="{$path}/Authority/Advanced" class="small">{translate text="Advanced"}</a> *}
       {if $filterList}
         <div class="keepFilters">
-          <input id="retainAll" type="checkbox" checked="checked" onclick="filterAll(this);" />
+          <input id="retainAll" type="checkbox" {if $retainFiltersByDefault}checked="checked" {/if} onclick="filterAll(this);" />
           <label for="retainAll">{translate text="basic_search_keep_filters"}</label>
           <div style="display:none;">
           {foreach from=$filterList item=data key=field}
           {foreach from=$data item=value}
-            <input type="checkbox" checked="checked" name="filter[]" value='{$value.field|escape}:&quot;{$value.value|escape}&quot;' />
+            <input type="checkbox" {if $retainFiltersByDefault}checked="checked" {/if} name="filter[]" value='{$value.field|escape}:&quot;{$value.value|escape}&quot;' />
           {/foreach}
           {/foreach}
           </div>

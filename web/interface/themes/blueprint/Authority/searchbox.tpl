@@ -18,12 +18,12 @@
       {* Not yet supported: <a href="{$path}/Authority/Advanced" class="small">{translate text="Advanced"}</a> *}
       {if $filterList}
         <div class="keepFilters">
-          <input type="checkbox" checked="checked" id="searchFormKeepFilters"/> 
+          <input type="checkbox" {if $retainFiltersByDefault}checked="checked" {/if} id="searchFormKeepFilters"/> 
           <label for="searchFormKeepFilters">{translate text="basic_search_keep_filters"}</label>
           <div class="offscreen">
             {foreach from=$filterList item=data key=field name=filterLoop}
               {foreach from=$data item=value}
-                <input id="applied_filter_{$smarty.foreach.filterLoop.iteration}" type="checkbox" checked="checked" name="filter[]" value="{$value.field|escape}:&quot;{$value.value|escape}&quot;" />
+                <input id="applied_filter_{$smarty.foreach.filterLoop.iteration}" type="checkbox" {if $retainFiltersByDefault}checked="checked" {/if} name="filter[]" value="{$value.field|escape}:&quot;{$value.value|escape}&quot;" />
                 <label for="applied_filter_{$smarty.foreach.filterLoop.iteration}">{$value.field|escape}:&quot;{$value.value|escape}&quot;</label>
               {/foreach}
             {/foreach}

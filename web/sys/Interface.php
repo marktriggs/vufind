@@ -125,6 +125,9 @@ class UInterface extends Smarty
             'autocomplete', 
             is_object($searchObject) ? $searchObject->getAutocompleteStatus() : false
         );
+        $this->assign(
+            'retainFiltersByDefault', $searchObject->getRetainFilterSetting()
+        );
 
         if (isset($configArray['OpenURL'])
             && isset($configArray['OpenURL']['url'])

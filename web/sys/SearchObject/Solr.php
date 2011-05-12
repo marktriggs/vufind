@@ -121,6 +121,10 @@ class SearchObject_Solr extends SearchObject_Base
         if (isset($searchSettings['General']['default_limit'])) {
             $this->defaultLimit = $searchSettings['General']['default_limit'];
         }
+        if (isset($searchSettings['General']['retain_filters_by_default'])) {
+            $this->retainFiltersByDefault
+                = $searchSettings['General']['retain_filters_by_default'];
+        }
         if (isset($searchSettings['DefaultSortingByType'])
             && is_array($searchSettings['DefaultSortingByType'])
         ) {
