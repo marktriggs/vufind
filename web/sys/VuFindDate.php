@@ -55,13 +55,13 @@ class VuFindDate
         $this->displayDateFormat
             = (isset($configArray['Site']['displayDateFormat']))
             ? $configArray['Site']['displayDateFormat'] : "m-d-Y";
-            
+
         // Set Display Date Format
         $this->displayTimeFormat
             = (isset($configArray['Site']['displayTimeFormat']))
             ? $configArray['Site']['displayTimeFormat'] : "H:i";
     }
-    
+
     /**
      * Protected method for conversion of a time / date string
      *
@@ -75,10 +75,46 @@ class VuFindDate
     private function _process($inputFormat, $outputFormat, $dateString)
     {
         $errors = "Date/time problem: Details: ";
-        $date = DateTime::createFromFormat($inputFormat, $dateString);
-        $getErrors = DateTime::getLastErrors();
 
-        if ($getErrors['warning_count'] == 0 
+        // For compatibility with PHP 5.2.x, we have to restrict the input formats
+        // to a fixed list...  but we'll check to see if we have access to PHP 5.3.x
+        // before failing if we encounter an input format that isn't whitelisted.
+        $validFormats = array("m-d-Y", "m-d-y", "m/d/Y", "m/d/y", "U", "m-d-y H:i");
+        $isValid = in_array($inputFormat, $validFormats);
+        if ($isValid) {
+            if ($inputFormat == 'U') {
+                // Special case for Unix timestamps:
+                $dateString = '@' . $dateString;
+            } else if ($inputFormat == 'm-d-Y H:i') {
+                // Special case for strings including times -- we need to convert to
+                // a timestamp for accuracy, and convert dashes to slashes to ensure
+                // that m/d/y order is used instead of d/m/y.
+                $dateString = '@' . strtotime(str_replace('-', '/', $dateString));
+            } else {
+                // Strip leading zeroes from date string:
+                $regEx = '/0*([0-9]+)(-|\/)0*([0-9]+)(-|\/)0*([0-9]+)/';
+                $dateString = trim(preg_replace($regEx, '$1/$3/$5', $dateString));
+            }
+            $getErrors = array(
+                'warning_count' => 0, 'error_count' => 0, 'errors' => array()
+            );
+            try {
+                $date = new DateTime($dateString);
+            } catch (Exception $e) {
+                $getErrors['error_count']++;
+                $getErrors['errors'][] = $e->getMessage();
+            }
+        } else {
+            if (!method_exists('DateTime', 'createFromFormat')) {
+                PEAR::raiseError(
+                    new PEAR_Error('Custom date formats require PHP 5.3 or higher.')
+                );
+            }
+            $date = DateTime::createFromFormat($inputFormat, $dateString);
+            $getErrors = DateTime::getLastErrors();
+        }
+
+        if ($getErrors['warning_count'] == 0
             && $getErrors['error_count'] == 0 && $date
         ) {
             return $date->format($outputFormat);
@@ -107,12 +143,12 @@ class VuFindDate
      * @return string               A re-formated date string
      * @access protected
      */
-    
+
     public function convertToDisplayDate($createFormat, $dateString)
     {
         return $this->_process($createFormat, $this->displayDateFormat, $dateString);
     }
-    
+
     /**
      * Public method for conversion of an admin defined date string
      * to a driver required date string
@@ -123,7 +159,7 @@ class VuFindDate
      * @return string               A re-formated date string
      * @access protected
      */
-     
+
     public function convertFromDisplayDate($outputFormat, $displayDate)
     {
         return $this->_process(
@@ -141,7 +177,7 @@ class VuFindDate
      * @return string               A re-formated time string
      * @access protected
      */
-    
+
     public function convertToDisplayTime($createFormat, $timeString)
     {
         return $this->_process($createFormat, $this->displayTimeFormat, $timeString);
