@@ -23,7 +23,7 @@
 
   {* Listing Options *}
   <div class="resulthead">
-    <div class="floatleft hitCount">
+    <div class="floatleft">
       {if $recordCount}
         {translate text="Showing"}
         <strong>{$recordStart}</strong> - <strong>{$recordEnd}</strong>

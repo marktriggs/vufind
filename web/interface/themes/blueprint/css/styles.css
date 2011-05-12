@@ -1153,11 +1153,6 @@ div.debug code {
 
 /* Grid View */
 
-.hitCount {
-    position: absolute;
-    bottom: 0px;
-}
-
 .viewButtons {
      text-align: right;
 }
