@@ -140,7 +140,8 @@ class SolrStats extends Solr
         $data['browser'] = $userAgent['browser'];
         $data['browserVersion'] = $userAgent['browserVersion'];
         $data['ipaddress'] = $_SERVER['REMOTE_ADDR'];
-        $data['referrer'] = $_SERVER['HTTP_REFERER'];
+        $data['referrer'] = isset($_SERVER['HTTP_REFERER'])
+            ? $_SERVER['HTTP_REFERER'] : '';
         $data['url'] = $_SERVER['REQUEST_URI'];
 
         $xml = $this->getSaveXML($data);
