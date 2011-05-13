@@ -65,8 +65,11 @@ class SeleniumTestCase extends PHPUnit_Extensions_SeleniumTestCase
     /* Record section table column names */
     protected $rec_row0,$rec_row1,$rec_row3,$rec_row4,$rec_row5,$rec_row6,$rec_row7;
 
-    protected $def_rec_tab;            // Default record tab
-    protected $debug =  false;            // Debug Flag
+    protected $def_rec_tab;          // Default record tab
+    protected $debug =  false;       // Debug Flag
+
+    protected $searchArray;          // Array of search options from searches.ini
+    protected $languages;            // Array of language options from config.ini
 
     /**
      * Standard setup method.
@@ -84,6 +87,10 @@ class SeleniumTestCase extends PHPUnit_Extensions_SeleniumTestCase
         //echo "\nCalling Setup\n";
         $configArray = parse_ini_file(
             dirname(__FILE__) . '/../../../web/conf/config.ini', true
+        );
+
+        $this->searchArray = parse_ini_file(
+            dirname(__FILE__) . '/../../../web/conf/searches.ini', true
         );
 
         // create the ini file name based on the langauge of the site.
@@ -144,6 +151,9 @@ class SeleniumTestCase extends PHPUnit_Extensions_SeleniumTestCase
         /*  Bibliographic Details constants END */
 
         $this->def_rec_tab = $configArray['Site']['defaultRecordTab'];
+
+        /* Language options in config file */
+        $this->languages = $configArray['Languages'];
 
         $this->setBrowser('*firefox');
         $this->setBrowserUrl($this->baseUrl);
