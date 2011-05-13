@@ -57,6 +57,23 @@ class VuFindDateTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test for an appropriate VuFindDate return value.
+     *
+     * @param string            $expected Expected value
+     * @param string|PEAR_Error $actual   Actual value
+     *
+     * @return void
+     * @access private
+     */
+    private function _checkDate($expected, $actual)
+    {
+        if (PEAR::isError($actual)) {
+            $this->fail($actual->getMessage());
+        }
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
      * Test citation generation
      *
      * @return void
@@ -75,37 +92,37 @@ class VuFindDateTest extends PHPUnit_Framework_TestCase
         $date = new VuFindDate();
 
         // Try some conversions:
-        $this->assertEquals(
+        $this->_checkDate(
             '11-29-1973', $date->convertToDisplayDate('U', 123456879)
         );
-        $this->assertEquals(
+        $this->_checkDate(
             '11-29-1973', $date->convertToDisplayDate('m-d-y', '11-29-73')
         );
-        $this->assertEquals(
+        $this->_checkDate(
             '11-29-1973', $date->convertToDisplayDate('m-d-y', '11-29-1973')
         );
-        $this->assertEquals(
+        $this->_checkDate(
             '11-29-1973', $date->convertToDisplayDate('m-d-y H:i', '11-29-73 23:01')
         );
-        $this->assertEquals(
+        $this->_checkDate(
             '23:01', $date->convertToDisplayTime('m-d-y H:i', '11-29-73 23:01')
         );
-        $this->assertEquals(
+        $this->_checkDate(
             '01-02-2001', $date->convertToDisplayDate('m-d-y', '01-02-01')
         );
-        $this->assertEquals(
+        $this->_checkDate(
             '01-02-2001', $date->convertToDisplayDate('m-d-y', '01-02-2001')
         );
-        $this->assertEquals(
+        $this->_checkDate(
             '01-02-2001', $date->convertToDisplayDate('m-d-y H:i', '01-02-01 05:11')
         );
-        $this->assertEquals(
+        $this->_checkDate(
             '05:11', $date->convertToDisplayTime('m-d-y H:i', '01-02-01 05:11')
         );
 
         // Check for proper handling of known problems:
         $bad = $date->convertToDisplayDate('U', 'invalid');
-        $this->assertEquals('PEAR_Error', get_class($bad));
+        $this->assertTrue(PEAR::isError($bad));
     }
 
     /**
