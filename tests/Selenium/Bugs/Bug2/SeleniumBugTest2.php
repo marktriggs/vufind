@@ -1,6 +1,6 @@
 <?php
 /**
- * Suite to run all tests in the current directory.
+ * Integration testing of Record module.
  *
  * PHP version 5
  *
@@ -21,37 +21,48 @@
  *
  * @category VuFind
  * @package  Tests
- * @author   Demian Katz <demian.katz@villanova.edu>
+ * @author   Preetha Rao <vufind-tech@lists.sourceforge.net>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/unit_tests Wiki
  */
-require_once 'PHPUnit/Framework/TestSuite.php';
-require_once dirname(__FILE__) . '/Record/AllTests.php';
-require_once dirname(__FILE__) . '/Bugs/AllTests.php';
+
+require_once dirname(__FILE__) . '/../../lib/SeleniumTestCase.php';
+//error_reporting(E_ALL);
 
 /**
- * Suite to run all tests in the current directory.
+ * Integration testing of Record module.
  *
  * @category VuFind
  * @package  Tests
- * @author   Demian Katz <demian.katz@villanova.edu>
+ * @author   Preetha Rao <vufind-tech@lists.sourceforge.net>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/unit_tests Wiki
  */
-class SeleniumAllTests
+class SeleniumBugTest2 extends SeleniumTestCase
 {
     /**
-     * Build the test suite.
+     * Check that series subfields are displayed in the proper order.
      *
-     * @return PHPUnit_Framework_TestSuite
+     * @return void
      * @access public
      */
-    public static function suite()
+    public function testRecord()
     {
-        $suite = new PHPUnit_Framework_TestSuite('VuFind - Selenium');
-        $suite->addTest(SeleniumRecordAllTests::suite());
-        $suite->addTest(SeleniumBugsAllTests::suite());
-        return $suite;
+        $this->open($this->baseUrl . '/Record/testbug2');
+        $this->waitForPageToLoad($this->timeout);
+
+        $this->assertContains($this->def_rec_tab, $this->getTitle());
+
+        $record_array = array(
+            "Main Author" => "Vico, Giambattista, 1668-1744.",
+            "Other Authors" => "Pandolfi, Claudia",
+            "Series"  => "Vico, Giambattista, 1668-1744. Works. 1982 ; 2, pt. 1.",
+            "Tags"    => "No Tags, Be the first to tag this record!"
+        );
+
+        // verify the record citation table values
+        $this->validateTable("citation", "record", $record_array);
     }
 }
 ?>
+

@@ -1,6 +1,6 @@
 <?php
 /**
- * Suite to run all tests in the current directory.
+ * Integration testing of Record module.
  *
  * PHP version 5
  *
@@ -21,37 +21,46 @@
  *
  * @category VuFind
  * @package  Tests
- * @author   Demian Katz <demian.katz@villanova.edu>
+ * @author   Preetha Rao <vufind-tech@lists.sourceforge.net>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/unit_tests Wiki
  */
-require_once 'PHPUnit/Framework/TestSuite.php';
-require_once dirname(__FILE__) . '/Record/AllTests.php';
-require_once dirname(__FILE__) . '/Bugs/AllTests.php';
+
+require_once dirname(__FILE__) . '/../../lib/SeleniumTestCase.php';
+//error_reporting(E_ALL);
 
 /**
- * Suite to run all tests in the current directory.
+ * Integration testing of Record module.
  *
  * @category VuFind
  * @package  Tests
- * @author   Demian Katz <demian.katz@villanova.edu>
+ * @author   Preetha Rao <vufind-tech@lists.sourceforge.net>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/unit_tests Wiki
  */
-class SeleniumAllTests
+class SeleniumBugTest1 extends SeleniumTestCase
 {
     /**
-     * Build the test suite.
+     * Confirm that a Hebrew author name can be retrieved correctly.
      *
-     * @return PHPUnit_Framework_TestSuite
+     * @return void
      * @access public
      */
-    public static function suite()
+    public function testRecord()
     {
-        $suite = new PHPUnit_Framework_TestSuite('VuFind - Selenium');
-        $suite->addTest(SeleniumRecordAllTests::suite());
-        $suite->addTest(SeleniumBugsAllTests::suite());
-        return $suite;
+        $this->open(
+            $this->baseUrl . "/Author/Home?author=%D7%A4%D7%A8%D7%95%D7%99%D7%A7" .
+            "%D7%98%20%D7%9E%D7%95%22%D7%A4%20%D7%A7%D7%93%D7%A1%D7%98%D7%A8%20" .
+            "%D7%AA%D7%9C%D7%AA-%D7%9E%D7%9E%D7%93%D7%99"
+        );
+
+        // Confirm that author search results were found; this is a very obscure
+        // string, so if there is any problem at all we should get nothing.  Looking
+        // for the expected publication date should suffice to confirm that the
+        // correct result was retrieved.
+        $this->assertTitle("Author Search Results");
+        $this->verifyTextPresent('Published 2004');
     }
 }
 ?>
+

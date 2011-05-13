@@ -26,8 +26,6 @@
  * @link     http://vufind.org/wiki/unit_tests Wiki
  */
 require_once 'PHPUnit/Framework/TestSuite.php';
-require_once dirname(__FILE__) . '/Record/AllTests.php';
-require_once dirname(__FILE__) . '/Bugs/AllTests.php';
 
 /**
  * Suite to run all tests in the current directory.
@@ -38,7 +36,7 @@ require_once dirname(__FILE__) . '/Bugs/AllTests.php';
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/unit_tests Wiki
  */
-class SeleniumAllTests
+class SeleniumBugsAllTests
 {
     /**
      * Build the test suite.
@@ -48,9 +46,19 @@ class SeleniumAllTests
      */
     public static function suite()
     {
-        $suite = new PHPUnit_Framework_TestSuite('VuFind - Selenium');
-        $suite->addTest(SeleniumRecordAllTests::suite());
-        $suite->addTest(SeleniumBugsAllTests::suite());
+        $suite = new PHPUnit_Framework_TestSuite('VuFind - Selenium - Bugs');
+
+        // Load all tests in subdirectories of the current directory.  This section
+        // of the test code is structured a bit differently than normal so that MARC
+        // records can be grouped with their corresponding tests.
+        foreach (glob(dirname(__FILE__) . '/Bug*/*.php') as $file) {
+            $base = basename($file);
+            if ($base != 'AllTests.php') {
+                include_once $file;
+                $suite->addTestSuite(substr($base, 0, strlen($base) - 4));
+            }
+        }
+
         return $suite;
     }
 }

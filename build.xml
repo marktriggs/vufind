@@ -76,14 +76,14 @@
     <exec command="chmod 644 ${apacheconfdir}/vufindtest" />
     <exec command="${apachectl} restart" />
 
-    <!-- import marc test records into vufind index ( note : the marc test records have prefix "testsample#" -->
-    <exec command="VUFIND_HOME=${srcdir} ${srcdir}/import-marc.sh ${marctestfile}" outputProperty="LASTOUTPUT" />
-    <echo message="${LASTOUTPUT}" />
+    <!-- import marc test records into vufind index (note: the marc test records have prefix "testsample#") -->
+    <exec command="find ${srcdir}/tests/Selenium/Bugs -name *.mrc -printf %p," outputProperty="buglist" />
+    <foreach list="${buglist}${marctestfile}" param="filename" delimiter="," target="importrec" />
 
     <!-- start Solr (use restart in case of old PID files) -->
     <exec command="VUFIND_HOME=${srcdir} JETTY_PID=${tmp}/vufindtest.pid JETTY_CONSOLE=/dev/null ${srcdir}/vufind.sh restart" outputProperty="LASTOUTPUT" />
     <echo message="${LASTOUTPUT}" />
- 
+
     <!-- start the X frame buffer and selenium RC server -->
     <exec command="VUFIND_HOME=${srcdir} ${srcdir}/tests/auto_test.sh start" outputProperty="LASTOUTPUT" />
     <echo message="${LASTOUTPUT}" />
@@ -93,8 +93,9 @@
   <!-- Uninstall and Deactivate VuFind -->
   <target name="shutdown" description="deactivate and uninstall demo">
 
-    <!-- delete the marc test records from vufind index --> 
-    <exec command="php ${srcdir}/util/deletes.php ${marctestfile}" />
+    <!-- delete the sample/bugs marc test records from vufind index -->
+    <exec command="find ${srcdir}/tests/Selenium/Bugs -name *.mrc -printf %p," outputProperty="buglist" />
+    <foreach list="${buglist}${marctestfile}" param="filename" delimiter="," target="deleterec" />
 
     <!-- remove Apache settings -->
     <exec command="rm ${apacheconfdir}/vufindtest" />
@@ -150,4 +151,25 @@
     <!-- report success -->
     <echo message="Packages successfully generated in ${builddir}/packages" />
   </target>
+
+  <target name="importrec" description="import each of the bug marc test record">
+    <if>
+    <istrue value="${filename}"/>       <!-- To ignore the last token, as find command output list has ',' after last filename -->
+      <then>
+        <exec command="VUFIND_HOME=${srcdir} ${srcdir}/import-marc.sh ${filename}" outputProperty="LASTOUTPUT" />
+        <echo message="${LASTOUTPUT}" />
+      </then>
+    </if>
+  </target>
+
+  <target name="deleterec" description="import each of the bug marc test record">
+    <if>
+    <istrue value="${filename}"/>
+      <then>
+        <exec command="php ${srcdir}/util/deletes.php ${filename}" />
+        <echo message="${LASTOUTPUT}" />
+      </then>
+    </if>
+  </target>
+
 </project>
