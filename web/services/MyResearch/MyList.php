@@ -120,7 +120,7 @@ class MyList extends Action
 
         // Create a handler for displaying favorites and use it to assign
         // appropriate template variables:
-        $allowEdit = ($user->id == $list->user_id);
+        $allowEdit = ($user && ($user->id == $list->user_id));
         $favList = new FavoriteHandler(
             $favorites, $listUser, $list->id, $allowEdit
         );
@@ -132,7 +132,7 @@ class MyList extends Action
         }
 
         // Get My Lists
-        $listList = $user->getLists();
+        $listList = $user ? $user->getLists() : array();
         $interface->assign('listList', $listList);
 
         // Get My Tags
