@@ -79,19 +79,18 @@ class VuFindDate
         // For compatibility with PHP 5.2.x, we have to restrict the input formats
         // to a fixed list...  but we'll check to see if we have access to PHP 5.3.x
         // before failing if we encounter an input format that isn't whitelisted.
-        $validFormats = array("m-d-Y", "m-d-y", "m/d/Y", "m/d/y", "U", "m-d-y H:i");
+        $validFormats = array(
+            "m-d-Y", "m-d-y", "m/d/Y", "m/d/y", "U", "m-d-y H:i", "Y-m-d",
+            "Y-m-d H:i"
+        );
         $isValid = in_array($inputFormat, $validFormats);
         if ($isValid) {
             if ($inputFormat == 'U') {
                 // Special case for Unix timestamps:
                 $dateString = '@' . $dateString;
-            } else if ($inputFormat == 'm-d-Y H:i') {
-                // Special case for strings including times -- we need to convert to
-                // a timestamp for accuracy, and convert dashes to slashes to ensure
-                // that m/d/y order is used instead of d/m/y.
-                $dateString = '@' . strtotime(str_replace('-', '/', $dateString));
             } else {
-                // Strip leading zeroes from date string:
+                // Strip leading zeroes from date string and normalize date separator
+                // to slashes:
                 $regEx = '/0*([0-9]+)(-|\/)0*([0-9]+)(-|\/)0*([0-9]+)/';
                 $dateString = trim(preg_replace($regEx, '$1/$3/$5', $dateString));
             }
@@ -107,7 +106,9 @@ class VuFindDate
         } else {
             if (!method_exists('DateTime', 'createFromFormat')) {
                 PEAR::raiseError(
-                    new PEAR_Error('Custom date formats require PHP 5.3 or higher.')
+                    new PEAR_Error(
+                        "Date format {$inputFormat} requires PHP 5.3 or higher."
+                    )
                 );
             }
             $date = DateTime::createFromFormat($inputFormat, $dateString);

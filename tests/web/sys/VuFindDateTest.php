@@ -119,6 +119,16 @@ class VuFindDateTest extends PHPUnit_Framework_TestCase
         $this->_checkDate(
             '05:11', $date->convertToDisplayTime('m-d-y H:i', '01-02-01 05:11')
         );
+        $this->_checkDate(
+            '01-02-2001', $date->convertToDisplayDate('Y-m-d', '2001-01-02')
+        );
+        $this->_checkDate(
+            '01-02-2001',
+            $date->convertToDisplayDate('Y-m-d H:i', '2001-01-02 05:11')
+        );
+        $this->_checkDate(
+            '05:11', $date->convertToDisplayTime('Y-m-d H:i', '2001-01-02 05:11')
+        );
 
         // Check for proper handling of known problems:
         $bad = $date->convertToDisplayDate('U', 'invalid');
