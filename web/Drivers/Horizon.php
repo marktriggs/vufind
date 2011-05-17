@@ -41,29 +41,37 @@ require_once 'Interface.php';
 class Horizon implements DriverInterface
 {
     private $_db;
+    protected $config;
 
     /**
      * Constructor
+     * 
+     * @param string $configFile An alternative config file name
      *
      * @access public
      */
-    function __construct()
+    public function __construct($configFile = false)
     {
+        
+        if (!$configFile) {
+            $configFile = "Horizon.ini";
+        }
+
         // Load Configuration for this Module
-        $configArray = parse_ini_file(
-            dirname(__FILE__) . '/../conf/Horizon.ini', true
+        $this->config = parse_ini_file(
+            dirname(__FILE__) . '/../conf/' . $configFile, true
         );
 
         // Connect to database
         $this->_db = mssql_pconnect(
-            $configArray['Catalog']['host'] . ':' . $configArray['Catalog']['port'],
-            $configArray['Catalog']['username'],
-            $configArray['Catalog']['password']
+            $this->config['Catalog']['host'] . ':' 
+            . $this->config['Catalog']['port'],
+            $this->config['Catalog']['username'],
+            $this->config['Catalog']['password']
         );
 
-
         // Select the databse
-        mssql_select_db($configArray['Catalog']['database']);
+        mssql_select_db($this->config['Catalog']['database']);
     }
 
     /**
