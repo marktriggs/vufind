@@ -58,9 +58,11 @@ if exist %index_dir% goto nomakeindexdir
 mkdir "%index_dir%"
 :nomakeindexdir
 
-call %VUFIND_HOME%\index-alphabetic-browse.bat build_browse title title_fullStr 1 VuFindTitleLeech
+call %VUFIND_HOME%\index-alphabetic-browse.bat build_browse title title_fullStr 1 "-Dbibleech=StoredFieldLeech -Dsortfield=title_sort -Dvaluefield=title_fullStr"
 call %VUFIND_HOME%\index-alphabetic-browse.bat build_browse topic topic_browse
 call %VUFIND_HOME%\index-alphabetic-browse.bat build_browse author author_browse
+call %VUFIND_HOME%\index-alphabetic-browse.bat build_browse lcc callnumber-a 1
+call %VUFIND_HOME%\index-alphabetic-browse.bat build_browse dewey dewey-raw 1 "-Dbibleech=StoredFieldLeech -Dsortfield=dewey-sort -Dvaluefield=dewey-raw"
 goto end
 
 rem Function to process a single browse index:
@@ -68,13 +70,15 @@ rem Function to process a single browse index:
 shift
 SET browse=%1
 SET field=%2
+SET jvmopts=%4
+
+rem Strip double quotes from JVM options:
+SET jvmopts=###%jvmopts%###
+SET jvmopts=%jvmopts:"###=%
+SET jvmopts=%jvmopts:###"=%
+SET jvmopts=%jvmopts:###=%
 
 echo Building browse index for %browse%...
-
-SET bib_leech=
-if "!%4!"=="!!" goto nobibleech
-SET bib_leech=-Dbibleech=%4
-:nobibleech
 
 set args="%bib_index%" "%field%" "%browse%.tmp"
 if "!%3!"=="!1!" goto skipauth
@@ -82,7 +86,7 @@ set args="%bib_index%" "%field%" "%auth_index%" "%browse%.tmp"
 :skipauth
 
 rem Extract lines from Solr
-java %bib_leech% -Dfile.encoding="UTF-8" -Dfield.preferred=heading -Dfield.insteadof=use_for -cp browse-indexing.jar PrintBrowseHeadings %args%
+java %jvmopts% -Dfile.encoding="UTF-8" -Dfield.preferred=heading -Dfield.insteadof=use_for -cp browse-indexing.jar PrintBrowseHeadings %args%
 
 rem Sort lines
 sort %browse%.tmp /o sorted-%browse%.tmp
