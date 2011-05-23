@@ -125,7 +125,7 @@
   <dt>{translate text='Online Access'}:</dt>
   <dd>
   {foreach from=$coreURLs item=desc key=u name=loop}
-    <p><a rel="external" href="{if $proxy}{$proxy}/login?url={$u|escape:'url'}{else}{$u|escape}{/if}">{$desc|escape}</a></p>
+    <p><a rel="external" href="{if $proxy}{$proxy}/login?qurl={$u|escape:'url'}{else}{$u|escape}{/if}">{$desc|escape}</a></p>
   {/foreach}
   {if $coreOpenURL}
     {include file="Search/openurl.tpl" openUrl=$coreOpenURL}

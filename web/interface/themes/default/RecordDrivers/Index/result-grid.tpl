@@ -20,7 +20,7 @@
         {/if}
         {foreach from=$summURLs key=recordurl item=urldesc}
         <div>
-          <a href="{$recordurl|escape}"  target="new">{if $recordurl == $urldesc}{translate text='Get full text'}{else}{$urldesc|escape}{/if}</a>
+          <a href="{if $proxy}{$proxy}/login?qurl={$recordurl|escape:"url"}{else}{$recordurl|escape}{/if}"  target="new">{if $recordurl == $urldesc}{translate text='Get full text'}{else}{$urldesc|escape}{/if}</a>
         </div>
         {/foreach}
       {else}

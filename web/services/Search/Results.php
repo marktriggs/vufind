@@ -58,6 +58,11 @@ class Results extends Action
         global $interface;
         global $configArray;
 
+        // Set Proxy URL
+        if (isset($configArray['EZproxy']['host'])) {
+            $interface->assign('proxy', $configArray['EZproxy']['host']);
+        }
+
         // Initialise from the current search globals
         $searchObject = SearchObjectFactory::initSearchObject();
         $searchObject->init();

@@ -33,32 +33,32 @@
       {elseif !empty($summCallNo)}
         <strong>{translate text='Call Number'}:</strong> {$summCallNo|escape}
       {/if}
-      
+
       {if $summOpenUrl || !empty($summURLs)}
         {if $summOpenUrl}
           <br/>
           {include file="Search/openurl.tpl" openUrl=$summOpenUrl}
         {/if}
         {foreach from=$summURLs key=recordurl item=urldesc}
-          <br/><a href="{$recordurl|escape}" class="fulltext" target="new">{if $recordurl == $urldesc}{translate text='Get full text'}{else}{$urldesc|escape}{/if}</a>
+          <br/><a href="{if $proxy}{$proxy}/login?qurl={$recordurl|escape:"url"}{else}{$recordurl|escape}{/if}" class="fulltext" target="new">{if $recordurl == $urldesc}{translate text='Get full text'}{else}{$urldesc|escape}{/if}</a>
         {/foreach}
       {/if}
-      
+
       <br/>
       {foreach from=$summFormats item=format}
         <span class="iconlabel {$format|lower|regex_replace:"/[^a-z0-9]/":""}">{translate text=$format}</span>
       {/foreach}
-      
+
       {if !$summOpenUrl && empty($summURLs)}
       <span class="ajax_availability hide" id="status{$summId|escape}">{translate text='Loading'}...</span>
-      {/if}     
+      {/if}
     </div>
 
     {if $showPreviews}
       {if (!empty($summLCCN)|!empty($summISBN)|!empty($summOCLC))}
       <div class="span-3 last">
-        {if $showGBSPreviews}      
-          <div class="previewDiv"> 
+        {if $showGBSPreviews}
+          <div class="previewDiv">
             <a title="{translate text='Preview from'} Google Books" class="hide previewGBS{if $summISBN} ISBN{$summISBN}{/if}{if $summLCCN} LCCN{$summLCCN}{/if}{if $summOCLC} OCLC{$summOCLC|@implode:' OCLC'}{/if}" target="_blank">
               <img src="https://www.google.com/intl/en/googlebooks/images/gbs_preview_button1.png" alt="{translate text='Preview'}"/>
             </a>
@@ -69,30 +69,30 @@
             <a title="{translate text='Preview from'} Open Library" class="hide previewOL{if $summISBN} ISBN{$summISBN}{/if}{if $summLCCN} LCCN{$summLCCN}{/if}{if $summOCLC} OCLC{$summOCLC|@implode:' OCLC'}{/if}" target="_blank">
               <img src="{$path}/images/preview_ol.gif" alt="{translate text='Preview'}"/>
             </a>
-          </div> 
+          </div>
         {/if}
         {if $showHTPreviews}
           <div class="previewDiv">
             <a title="{translate text='Preview from'} HathiTrust" class="hide previewHT{if $summISBN} ISBN{$summISBN}{/if}{if $summLCCN} LCCN{$summLCCN}{/if}{if $summOCLC} OCLC{$summOCLC|@implode:' OCLC'}{/if}" target="_blank">
               <img src="{$path}/images/preview_ht.gif" alt="{translate text='Preview'}"/>
             </a>
-          </div> 
+          </div>
         {/if}
         <span class="previewBibkeys{if $summISBN} ISBN{$summISBN}{/if}{if $summLCCN} LCCN{$summLCCN}{/if}{if $summOCLC} OCLC{$summOCLC|@implode:' OCLC'}{/if}"></span>
       </div>
       {/if}
-    {/if}     
+    {/if}
   </div>
 
   <div class="span-4 last">
     <a id="saveRecord{$summId|escape}" href="{$url}/Record/{$summId|escape:"url"}/Save" class="fav tool saveRecord" title="{translate text='Add to favorites'}">{translate text='Add to favorites'}</a>
-    
+
     {* Display the lists that this record is saved to *}
     <div class="savedLists info hide" id="savedLists{$summId|escape}">
       <strong>{translate text="Saved in"}:</strong>
     </div>
   </div>
-  
+
   <div class="clear"></div>
 </div>
 
