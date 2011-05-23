@@ -697,6 +697,41 @@ dl.narrowList a {
     padding:.5em .5em .5em 20px;
     margin-right:1em;
 }
+.holdPlace {
+    background-image:url(../images/fugue/holdPlace.png);
+    background-repeat:no-repeat;
+    background-position: left;
+    padding:.5em .5em .5em 20px;
+    margin-right:1em;
+}
+.holdCancel {
+    background-image:url(../images/fugue/holdCancel.png);
+    background-repeat:no-repeat;
+    background-position: left;
+    padding:.5em .5em .5em 20px;
+    margin-right:1em;
+}
+.holdCancelAll {
+    background-image:url(../images/fugue/holdCancelAll.png);
+    background-repeat:no-repeat;
+    background-position: left;
+    padding:.5em .5em .5em 20px;
+    margin-right:1em;
+}
+.renew {
+    background-image:url(../images/fugue/renew.png);
+    background-repeat:no-repeat;
+    background-position: left;
+    padding:.5em .5em .5em 20px;
+    margin-right:1em;
+}
+.renewAll {
+    background-image:url(../images/fugue/renewAll.png);
+    background-repeat:no-repeat;
+    background-position: left;
+    padding:.5em .5em .5em 20px;
+    margin-right:1em;
+}
 
 /***** Pagination *****/
 
@@ -734,7 +769,9 @@ div.recordsubcontent {
     margin-top: 1em;
     max-width: 120px;
 }
-
+.holdsMessage {
+    margin-top: 1em;
+}
 /***** Citation Table *****/
 .citation {
     font-size:90%;
@@ -866,6 +903,31 @@ ul.similar li {
     text-align: left;
     background:white;
     margin: 0px;
+}
+
+/*********** Toolbar (Favorites View) ************/
+.toolbar ul li input.button {
+    background-color:transparent;
+    background-position: 2px center;
+    border:0 none;
+    cursor:pointer;
+    margin-right:0;
+    padding:0 0 0 23px;
+    vertical-align: top;
+    color: #06C;
+}
+
+.toolbar ul li input.button {
+    width: 0;  /* IE table-cell margin fix */
+    overflow: visible;
+}
+
+.toolbar ul li input.button[class] {  /* IE < 7 ignores [class] */
+    width: auto;  /* cancel margin fix for other browsers */
+}
+
+.toolbar ul li input.checkbox {
+    vertical-align: top;
 }
 
 /*** MARC view (Record page) **/

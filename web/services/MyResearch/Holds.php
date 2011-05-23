@@ -40,6 +40,9 @@ require_once 'services/MyResearch/MyResearch.php';
  */
 class Holds extends MyResearch
 {
+    protected $holdResults;
+    protected $cancelResults;
+    
     /**
      * Process parameters and display the page.
      *
@@ -55,26 +58,110 @@ class Holds extends MyResearch
             if (PEAR::isError($patron)) {
                 PEAR::raiseError($patron);
             }
+            // Is cancelling Holds Available
+            if ($this->cancelHolds != false) {
+        
+                // Get Message from Hold.php
+                if (isset($_GET['success']) && $_GET['success'] != "") {
+                    $this->holdResults = array(
+                        'success' => true, 'status' => "hold_place_success"
+                    );
+                }
+
+                // Process Submitted Form
+                if (isset($_POST['cancelSelected']) || isset($_POST['cancelAll'])) {
+                    $this->_cancelHolds($patron);       
+                }
+                $interface->assign('holdResults', $this->holdResults);
+                $interface->assign('cancelResults', $this->cancelResults);
+            }   
+                
             $result = $this->catalog->getMyHolds($patron);
             if (!PEAR::isError($result)) {
                 if (count($result)) {
                     $recordList = array();
                     foreach ($result as $row) {
                         $record = $this->db->getRecord($row['id']);
-                        $record['createdate'] = $row['create'];
-                        $record['expiredate'] = $row['expire'];
+                        $record['ils_details'] = $row;
                         $recordList[] = $record;
                     }
+
+                    // Get List of PickUp Libraries based on patrons home library
+                    $libs = $this->catalog->getPickUpLocations($patron);
+                    $interface->assign('pickup', $libs);
+                    $interface->assign('home_library', $user->home_library);
+                    
+                    if ($this->cancelHolds != false) {
+                        $recordList = $this->_addCancelDetails($recordList);
+                    }                    
                     $interface->assign('recordList', $recordList);
                 } else {
                     $interface->assign('recordList', false);
                 }
+            } else {
+                PEAR::raiseError($result);
             }
         }
 
         $interface->setTemplate('holds.tpl');
         $interface->setPageTitle('My Holds');
         $interface->display('layout.tpl');
+    }
+
+    /**
+     * Private method for cancelling holds
+     *
+     * @param array $patron An array of patron information 
+     *
+     * @return null
+     * @access private
+     */
+    private function _cancelHolds($patron)
+    {
+        global $interface;
+        
+        $gatheredDetails['details'] = isset($_POST['cancelAll'])
+                ? $_POST['cancelAllIDS'] : $_POST['cancelSelectedIDS'];
+        if (is_array($gatheredDetails['details'])) {
+            // Add Patron Data to Submitted Data
+            $gatheredDetails['patron'] = $patron;
+            $this->cancelResults = $this->catalog->cancelHolds($gatheredDetails);
+            if ($this->cancelResults == false) {
+                $interface->assign('errorMsg', 'hold_cancel_fail');
+            }
+        } else {
+             $interface->assign('errorMsg', 'hold_empty_selection');
+        }
+    }
+    
+    /**
+     * Adds a link or form details to existing hold details
+     *
+     * @param array $recordList An array of patron holds
+     *
+     * @return array An array of patron holds with links / form details
+     * @access private
+     */
+    private function _addCancelDetails($recordList)
+    {
+        global $interface;
+
+        foreach ($recordList as $record) {
+            // Generate Form Details for cancelling Holds if Cancelling Holds 
+            // is enabled
+            if ($this->cancelHolds['function'] == "getCancelHoldLink") {
+                // Build OPAC URL
+                $record['ils_details']['cancel_link'] 
+                    = $this->catalog->getCancelHoldLink($record['ils_details']);
+            } else {
+                // Form Details
+                $interface->assign('cancelForm', true);
+                $record['ils_details']['cancel_details']
+                    = $this->catalog->getCancelHoldDetails($record['ils_details']);
+            }
+            $holdList[] = $record;    
+        }
+        return $holdList;
     }
 }
 

@@ -204,14 +204,15 @@ class Demo implements DriverInterface
      * This is responsible for retrieving the holding information of a certain
      * record.
      *
-     * @param string $id The record id to retrieve the holdings for
+     * @param string $id     The record id to retrieve the holdings for
+     * @param array  $patron Patron data
      *
      * @return mixed     On success, an associative array with the following keys:
      * id, availability (boolean), status, location, reserve, callnumber, duedate,
      * number, barcode; on failure, a PEAR_Error.
      * @access public
      */
-    public function getHolding($id)
+    public function getHolding($id, $patron = false)
     {
         return $this->getStatus($id);
     }

@@ -321,16 +321,15 @@ class Virtua implements DriverInterface
      *   - Used on the record screen during build (php)
      *     in combination with serials : getPurchaseHistory()
      *
-     * @param string $id        The record id to retrieve the holdings for
-     * @param string $patron_id Non-standard parameter used for checking hold
-     * status.
+     * @param string $id     The record id to retrieve the holdings for
+     * @param array  $patron Patron data
      *
      * @return mixed            On success, an associative array with the following
      * keys: id, availability (boolean), status, location, reserve, callnumber, 
      * duedate, number, barcode; on failure, a PEAR_Error.
      * @access public
      */
-    public function getHolding($id, $patron_id = null)
+    public function getHolding($id, $patron = false)
     {
         // Strip off the prefix from vtls exports
         $db_id = str_replace("vtls", "", $id);
@@ -449,8 +448,8 @@ class Virtua implements DriverInterface
             $holding[] = $temp;
         }
 
-        if (count($holding) != 0 && $patron_id != null) {
-            return $this->_checkHoldAllowed($patron_id, $holding);
+        if (count($holding) != 0 && $patron['id'] != null) {
+            return $this->_checkHoldAllowed($patron['id'], $holding);
         } else {
             return $holding;
         }
@@ -1513,21 +1512,28 @@ class Virtua implements DriverInterface
     /**
      * Place Hold
      *
-     * This is responsible for both placing holds as well as placing recalls.
+     * Attempts to place a hold or recall on a particular item and returns
+     * an array with result details or a PEAR error on failure of support classes
      *
-     * @param string $patron_id  The id of the patron
-     * @param string $item_id    The id of the record to hold
-     * @param string $req_level  Level of hold to place
-     * @param string $pickup_loc Desired pickup location
-     * @param string $last_date  Expiration date for hold request
+     * @param array $holdDetails An array of item and patron data
      *
-     * @return mixed           True if successful, false if unsuccessful, PEAR_Error
-     * on error
+     * @return mixed An array of data on the request including
+     * whether or not it was successful and a system message (if available) or a
+     * PEAR error on failure of support classes
      * @access public
      */
-    public function placeHold(
-        $patron_id, $item_id, $req_level, $pickup_loc, $last_date
-    ) {
+    public function placeHold($holdDetails)
+    {
+        // Extract key values from the hold details
+        $patron_id = $holdDetails['patron'];
+        $req_level = $holdDetails['req_level'];
+        $pickup_loc = $holdDetails['pickUpLocation'];
+        $item_id = $holdDetails['item_id'];
+        $last_date = $holdDetails['requiredBy'];
+
+        // Assume an error response:
+        $response = array('success' => false, 'status' =>"hold_error_fail");
+
         // Get the iPortal server
         $web_server = $this->_config['Catalog']['webhost'];
 
@@ -1539,7 +1545,7 @@ class Virtua implements DriverInterface
             'volume' => 2
             );
         if (!in_array($req_level, array_keys($allowed_req_levels))) {
-            return false;
+            return $response;
         }
         //  * Pickup Location
         $allowed_pickup_locs = array(
@@ -1548,12 +1554,12 @@ class Virtua implements DriverInterface
             'Springfield'  => '50000'
             );
         if (!in_array($pickup_loc, array_keys($allowed_pickup_locs))) {
-            return false;
+            return $response;
         }
         //  * Last Date - Valid date and a future date
         $ts_last_date = strtotime($last_date);
         if ($ts_last_date == 0 || $ts_last_date <= strtotime('now')) {
-            return false;
+            return $response;
         }
 
         // Still here? Guess the request is valid, lets send it to virtua
@@ -1588,16 +1594,14 @@ class Virtua implements DriverInterface
             $error_message = "Your request was not processed.";
             $test = strpos($result, $error_message);
 
-            // Return true unless we find the error
+            // If we succeeded, override the default fail message with success:
             if ($test === false) {
-                return true;
-            } else {
-                return false;
+                $response['success'] = true;
+                $response['status'] = "hold_success";
             }
-        } else {
-            // Invalid server response. It's probably down
-            return false;
         }
+
+        return $response;
     }
 
     /**

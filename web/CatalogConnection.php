@@ -89,6 +89,144 @@ class CatalogConnection
     }
 
     /**
+     * Check Function
+     *
+     * This is responsible for checking the driver configuration to determine
+     * if the system supports a particular function.
+     *
+     * @param string $function The name of the function to check.
+     *
+     * @return mixed On success, an associative array with specific function keys
+     * and values; on failure, false.
+     * @access public
+     */
+    public function checkFunction($function)
+    {
+        // Extract the configuration from the driver if available:
+        $functionConfig = method_exists($this->driver, 'getConfig')
+            ? $this->driver->getConfig($function) : false;
+
+        // See if we have a corresponding check method to analyze the response:
+        $checkMethod = "_checkMethod".$function;
+        if (!method_exists($this, $checkMethod)) {
+            return false;
+        }
+
+        // Send back the settings:
+        return $this->$checkMethod($functionConfig);
+    }
+
+    /**
+     * Check Holds
+     *
+     * A support method for checkFunction(). This is responsible for checking
+     * the driver configuration to determine if the system supports Holds.
+     *
+     * @param string $functionConfig The Hold configuration values
+     *
+     * @return mixed On success, an associative array with specific function keys
+     * and values either for placing holds via a form or a URL; on failure, false.
+     * @access private
+     */
+    private function _checkMethodHolds($functionConfig)
+    {
+        global $configArray;
+        $response = false;
+
+        if ($this->getHoldsMode() != "none"
+            && method_exists($this->driver, 'placeHold')
+            && $functionConfig['HMACKeys'] != ""
+        ) {
+            $response = array('function' => "placeHold");
+            $response['HMACKeys'] = explode(":", $functionConfig['HMACKeys']);
+            if (isset($functionConfig['defaultRequiredDate'])) {
+                $response['defaultRequiredDate']
+                    = $functionConfig['defaultRequiredDate'];
+            }
+            if (isset($functionConfig['extraHoldFields'])) {
+                $response['extraHoldFields'] = $functionConfig['extraHoldFields'];
+            }
+        } else if (method_exists($this->driver, 'getHoldLink')) {
+            $response = array('function' => "getHoldLink");
+        }
+        return $response;
+    }
+
+    /**
+     * Check Cancel Holds
+     *
+     * A support method for checkFunction(). This is responsible for checking
+     * the driver configuration to determine if the system supports Cancelling Holds.
+     *
+     * @param string $functionConfig The Cancel Hold configuration values
+     *
+     * @return mixed On success, an associative array with specific function keys
+     * and values either for cancelling holds via a form or a URL;
+     * on failure, false.
+     * @access private
+     */
+    private function _checkMethodcancelHolds($functionConfig)
+    {
+        global $configArray;
+        $response = false;
+
+        if ($configArray['Catalog']['cancel_holds_enabled'] == true
+            && method_exists($this->driver, 'cancelHolds')
+        ) {
+            $response = array('function' => "cancelHolds");
+        } else if ($configArray['Catalog']['cancel_holds_enabled'] == true
+            && method_exists($this->driver, 'getCancelHoldLink')
+        ) {
+            $response = array('function' => "getCancelHoldLink");
+        }
+        return $response;
+    }
+
+    /**
+     * Check Renewals
+     *
+     * A support method for checkFunction(). This is responsible for checking
+     * the driver configuration to determine if the system supports Renewing Items.
+     *
+     * @param string $functionConfig The Renewal configuration values
+     *
+     * @return mixed On success, an associative array with specific function keys
+     * and values either for renewing items via a form or a URL; on failure, false.
+     * @access private
+     */
+    private function _checkMethodRenewals($functionConfig)
+    {
+        global $configArray;
+        $response = false;
+
+        if ($configArray['Catalog']['renewals_enabled'] == true
+            && method_exists($this->driver, 'renewMyItems')
+        ) {
+            $response = array('function' => "renewMyItems");
+        } else if ($configArray['Catalog']['renewals_enabled'] == true
+            && method_exists($this->driver, 'renewMyItemsLink')
+        ) {
+            $response = array('function' => "renewMyItemsLink");
+        }
+        return $response;
+    }
+
+    /**
+     * Get Holds Mode
+     *
+     * This is responsible for returning the holds mode
+     *
+     * @return string The Holds mode
+     * @access public
+     */
+    public static function getHoldsMode()
+    {
+        global $configArray;
+        return isset($configArray['Catalog']['holds_mode'])
+            ? $configArray['Catalog']['holds_mode'] : 'all';
+    }
+
+    /**
      * Get Status
      *
      * This is responsible for retrieving the status information of a certain
@@ -131,15 +269,17 @@ class CatalogConnection
      * record.
      *
      * @param string $recordId The record id to retrieve the holdings for
+     * @param array  $patron   Optional Patron details to determine if a user can
+     * place a hold or recall on an item
      *
      * @return mixed     On success, an associative array with the following keys:
      * id, availability (boolean), status, location, reserve, callnumber, duedate,
      * number, barcode; on failure, a PEAR_Error.
      * @access public
      */
-    public function getHolding($recordId)
+    public function getHolding($recordId, $patron = false)
     {
-        $holding = $this->driver->getHolding($recordId);
+        $holding = $this->driver->getHolding($recordId, $patron);
 
         // Validate return from driver's getHolding method -- should be an array or
         // an error.  Anything else is unexpected and should become an error.
@@ -247,42 +387,6 @@ class CatalogConnection
     public function getMyProfile($patron)
     {
         return $this->driver->getMyProfile($patron);
-    }
-
-    /**
-     * Place Hold
-     *
-     * This is responsible for both placing holds as well as placing recalls.
-     *
-     * @param string $recordId The id of the bib record
-     * @param string $patronId The id of the patron
-     * @param string $comment  Any comment regarding the hold or recall
-     * @param string $type     Whether to place a hold or recall
-     *
-     * @return mixed           True if successful, false if unsuccessful, PEAR_Error
-     * on error
-     * @access public
-     */
-    public function placeHold($recordId, $patronId, $comment, $type)
-    {
-        return $this->driver->placeHold($recordId, $patronId, $comment, $type);
-    }
-
-    /**
-     * Get Hold Link
-     *
-     * The goal for this method is to return a URL to a "place hold" web page on
-     * the ILS OPAC. This is used for ILSs that do not support an API or method
-     * to place Holds.
-     *
-     * @param string $recordId The id of the bib record
-     *
-     * @return string          URL to ILS's OPAC's place hold screen.
-     * @access public
-     */
-    public function getHoldLink($recordId)
-    {
-        return $this->driver->getHoldLink($recordId);
     }
 
     /**

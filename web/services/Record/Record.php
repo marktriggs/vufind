@@ -32,6 +32,7 @@ require_once 'sys/Language.php';
 
 require_once 'RecordDrivers/Factory.php';
 require_once 'sys/ResultScroller.php';
+require_once 'sys/VuFindDate.php';
 
 /**
  * Base class shared by most Record module actions.
@@ -48,6 +49,7 @@ class Record extends Action
     protected $recordDriver;
     protected $cacheId;
     protected $db;
+    protected $catalog;
     protected $errorMsg;
     protected $infoMsg;
 
@@ -60,6 +62,7 @@ class Record extends Action
     {
         global $configArray;
         global $interface;
+        global $user;
 
         //$interface->caching = 1;
 
@@ -75,6 +78,28 @@ class Record extends Action
 
         // Setup Search Engine Connection
         $this->db = ConnectionManager::connectToIndex();
+        
+        // Connect to Database
+        $this->catalog = ConnectionManager::connectToCatalog();
+        
+        // Set up object for formatting dates and times:
+        $this->dateFormat = new VuFindDate();
+        
+        // Register Library Catalog Account
+        if (isset($_POST['submit']) && !empty($_POST['submit'])) {
+            if (isset($_POST['cat_username']) 
+                && isset($_POST['cat_password'])
+            ) {
+                $result = UserAccount::processCatalogLogin(
+                    $_POST['cat_username'], $_POST['cat_password']
+                );
+                if ($result) {
+                    $interface->assign('user', $user);
+                } else {
+                    $interface->assign('loginError', 'Invalid Patron Login');
+                }
+            }
+        }
 
         // Retrieve the record from the index
         if (!($record = $this->db->getRecord($_REQUEST['id']))) {

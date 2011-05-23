@@ -111,7 +111,7 @@ class Voyager implements DriverInterface
      */
     protected function buildSqlFromArray($sql)
     {
-        $modifier = isset($sql['modifier']) ? $sql['modifier'] : "";
+        $modifier = isset($sql['modifier']) ? $sql['modifier'] . " " : "";
 
         // Put String Together
         $sqlString = "SELECT ". $modifier . implode(", ", $sql['expressions']);
@@ -343,6 +343,7 @@ class Voyager implements DriverInterface
     {
         // Expressions
         $sqlExpressions = array(
+            "BIB_ITEM.BIB_ID",
             "ITEM_BARCODE.ITEM_BARCODE", "ITEM.ITEM_ID",
             "ITEM.ON_RESERVE", "ITEM.ITEM_SEQUENCE_NUMBER",
             "ITEM.RECALLS_PLACED", "ITEM.HOLDS_PLACED",
@@ -575,12 +576,33 @@ class Voyager implements DriverInterface
     /**
      * Protected support method for getHolding.
      *
-     * @param array $data Item Data
+     * @param array $sqlRow SQL Row Data
      *
      * @return array Keyed data
      * @access protected
      */
-    protected function processHoldingData($data)
+    protected function processHoldingRow($sqlRow)
+    {
+        return array(
+            'id' => $sqlRow['BIB_ID'],
+            'status' => $sqlRow['STATUS'],
+            'location' => htmlentities($sqlRow['LOCATION']),
+            'reserve' => $sqlRow['ON_RESERVE'],
+            'callnumber' => $sqlRow['CALLNUMBER'],
+            'barcode' => $sqlRow['ITEM_BARCODE']
+        );
+    }
+
+    /**
+     * Protected support method for getHolding.
+     *
+     * @param array $data   Item Data
+     * @param array $patron Patron Data
+     *
+     * @return array Keyed data
+     * @access protected
+     */
+    protected function processHoldingData($data, $patron = false)
     {
         $holding = array();
 
@@ -630,26 +652,21 @@ class Voyager implements DriverInterface
 
                 $requests_placed = $row['HOLDS_PLACED'] + $row['RECALLS_PLACED'];
 
-                $holding[$i] = array(
-                    'id' => $row['BIB_ID'],
+                $holding[$i] = $this->processHoldingRow($row);
+                $holding[$i] += array(
                     'availability' => $availability['available'],
-                    'status' => $row['STATUS'],
-                    'location' => htmlentities($row['LOCATION']),
-                    'reserve' => $row['ON_RESERVE'],
-                    'callnumber' => $row['CALLNUMBER'],
                     'duedate' => $dueDate,
                     'number' => $number,
-                    'barcode' => $row['ITEM_BARCODE'],
                     'requests_placed' => $requests_placed,
-                    'returnDate' => $returnDate
+                    'returnDate' => $returnDate 
                 );
-
+                
                 // Parse Holding Record
                 if ($row['RECORD_SEGMENT']) {
                     $marcDetails
                         = $this->processRecordSegment($row['RECORD_SEGMENT']);
                     if (!empty($marcDetails)) {
-                        $holding[$i] = $holding[$i] + $marcDetails;
+                        $holding[$i] += $marcDetails;
                     }
                 }
 
@@ -665,14 +682,15 @@ class Voyager implements DriverInterface
      * This is responsible for retrieving the holding information of a certain
      * record.
      *
-     * @param string $id The record id to retrieve the holdings for
+     * @param string $id     The record id to retrieve the holdings for
+     * @param array  $patron Patron data
      *
      * @return mixed     On success, an associative array with the following keys:
      * id, availability (boolean), status, location, reserve, callnumber, duedate,
      * number, barcode; on failure, a PEAR_Error.
      * @access public
      */
-    public function getHolding($id)
+    public function getHolding($id, $patron = false)
     {
         $possibleQueries = array();
 
@@ -711,7 +729,7 @@ class Voyager implements DriverInterface
                 break;
             }
         }
-        return $this->processHoldingData($data);
+        return $this->processHoldingData($data, $patron);
     }
 
     /**
@@ -815,19 +833,24 @@ class Voyager implements DriverInterface
             "to_char(CIRC_TRANSACTIONS.CURRENT_DUE_DATE, 'MM-DD-YY HH24:MI')" .
             " as DUEDATE",
             "to_char(CURRENT_DUE_DATE, 'YYYYMMDD HH24:MI') as FULLDATE",
-            "BIB_ITEM.BIB_ID"
+            "BIB_ITEM.BIB_ID",
+            "CIRC_TRANSACTIONS.ITEM_ID as ITEM_ID",
+            "MFHD_ITEM.ITEM_ENUM",
+            "MFHD_ITEM.YEAR"
         );
 
         // From
         $sqlFrom = array(
             $this->dbName.".CIRC_TRANSACTIONS",
-            $this->dbName.".BIB_ITEM"
+            $this->dbName.".BIB_ITEM",
+            $this->dbName.".MFHD_ITEM"
         );
 
         // Where
         $sqlWhere = array(
             "CIRC_TRANSACTIONS.PATRON_ID = :id",
-            "BIB_ITEM.ITEM_ID = CIRC_TRANSACTIONS.ITEM_ID"
+            "BIB_ITEM.ITEM_ID = CIRC_TRANSACTIONS.ITEM_ID",
+            "CIRC_TRANSACTIONS.ITEM_ID = MFHD_ITEM.ITEM_ID(+)"
         );
 
         // Order
@@ -841,7 +864,7 @@ class Voyager implements DriverInterface
             'from' => $sqlFrom,
             'where' => $sqlWhere,
             'order' => $sqlOrder,
-            'bind' => $sqlBind,
+            'bind' => $sqlBind
         );
 
         return $sqlArray;
@@ -851,11 +874,12 @@ class Voyager implements DriverInterface
      * Protected support method for getMyTransactions.
      *
      * @param array $sqlRow An array of keyed data
+     * @param array $patron An array of keyed patron data
      *
      * @return array Keyed data for display by template files
      * @access protected
      */
-    protected function processMyTransactionsData($sqlRow)
+    protected function processMyTransactionsData($sqlRow, $patron = false)
     {
         // Convert Voyager Format to display format
         if (!empty($sqlRow['DUEDATE'])) {
@@ -871,29 +895,29 @@ class Voyager implements DriverInterface
             if (PEAR::isError($dueTime)) {
                 return $dueTime;
             }
-            $dueDate .= " " . $dueTime;
         }
 
-        $dueStatus = 0;
+        $dueStatus = false;
         if (!empty($sqlRow['FULLDATE'])) {
-            // Due Date Status 0 = Not Due, 1 = Due Today, 2 = Overdue
             $now = time();
             $dueTimeStamp = strtotime($sqlRow['FULLDATE']);
-
-            if ($now > $dueTimeStamp) {
-                $dueStatus = 2;
-            } else if ($now > $dueTimeStamp-(1*24*60*60)) {
-                $dueStatus = 1;
-            } else {
-                $dueStatus = 0;
+            if (!PEAR::isError($dueTimeStamp) && is_numeric($dueTimeStamp)) {
+                if ($now > $dueTimeStamp) {
+                    $dueStatus = "overdue";
+                } else if ($now > $dueTimeStamp-(1*24*60*60)) {
+                    $dueStatus = "due";
+                }
             }
         }
 
         return array(
             'id' => $sqlRow['BIB_ID'],
+            'item_id' => $sqlRow['ITEM_ID'],
             'duedate' => $dueDate,
             'dueTime' => $dueTime,
-            'dueStatus' => $dueStatus
+            'dueStatus' => $dueStatus,
+            'volume' => str_replace("v.", "", $sqlRow['ITEM_ENUM']),
+            'publication_year' => $sqlRow['YEAR']
         );
     }
 
@@ -921,7 +945,7 @@ class Voyager implements DriverInterface
             $sqlStmt = $this->db->prepare($sql['string']);
             $sqlStmt->execute($sql['bind']);
             while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
-                $processRow = $this->processMyTransactionsData($row);
+                $processRow = $this->processMyTransactionsData($row, $patron);
                 if (PEAR::isError($processRow)) {
                     return $processRow;
                 }
@@ -1120,7 +1144,7 @@ class Voyager implements DriverInterface
         $sqlBind = array(':id' => $patron['id']);
 
         $sqlArray = array(
-            'modifier' => $sqlSelectModifer,
+            'modifier' => $sqlSelectModifier,
             'expressions' => $sqlExpressions,
             'from' => $sqlFrom,
             'where' => $sqlWhere,

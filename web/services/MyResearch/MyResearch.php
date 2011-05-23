@@ -49,6 +49,9 @@ class MyResearch extends Action
     protected $infoMsg;
     protected $showExport;
     protected $followupUrl;
+    protected $checkHolds;
+    protected $checkRenew;
+    protected $cancelHolds;
 
     /**
      * Constructor
@@ -72,6 +75,15 @@ class MyResearch extends Action
 
         // Connect to Database
         $this->catalog = ConnectionManager::connectToCatalog();
+
+        // Is Placing Holds allowed?
+        $this->checkHolds = $this->catalog->checkFunction("Holds");
+
+        // Is Cancelling Holds allowed?
+        $this->cancelHolds = $this->catalog->checkFunction("cancelHolds");
+
+        // Is Renewing Items allowed?
+        $this->checkRenew = $this->catalog->checkFunction("Renewals");
 
         // Register Library Catalog Account
         if (isset($_POST['submit']) && !empty($_POST['submit']) && $this->catalog

@@ -348,6 +348,9 @@ ul.menu li{
 .userMsg {
     color: #6d8822;
 }
+.holdsMessage {
+    margin-top: 1em;
+}
 
 #tagForm {
     display: none;
@@ -965,6 +968,41 @@ table.datagrid tr.oddrow {
 }
 .addThis {
     background-image:url(<?php echo $configArray['Site']['path'];?>/images/silk/tag_yellow.png);
+    background-repeat:no-repeat;
+    background-position: left;
+    padding:.5em .5em .5em 20px;
+    margin-right:1em;
+}
+.holdPlace {
+    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/holdPlace.png);
+    background-repeat:no-repeat;
+    background-position: left;
+    padding:.5em .5em .5em 20px;
+    margin-right:1em;
+}
+.holdCancel {
+    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/holdCancel.png);
+    background-repeat:no-repeat;
+    background-position: left;
+    padding:.5em .5em .5em 20px;
+    margin-right:1em;
+}
+.holdCancelAll {
+    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/holdCancelAll.png);
+    background-repeat:no-repeat;
+    background-position: left;
+    padding:.5em .5em .5em 20px;
+    margin-right:1em;
+}
+.renew {
+    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/renew.png);
+    background-repeat:no-repeat;
+    background-position: left;
+    padding:.5em .5em .5em 20px;
+    margin-right:1em;
+}
+.renewAll {
+    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/renewAll.png);
     background-repeat:no-repeat;
     background-position: left;
     padding:.5em .5em .5em 20px;

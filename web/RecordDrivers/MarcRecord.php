@@ -603,31 +603,23 @@ class MarcRecord extends IndexRecord
     /**
      * Get an array of information about record holdings, obtained in real-time
      * from the ILS.
+     * 
+     * @param array $patron An array of patron data
      *
      * @return array
      * @access protected
      */
-    protected function getRealTimeHoldings()
+    protected function getRealTimeHoldings($patron = false)
     {
-        // Get Holdings Data
+        // Get ID and connect to catalog
         $id = $this->getUniqueID();
         $catalog = ConnectionManager::connectToCatalog();
-        if ($catalog && $catalog->status) {
-            $result = $catalog->getHolding($id);
-            if (PEAR::isError($result)) {
-                PEAR::raiseError($result);
-            }
-            $holdings = array();
-            if (count($result)) {
-                foreach ($result as $copy) {
-                    if ($copy['location'] != 'World Wide Web') {
-                        $holdings[$copy['location']][] = $copy;
-                    }
-                }
-            }
-            return $holdings;
-        }
-        return array();
+
+        include_once 'sys/HoldLogic.php';
+        $holdLogic = new HoldLogic($catalog);
+
+        return $holdLogic->getHoldings($id, $patron);
+
     }
 
     /**

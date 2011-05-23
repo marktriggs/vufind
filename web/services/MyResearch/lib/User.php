@@ -58,6 +58,7 @@ class User extends DB_DataObject
     public $cat_username;                    // string(50)
     public $cat_password;                    // string(50)
     public $college;                         // string(100)  not_null
+    public $home_library;                         // string(100)  not_null
     public $major;                           // string(100)  not_null
     public $created;                         // datetime(19)  not_null binary
 
@@ -79,7 +80,7 @@ class User extends DB_DataObject
     {
         return array(
             'id', 'username', 'password', 'cat_username', 'cat_password',
-            'firstname', 'lastname', 'email', 'college', 'major'
+            'firstname', 'lastname', 'email', 'college', 'home_library', 'major'
         );
     }
 
@@ -406,4 +407,27 @@ class User extends DB_DataObject
 
         return $lists;
     }
+
+    /**
+     * Changes the home library of a user
+     *
+     * @param string $home_library The new home library code
+     *
+     * @return boolean True on success
+     * @access public
+     */
+    public function changeHomeLibrary($home_library)
+    {
+        $this->home_library = $home_library;
+        $this->update();
+        
+        // Update Session
+
+        if ($session_info = UserAccount::isLoggedIn()) {
+            $session_info->home_library = $home_library;
+            UserAccount::updateSession($session_info);
+        }
+        return true;
+    }
+
 }

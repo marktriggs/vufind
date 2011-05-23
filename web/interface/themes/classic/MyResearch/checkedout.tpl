@@ -1,16 +1,45 @@
 <div id="bd">
   <div id="yui-main" class="content">
     <div class="yui-b first contentbox">
-    
+
         {if $user->cat_username}
           <h4>{translate text='Your Checked Out Items'}</h4>
+          {if $blocks}
+            {foreach from=$blocks item=block}
+              <p class="info">{translate text=$block}</p>
+            {/foreach}
+          {/if}
+
           {if $transList}
+
+            {if $renewForm}
+            <form name="renewals" action="{$url}/MyResearch/CheckedOut" method="post" id="renewals">
+              <div class="toolbar">
+                <ul>
+                  <li><input type="submit" class="button renew" name="renewSelected" value="{translate text="renew_selected"}" /></li>
+                  <li><input type="submit" class="button renewAll" name="renewAll" value="{translate text='renew_all'}" /></li>
+                </ul>
+              </div>
+              <br />
+            {/if}
+
+            {if $errorMsg}
+              <p class="error">{translate text=$errorMsg}</p>
+            {/if}
+
           <ul class="filters">
           {foreach from=$transList item=resource name="recordLoop"}
             {if ($smarty.foreach.recordLoop.iteration % 2) == 0}
             <li class="result alt">
             {else}
             <li class="result">
+            {/if}
+            {if $renewForm}
+              {if $resource.ils_details.renewable && $resource.ils_details.renew_details}
+                <div class="hiddenLabel"><label for="checkbox_{$resource.id|regex_replace:'/[^a-z0-9]/':''|escape}">{translate text="Select this record"}</label></div>
+                <input type="checkbox" name="renewSelectedIDS[]" value="{$resource.ils_details.renew_details}" class="ui_checkboxes" id="checkbox_{$resource.id|regex_replace:'/[^a-z0-9]/':''|escape}" />
+                <input type="hidden" name="renewAllIDS[]" value="{$resource.ils_details.renew_details}" />
+              {/if}
             {/if}
               <div class="yui-ge">
                 <div class="yui-u first">
@@ -40,9 +69,48 @@
                       <span class="iconlabel {$resource.format|lower|regex_replace:"/[^a-z0-9]/":""}">{translate text=$resource.format}</span>
                     {/if}
 
-                    <br>
-                    
-                    <b>{translate text='Due'}: {$resource.duedate|escape}</b>
+                    {if $resource.ils_details.volume}
+                      <strong>{translate text='Volume'}:</strong> {$resource.ils_details.volume|escape}
+                      <br />
+                    {/if}
+
+                    {if $resource.ils_details.publication_year}
+                      <strong>{translate text='Year of Publication'}:</strong> {$resource.ils_details.publication_year|escape}
+                      <br />
+                    {/if}
+
+                    {assign var="showStatus" value="show"}
+                    {if $renewResult[$resource.ils_details.item_id]}
+                      {if $renewResult[$resource.ils_details.item_id].success}
+                        {assign var="showStatus" value="hide"}
+                        <strong>{translate text='Due Date'}: {$renewResult[$resource.ils_details.item_id].new_date} {if $renewResult[$resource.ils_details.item_id].new_time}{$renewResult[$resource.ils_details.item_id].new_time|escape}{/if}</strong>
+                        <br />
+                        <span class="userMsg">{translate text='renew_success'}</span>
+                      {else}
+                        <strong>{translate text='Due Date'}: {$resource.ils_details.duedate|escape} {if $resource.ils_details.dueTime} {$resource.ils_details.dueTime|escape}{/if}</strong>
+                        <br />
+                        <span class="error">{translate text='renew_fail'}{if $renewResult[$resource.ils_details.item_id].sysMessage}: {$renewResult[$resource.ils_details.item_id].sysMessage|escape}{/if}</span>
+                      {/if}
+                    {else}
+                      <strong>{translate text='Due Date'}: {$resource.ils_details.duedate|escape} {if $resource.ils_details.dueTime} {$resource.ils_details.dueTime|escape}{/if}</strong>
+                      <br />
+                      {if $showStatus == "show"}
+                        {if $resource.ils_details.dueStatus == "overdue"}
+                          <div class="error">{translate text="renew_item_overdue"}</div>
+                        {elseif $resource.ils_details.dueStatus == "due"}
+                          <div class="userMsg">{translate text="renew_item_due"}</div>
+                        {/if}
+                      {/if}
+                    {/if}
+
+                    <br />
+                    {if $resource.ils_details.message}
+                      <span class="userMsg">{translate text=$resource.ils_details.message}</span>
+                      <br />
+                    {/if}
+                    {if $resource.ils_details.renewable && $resource.ils_details.renew_link}
+                      <a href="{$resource.ils_details.renew_link|escape}">{translate text='renew_item'}</a>
+                    {/if}
 
                   </div>
                 </div>
@@ -51,6 +119,9 @@
             </li>
           {/foreach}
           </ul>
+          {if $renewForm}
+            </form>
+          {/if}
           {else}
           {translate text='You do not have any items checked out'}.
           {/if}
@@ -58,7 +129,7 @@
           {include file="MyResearch/catalog-login.tpl"}
         {/if}
 
-    
+
     </div>
   </div>
 

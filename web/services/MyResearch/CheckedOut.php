@@ -52,27 +52,108 @@ class CheckedOut extends MyResearch
 
         // Get My Transactions
         if ($patron = UserAccount::catalogLogin()) {
+            if (PEAR::isError($patron)) {
+                PEAR::raiseError($patron);
+            }
+
+            // Renew Items
+            if (isset($_POST['renewAll']) || isset($_POST['renewSelected'])) {
+                $this->_renewItems($patron);          
+            }
+            
             $result = $this->catalog->getMyTransactions($patron);
-            if (!PEAR::isError($result)) {
-                $transList = array();
-                foreach ($result as $data) {
-                    $record = $this->db->getRecord($data['id']);
-                    $transList[] = array(
-                        'id'      => $data['id'],
-                        'isbn'    => $record['isbn'],
-                        'author'  => $record['author'],
-                        'title'   => $record['title'],
-                        'format'  => $record['format'],
-                        'duedate' => $data['duedate']
-                    );
-                }
-                $interface->assign('transList', $transList);
+            if (PEAR::isError($result)) {
+                PEAR::raiseError($result);
+            } 
+            
+            $transList = array();
+            foreach ($result as $data) {
+                $record = $this->db->getRecord($data['id']);
+                $transList[] = array('id'      => $data['id'],
+                                     'isbn'    => $record['isbn'],
+                                     'author'  => $record['author'],
+                                     'title'   => $record['title'],
+                                     'format'  => $record['format'],
+                                     'ils_details' => $data);
+            }
+
+            if ($this->checkRenew) {
+                $transList = $this->_addRenewDetails($transList);
             }
         }
-
+        $interface->assign('transList', $transList);
         $interface->setTemplate('checkedout.tpl');
         $interface->setPageTitle('Checked Out Items');
         $interface->display('layout.tpl');
+    }
+    
+    /**
+     * Adds a link or form details to existing checkout details
+     *
+     * @param array $transList An array of patron items
+     *
+     * @return array An array of patron items with links / form details
+     * @access private
+     */
+    private function _addRenewDetails($transList)
+    {
+        global $interface;
+
+        foreach ($transList as $key => $item) {
+
+            // Reset $renew_details for next item 
+            $renew_details = ""; 
+            if ($this->checkRenew['function'] == "renewMyItemsLink") {
+                // Build OPAC URL
+                $transList[$key]['ils_details']['renew_link'] 
+                    = $this->catalog->renewMyItemsLink($item['ils_details']);
+            } else {
+                // Form Details
+                if ($transList[$key]['ils_details']['renewable']) {
+                    $interface->assign('renewForm', true);
+                }
+                $transList[$key]['ils_details']['renew_details'] 
+                    = $this->catalog->getRenewDetails($item['ils_details']);
+            }
+        }
+        return $transList;    
+    }
+
+    /**
+     * Private method for renewing items
+     *
+     * @param array $patron An array of patron information 
+     *
+     * @return null
+     * @access private
+     */
+    private function _renewItems($patron)
+    {
+        global $interface;
+
+        $gatheredDetails['details'] = isset($_POST['renewAll'])
+            ? $_POST['renewAllIDS'] : $_POST['renewSelectedIDS'];
+
+        if (is_array($gatheredDetails['details'])) {
+            // Add Patron Data to Submitted Data
+            $gatheredDetails['patron'] = $patron;         
+            $renewResult = $this->catalog->renewMyItems($gatheredDetails);
+
+            if ($renewResult !== false) {
+                // Assign Blocks to the Template
+                $interface->assign('blocks', $renewResult['block']);   
+                       
+                // Assign Results to the Template
+                $interface->assign('renewResult', $renewResult['details']);
+
+                // Extract id keys and assign them to the Template
+                $interface->assign('renewArray', $renewResult['ids']);
+            } else {
+                 $interface->assign('errorMsg', 'renew_system_error');
+            }
+        } else {
+            $interface->assign('errorMsg', 'renew_empty_selection');
+        }
     }
 }
 

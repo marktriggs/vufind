@@ -440,14 +440,23 @@ class IndexRecord implements RecordInterface
      * (i.e. URLs in MARC 856 fields) and, if necessary, the ILS driver.
      * Returns null if no data is available.
      *
+     * @param array $patron An array of patron data
+     *
      * @return string Name of Smarty template file to display.
      * @access public
      */
-    public function getHoldings()
+    public function getHoldings($patron = false)
     {
         global $interface;
         global $configArray;
 
+        if ("driver" == CatalogConnection::getHoldsMode()) {
+            $interface->assign('driverMode', true);
+            if (!UserAccount::isLoggedIn()) {
+                $interface->assign('showLoginMsg', true);
+            }
+        }  
+        
         // Only display OpenURL link if the option is turned on and we have
         // an ISSN.  We may eventually want to make this rule more flexible,
         // but for now the ISSN restriction is designed to be consistent with
@@ -468,7 +477,7 @@ class IndexRecord implements RecordInterface
         $interface->assign('holdingArrOCLC', $this->getOCLC());
 
         // Load real-time data if available:
-        $interface->assign('holdings', $this->getRealTimeHoldings());
+        $interface->assign('holdings', $this->getRealTimeHoldings($patron));
         $interface->assign('history', $this->getRealTimeHistory());
 
         return 'RecordDrivers/Index/holdings.tpl';
@@ -1478,10 +1487,12 @@ class IndexRecord implements RecordInterface
      * Get an array of information about record holdings, obtained in real-time
      * from the ILS.
      *
+     * @param array $patron An array for patron information
+     *
      * @return array
      * @access protected
      */
-    protected function getRealTimeHoldings()
+    protected function getRealTimeHoldings($patron = false)
     {
         // Not supported by the Solr index -- implement in child classes.
         return array();

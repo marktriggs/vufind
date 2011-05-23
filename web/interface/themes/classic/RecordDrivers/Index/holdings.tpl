@@ -1,3 +1,14 @@
+{if $driverMode && !empty($holdings)}
+  {if $showLoginMsg}
+    <div class="userMsg">
+      <a href="{$path}/MyResearch/Home?followup=true&followupModule=Record&followupAction={$id}">{translate text="Login"}</a> {translate text="hold_login"}
+    </div>
+  {/if}
+  {if $user && !$user->cat_username}
+    {include file="MyResearch/catalog-login.tpl"}
+  {/if}
+{/if}
+
 {if !empty($holdingURLs) || $holdingsOpenURL}
   <h3>{translate text="Internet"}</h3>
   {if !empty($holdingURLs)}
@@ -55,14 +66,28 @@
       {translate text="On Reserve - Ask at Circulation Desk"}
       {else}
         {if $row.availability}
-      <span class="available">{translate text="Available"}</span> | 
-      <a href="{$url}/Record/{$id|escape:"url"}/Hold">{translate text="Place a Hold"}</a>
-        {else}
-      <span class="checkedout">{$row.status|escape}</span>
-          {if $row.duedate}
-      {translate text="Due"}: {$row.duedate|escape} | 
-      <a href="{$url}/Record/{$id|escape:"url"}/Hold">{translate text="Recall This"}</a>
+        {* Begin Available Items (Holds) *}
+          <div>
+           <span class="available">{translate text="Available"}</span>
+          {if $row.link}
+            <a class="holdPlace" href="{$row.link|escape}"><span>{translate text="Place a Hold"}</span></a>
           {/if}
+          </div>
+        {else}
+        {* Begin Unavailable Items (Recalls) *}
+          <div>
+          <span class="checkedout">{translate text=$row.status}</span>
+          {if $row.returnDate} <span class="statusExtra">{$row.returnDate|escape}</span>{/if}
+          {if $row.duedate}
+          <span class="statusExtra">{translate text="Due"}: {$row.duedate|escape}</span>
+          {/if}
+          {if $row.requests_placed > 0}
+            <span>{translate text="Requests"}: {$row.requests_placed|escape}</span>
+          {/if}
+          {if $row.link}
+            <a class="holdPlace" href="{$row.link|escape}"><span>{translate text="Recall This"}</span></a>
+          {/if}
+          </div>
         {/if}
       {/if}
     </td>

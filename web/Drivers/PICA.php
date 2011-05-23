@@ -526,25 +526,23 @@ class PICA extends DAIA
     /**
      * Place Hold
      *
-     * This is responsible for both placing holds as well as placing recalls.
+     * Attempts to place a hold or recall on a particular item and returns
+     * an array with result details or a PEAR error on failure of support classes
      *
      * TODO: implement it for PICA
      * Make a request on a specific record
      *
-     * @param string $recordId The id of the bib record
-     * @param string $patronId The id of the patron
-     * @param string $comment  Any comment regarding the hold or recall
-     * @param string $type     Whether to place a hold or recall
+     * @param array $holdDetails An array of item and patron data
      *
-     * @return mixed           True if successful, false if unsuccessful, PEAR_Error
-     * on error
+     * @return mixed An array of data on the request including
+     * whether or not it was successful and a system message (if available) or a
+     * PEAR error on failure of support classes
      * @access public
      */
-    public function placeHold($recordId, $patronId, $comment, $type)
-    {
-        $hold=false;
-        return $hold;
-    }
+    //public function placeHold($holdDetails)
+    //{
+    //}
+
 
     /**
      * Get Funds

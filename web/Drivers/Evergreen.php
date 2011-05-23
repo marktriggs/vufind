@@ -173,14 +173,15 @@ class Evergreen implements DriverInterface
      * This is responsible for retrieving the holding information of a certain
      * record.
      *
-     * @param string $id The record id to retrieve the holdings for
+     * @param string $id     The record id to retrieve the holdings for
+     * @param array  $patron Patron data
      *
      * @return mixed     On success, an associative array with the following keys:
      * id, availability (boolean), status, location, reserve, callnumber, duedate,
      * number, barcode; on failure, a PEAR_Error.
      * @access public
      */
-    public function getHolding($id)
+    public function getHolding($id, $patron = false)
     {
         $holding = array();
 
@@ -542,18 +543,17 @@ class Evergreen implements DriverInterface
     /**
      * Place Hold
      *
-     * This is responsible for both placing holds as well as placing recalls.
+     * Attempts to place a hold or recall on a particular item and returns
+     * an array with result details or a PEAR error on failure of support classes
      *
-     * @param string $recordId The id of the bib record
-     * @param string $patronId The id of the patron
-     * @param string $comment  Any comment regarding the hold or recall
-     * @param string $type     Whether to place a hold or recall
+     * @param array $holdDetails An array of item and patron data
      *
-     * @return mixed           True if successful, false if unsuccessful, PEAR_Error
-     * on error
+     * @return mixed An array of data on the request including
+     * whether or not it was successful and a system message (if available) or a
+     * PEAR error on failure of support classes
      * @access public
      */
-    //public function placeHold($recordId, $patronId, $comment, $type)
+    //public function placeHold($holdDetails)
     //{
         // Need to check asset.copy.status -> config.copy_status.holdable = true
         // If it is holdable, place hold in action.hold_request:

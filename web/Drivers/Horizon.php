@@ -80,14 +80,15 @@ class Horizon implements DriverInterface
      * This is responsible for retrieving the holding information of a certain
      * record.
      *
-     * @param string $id The record id to retrieve the holdings for
+     * @param string $id     The record id to retrieve the holdings for
+     * @param array  $patron Patron data
      *
      * @return mixed     On success, an associative array with the following keys:
      * id, availability (boolean), status, location, reserve, callnumber, duedate,
      * number, barcode; on failure, a PEAR_Error.
      * @access public
      */
-    public function getHolding($id)
+    public function getHolding($id, $patron = false)
     {
         // Query holding information based on id field defined in
         // import/marc.properties
@@ -144,16 +145,6 @@ class Horizon implements DriverInterface
             return new PEAR_Error($e->getMessage());
         }
     }
-
-    /* DEPRECATED
-    public function getHoldings($idList)
-    {
-        foreach ($idList as $id) {
-            $holdings[] = $this->getHolding($id);
-        }
-        return $holdings;
-    }
-     */
 
     /**
      * Get Status
@@ -463,26 +454,6 @@ class Horizon implements DriverInterface
         }
 
     }
-
-    /**
-     * Place Hold
-     *
-     * This is responsible for both placing holds as well as placing recalls.
-     *
-     * @param string $recordId The id of the bib record
-     * @param string $patronId The id of the patron
-     * @param string $comment  Any comment regarding the hold or recall
-     * @param string $type     Whether to place a hold or recall
-     *
-     * @return mixed           True if successful, false if unsuccessful, PEAR_Error
-     * on error
-     * @access public
-     */
-    public function placeHold($recordId, $patronId, $comment, $type)
-    {
-        return true;
-    }
-
 }
 
 ?>

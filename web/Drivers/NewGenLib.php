@@ -76,13 +76,14 @@ class NewGenLib implements DriverInterface
      * record.
      *
      * @param string $RecordID The record id to retrieve the holdings for
+     * @param array  $patron   Patron data
      *
      * @return mixed           On success, an associative array with the following
      * keys: id, availability (boolean), status, location, reserve, callnumber,
      * duedate, number, barcode; on failure, a PEAR_Error.
      * @access public
      */
-    public function getHolding($RecordID)
+    public function getHolding($RecordID, $patron = false)
     {
         $holding = array();
         $pieces = explode("_", $RecordID);
