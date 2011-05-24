@@ -954,35 +954,35 @@ table.datagrid tr.oddrow {
 }
 
 .holdPlace {
-    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/holdPlace.png);
+    background-image:url(<?php echo $configArray['Site']['path'];?>/images/fugue/holdPlace.png);
     background-repeat:no-repeat;
     background-position: left;
     padding:.5em .5em .5em 20px;
     margin-right:1em;
 }
 .holdCancel {
-    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/holdCancel.png);
+    background-image:url(<?php echo $configArray['Site']['path'];?>/images/fugue/holdCancel.png);
     background-repeat:no-repeat;
     background-position: left;
     padding:.5em .5em .5em 20px;
     margin-right:1em;
 }
 .holdCancelAll {
-    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/holdCancelAll.png);
+    background-image:url(<?php echo $configArray['Site']['path'];?>/images/fugue/holdCancelAll.png);
     background-repeat:no-repeat;
     background-position: left;
     padding:.5em .5em .5em 20px;
     margin-right:1em;
 }
 .renew {
-    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/renew.png);
+    background-image:url(<?php echo $configArray['Site']['path'];?>/images/fugue/renew.png);
     background-repeat:no-repeat;
     background-position: left;
     padding:.5em .5em .5em 20px;
     margin-right:1em;
 }
 .renewAll {
-    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/renewAll.png);
+    background-image:url(<?php echo $configArray['Site']['path'];?>/images/fugue/renewAll.png);
     background-repeat:no-repeat;
     background-position: left;
     padding:.5em .5em .5em 20px;
