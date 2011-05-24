@@ -167,7 +167,6 @@
     <istrue value="${filename}"/>
       <then>
         <exec command="php ${srcdir}/util/deletes.php ${filename}" />
-        <echo message="${LASTOUTPUT}" />
       </then>
     </if>
   </target>
