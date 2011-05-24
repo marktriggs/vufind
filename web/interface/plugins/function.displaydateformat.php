@@ -36,24 +36,23 @@
  * -------------------------------------------------------------
  *
  * @param array $params An optional keyed array containing [date], a due date string
- * to be formated and [replace], an array of characters to replace the numbers in 
+ * to be formated and [replace], an array of characters to replace the numbers in
  * [date]
  *
  * @return string Alphabetical help string
- */ 
+ */
 require_once 'sys/VuFindDate.php';
 // @codingStandardsIgnoreStart
 function smarty_function_displaydateformat($params, &$smarty)
 {   // @codingStandardsIgnoreEnd
-
     $dateFormat = new VuFindDate();
     $search = array("1", "2", "3");
 
     if (!empty($params['replace']) && !empty($params['date'])) {
         $replace = $params['replace'];
-        $dueDateHelpString = $params['date'];     
+        $dueDateHelpString = $params['date'];
     } else {
-        $dueDateHelpString 
+        $dueDateHelpString
             = $dateFormat->convertToDisplayDate("m-d-y", "11-22-3333");
         $replace = array(
             translate("date_month_placeholder"),
@@ -61,7 +60,7 @@ function smarty_function_displaydateformat($params, &$smarty)
             translate("date_year_placeholder")
         );
     }
-    
+
     return str_replace($search, $replace, $dueDateHelpString);
 }
 ?>
