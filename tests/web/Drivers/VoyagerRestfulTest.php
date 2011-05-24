@@ -49,7 +49,11 @@ class VoyagerRestfulTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->_driver = new VoyagerRestful();
+        try {
+            $this->_driver = new VoyagerRestful();
+        } catch (PDOException $e) {
+            $this->markTestSkipped();
+        }
     }
 
     /**
