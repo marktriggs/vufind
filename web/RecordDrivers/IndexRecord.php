@@ -1088,7 +1088,7 @@ class IndexRecord implements RecordInterface
         }
         $issn = $issns[0];
         if ($pos = strpos($issn, ' ')) {
-            $isbn = substr($issn, 0, $pos);
+            $issn = substr($issn, 0, $pos);
         }
         return $issn;
     }
