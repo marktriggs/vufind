@@ -281,6 +281,9 @@ ul.menu li{
 .result.alt {
     background-color:#fff;
 }
+.groupCallnumber {
+    margin-left: 18px;
+}
 .toggle {
     float: right;
     margin-bottom: 1px;
@@ -837,6 +840,11 @@ table.datagrid tr.oddrow {
     color:#009900;
     padding-left:18px
 }
+.availableLoc {
+    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/tick-small.png);
+    background-repeat:no-repeat;
+    padding-left:18px
+}
 .available span{
     padding-left:10px;
 }
@@ -844,6 +852,11 @@ table.datagrid tr.oddrow {
     background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/silk/bullet_red.png);
     background-repeat:no-repeat;
     color:#cc0000;
+    padding-left:18px
+}
+.checkedoutLoc {
+    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/cross-small.png);
+    background-repeat:no-repeat;
     padding-left:18px
 }
 .checkedout span{

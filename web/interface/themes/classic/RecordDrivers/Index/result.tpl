@@ -28,7 +28,9 @@
       {elseif !empty($summCallNo)}
       <b>{translate text='Call Number'}:</b> {$summCallNo|escape}
       {/if}
-
+      </div>
+      
+      <div class="resultItemLine4">
       {if $summOpenUrl || !empty($summURLs)}
         {if $summOpenUrl}
           <br>
@@ -42,6 +44,7 @@
           <span class="unknown" style="font-size: 8pt;">{translate text='Loading'}...</span>
         </div>
       {/if}
+        <div style="display: none;" id="locationDetails{$summId|escape}">&nbsp;</div>
       </div>
       {foreach from=$summFormats item=format}
         <span class="iconlabel {$format|lower|regex_replace:"/[^a-z0-9]/":""}">{translate text=$format}</span>

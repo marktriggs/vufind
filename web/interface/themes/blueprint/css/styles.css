@@ -5,7 +5,7 @@
 body {
     margin: 1.5em 0;
     /*background:url("../images/bg_body.jpg") no-repeat scroll center top;*/
-    background-color: #619144; 
+    background-color: #619144;
 }
 
 /* adjust some default blueprint styles */
@@ -90,10 +90,10 @@ div.dialogLoading {
 }
 .floatleft { float:left; }
 .floatright { float:right; }
-img.alignright { 
+img.alignright {
     float: right;
     margin: 0 0 0 10px;
-}    
+}
 img.alignleft {
     float: left;
     margin: 0 10px 0 0;
@@ -194,8 +194,8 @@ ul.cartContent {
 }
 
 /** Autocomplete */
-.ui-autocomplete { 
-    max-width: 500px; 
+.ui-autocomplete {
+    max-width: 500px;
     max-height: 300px;
     overflow: hidden;
 }
@@ -206,10 +206,10 @@ fieldset.pubyearLimit {
     border: 0;
 }
 fieldset.publishDateLimit .ui-slider {
-    clear: both; 
+    clear: both;
     margin: .5em;
 }
-    
+
 
 /*****************Breadcrumbs*******************/
 div.breadcrumbs {
@@ -340,8 +340,8 @@ ul.recordSet .addToFavLink {
     border-bottom: 1px #eee solid;
     position: relative;
 }
-.savedLists { 
-    margin-top: .4em; 
+.savedLists {
+    margin-top: .4em;
     padding-bottom:0.4em;
     padding-top:0.4em;
 }
@@ -351,7 +351,10 @@ ul.recordSet .addToFavLink {
 li.result blockquote {
   margin:0;
 }
-    
+.groupCallnumber {
+    margin-left: 18px;
+}
+
 /** Side facets */
 
 ul.filters {
@@ -438,31 +441,31 @@ dl.narrowList a {
 .login {
     background-image:url(../images/silk/user.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em .5em .5em 20px;
 }
 .logout {
     background-image:url(../images/silk/door_out.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em .5em .5em 20px;
 }
 .account {
     background-image:url(../images/silk/user.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em .5em .5em 20px;
 }
 .new_account {
     background-image:url(../images/silk/user_add.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em .5em .5em 20px;
 }
 .cite {
     background-image:url(../images/silk/report.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em .5em .5em 20px;
     margin-right:1em;
 }
@@ -476,63 +479,63 @@ dl.narrowList a {
 .sms {
     background-image:url(../images/silk/phone.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em .5em .5em 20px;
     margin-right:1em;
 }
 .tag {
     background-image:url(../images/silk/tag_blue.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em .5em .5em 20px;
     margin-right:1em;
 }
 .mail {
     background-image:url(../images/silk/email.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em .5em .5em 20px;
     margin-right:1em;
 }
 .fav {
     background-image:url(../images/silk/heart.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em .5em .5em 20px;
     margin-right:1em;
 }
 .edit {
     background-image:url(../images/silk/edit.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em 0 .5em 18px;
     margin-right:.7em;
 }
 .save {
     background-image:url(../images/silk/disk-black.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em 0 .5em 18px;
     margin-right:.7em;
 }
 .delete {
     background-image:url(../images/silk/delete.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em .5em .5em 18px;
     margin-right:0;
 }
 .feed {
     background-image:url(../images/silk/feed.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em .5em .5em 20px;
     margin-left:1em;
 }
 .list {
     background-image:url(../images/silk/list.png);
     background-repeat:no-repeat;
-    background-position: left; 
+    background-position: left;
     padding:.5em .5em .5em 20px;
     /*margin-left:1em;*/
 }
@@ -549,10 +552,20 @@ dl.narrowList a {
     color:#009900;
     padding-left:18px
 }
+.availableLoc {
+    background-image:url(../images/fugue/tick-small.png);
+    background-repeat:no-repeat;
+    padding-left:18px
+}
 .checkedout {
     background-image:url(../images/silk/bullet_red.png);
     background-repeat:no-repeat;
     color:#cc0000;
+    padding-left:18px
+}
+.checkedoutLoc {
+    background-image:url(../images/fugue/cross-small.png);
+    background-repeat:no-repeat;
     padding-left:18px
 }
 .cd {
@@ -762,7 +775,7 @@ div.record {
 div.recordsubcontent {
     padding:1em 1.5em 1em 1.5em;
 }
-.recordcover { 
+.recordcover {
     padding:3px;
     background-color:#eee;
     border:1px solid #cfcfcf;
@@ -881,7 +894,7 @@ ul.similar li {
     list-style-type:none;
 }
 .toolbar ul li {
-    float:left; 
+    float:left;
     margin-left:.5em;
 }
 .toolbar ul.menu {
@@ -1176,7 +1189,7 @@ p.citationText {
 
 /** Solr record editor */
 div.fieldValue {
-    width: 500px; 
+    width: 500px;
     overflow: auto;
 }
 
@@ -1194,12 +1207,12 @@ div.debug code {
 
 /** Open Library Subjects **/
 .olSubjectImage {
-    width:36px; 
+    width:36px;
     border: 1px solid black
 }
 
 .olSubjectCover {
-    float:left; 
+    float:left;
     margin-right: 10px;
 }
 
@@ -1220,10 +1233,10 @@ div.debug code {
 }
 
 .gridImageBox {
-    text-align:center; 
-    width:155px; 
-    height:130px; 
-    overflow:hidden; 
+    text-align:center;
+    width:155px;
+    height:130px;
+    overflow:hidden;
     display:block;
 }
 
@@ -1232,9 +1245,9 @@ div.debug code {
 }
 
 .gridTitleBox {
-    height:55px; 
-    display:block; 
-    text-align:center; 
+    height:55px;
+    display:block;
+    text-align:center;
     font-size:86%;
     width:155px;
 }

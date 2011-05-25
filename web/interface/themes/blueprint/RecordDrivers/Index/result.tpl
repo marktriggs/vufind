@@ -28,8 +28,9 @@
       {if !empty($summSnippetCaption)}<strong>{translate text=$summSnippetCaption}:</strong>{/if}
       {if !empty($summSnippet)}<span class="quotestart">&#8220;</span>...{$summSnippet|highlight}...<span class="quoteend">&#8221;</span><br/>{/if}
       {if $summAjaxStatus}
-        <strong>{translate text='Call Number'}:</strong> <span class="ajax_availability hide" id="callnumber{$summId|escape}">{translate text='Loading'}...</span><br/>
+        <strong class="hideIfDetailed{$summId|escape}">{translate text='Call Number'}:</strong> <span class="ajax_availability hide" id="callnumber{$summId|escape}">{translate text='Loading'}...</span><br class="hideIfDetailed{$summId|escape}"/>
         <strong>{translate text='Located'}:</strong> <span class="ajax_availability hide" id="location{$summId|escape}">{translate text='Loading'}...</span>
+        <div class="hide" id="locationDetails{$summId|escape}"></div>
       {elseif !empty($summCallNo)}
         <strong>{translate text='Call Number'}:</strong> {$summCallNo|escape}
       {/if}
@@ -44,7 +45,7 @@
         {/foreach}
       {/if}
 
-      <br/>
+      <br class="hideIfDetailed{$summId|escape}"/>
       {foreach from=$summFormats item=format}
         <span class="iconlabel {$format|lower|regex_replace:"/[^a-z0-9]/":""}">{translate text=$format}</span>
       {/foreach}

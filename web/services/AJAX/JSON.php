@@ -151,6 +151,7 @@ class JSON extends Action
     public function getItemStatuses()
     {
         global $interface;
+        global $configArray;
 
         $catalog = ConnectionManager::connectToCatalog();
         if (!$catalog || !$catalog->status) {
@@ -177,12 +178,26 @@ class JSON extends Action
             'unavailable' => $interface->fetch('AJAX/status-unavailable.tpl')
         );
 
+        // Load callnumber and location settings:
+        $callnumberSetting = isset($configArray['Item_Status']['multiple_call_nos'])
+            ? $configArray['Item_Status']['multiple_call_nos'] : 'msg';
+        $locationSetting = isset($configArray['Item_Status']['multiple_locations'])
+            ? $configArray['Item_Status']['multiple_locations'] : 'msg';
+
         // Loop through all the status information that came back
         $statuses = array();
         foreach ($results as $record) {
             // Skip errors and empty records:
             if (!PEAR::isError($record) && count($record)) {
-                $current = $this->_getItemStatus($record, $messages);
+                if ($locationSetting == "group") {
+                    $current = $this->_getItemStatusGroup(
+                        $record, $messages, $callnumberSetting
+                    );
+                } else {
+                    $current = $this->_getItemStatus(
+                        $record, $messages, $locationSetting, $callnumberSetting
+                    );
+                }
                 $statuses[] = $current;
 
                 // The current ID is not missing -- remove it from the missing list.
@@ -197,6 +212,7 @@ class JSON extends Action
                 'availability'         => 'false',
                 'availability_message' => $messages['unavailable'],
                 'location'             => translate('Unknown'),
+                'locationList'         => false,
                 'reserve'              => 'false',
                 'reserve_message'      => translate('Not On Reserve'),
                 'callnumber'           => ''
@@ -504,9 +520,12 @@ class JSON extends Action
         $_SESSION['exportFormat'] = $_POST['format'];
 
         $html = '<p><a class="save" onclick="hideLightbox();" href="'
-           . $configArray['Site']['url'] . '/MyResearch/Bulk?exportInit">' 
+           . $configArray['Site']['url'] . '/MyResearch/Bulk?exportInit">'
            . translate('Download') . '</a></p>';
-        $this->output(array('result'=>translate('Done'), 'result_additional'=>$html), JSON::STATUS_OK);
+        $this->output(
+            array('result'=>translate('Done'), 'result_additional'=>$html),
+            JSON::STATUS_OK
+        );
     }
 
     /**
@@ -702,18 +721,24 @@ class JSON extends Action
     }
 
     /**
-     * Support method for getItemStatuses() -- process a single bibliographic record.
+     * Support method for getItemStatuses() -- process a single bibliographic record
+     * for location settings other than "group".
      *
-     * @param array $record   Information on items linked to a single bib record
-     * @param array $messages Custom status HTML (keys = available/unavailable)
+     * @param array  $record            Information on items linked to a single bib
+     *                                  record
+     * @param array  $messages          Custom status HTML
+     *                                  (keys = available/unavailable)
+     * @param string $locationSetting   The location mode setting used for
+     *                                  _pickValue()
+     * @param string $callnumberSetting The callnumber mode setting used for
+     *                                  _pickValue()
      *
-     * @return array          Summarized availability information
+     * @return array                    Summarized availability information
      * @access private
      */
-    private function _getItemStatus($record, $messages)
-    {
-        global $configArray;
-
+    private function _getItemStatus($record, $messages, $locationSetting,
+        $callnumberSetting
+    ) {
         // Summarize call number, location and availability info across all items:
         $callNumbers = $locations = array();
         $available = false;
@@ -729,18 +754,12 @@ class JSON extends Action
 
         // Determine call number string based on findings:
         $callNumber = $this->_pickValue(
-            $callNumbers,
-            isset($configArray['Item_Status']['multiple_call_nos'])
-            ? $configArray['Item_Status']['multiple_call_nos'] : 'msg',
-            'Multiple Call Numbers'
+            $callNumbers, $callnumberSetting, 'Multiple Call Numbers'
         );
 
         // Determine location string based on findings:
         $location = $this->_pickValue(
-            $locations,
-            isset($configArray['Item_Status']['multiple_locations'])
-            ? $configArray['Item_Status']['multiple_locations'] : 'msg',
-            'Multiple Locations'
+            $locations, $locationSetting, 'Multiple Locations'
         );
 
         // Send back the collected details:
@@ -750,11 +769,73 @@ class JSON extends Action
             'availability_message' =>
                 $messages[$available ? 'available' : 'unavailable'],
             'location' => $location,
+            'locationList' => false,
             'reserve' =>
                 ($record[0]['reserve'] == 'Y' ? 'true' : 'false'),
             'reserve_message' => $record[0]['reserve'] == 'Y'
                 ? translate('on_reserve') : translate('Not On Reserve'),
             'callnumber' => $callNumber
+        );
+    }
+
+    /**
+     * Support method for getItemStatuses() -- process a single bibliographic record
+     * for "group" location setting.
+     *
+     * @param array  $record            Information on items linked to a single
+     *                                  bib record
+     * @param array  $messages          Custom status HTML
+     *                                  (keys = available/unavailable)
+     * @param string $callnumberSetting The callnumber mode setting used for
+     *                                  _pickValue()
+     *
+     * @return array                    Summarized availability information
+     * @access private
+     */
+    private function _getItemStatusGroup($record, $messages, $callnumberSetting)
+    {
+        // Summarize call number, location and availability info across all items:
+        $locations =  array();
+        $available = false;
+        foreach ($record as $info) {
+            // Find an available copy
+            if ($info['availability']) {
+                $available = $locations[$info['location']]['available'] = true;
+            }
+            // Store call number/location info:
+            $locations[$info['location']]['callnumbers'][] = $info['callnumber'];
+        }
+
+        // Build list split out by location:
+        $locationList = false;
+        foreach ($locations as $location => $details) {
+            $locationCallnumbers = array_unique($details['callnumbers']);
+            // Determine call number string based on findings:
+            $locationCallnumbers = $this->_pickValue(
+                $locationCallnumbers, $callnumberSetting, 'Multiple Call Numbers'
+            );
+            $locationInfo = array(
+                'availability' =>
+                    isset($details['available']) ? $details['available'] : false,
+                'location' => $location,
+                'callnumbers' => $locationCallnumbers
+            );
+            $locationList[] = $locationInfo;
+        }
+
+        // Send back the collected details:
+        return array(
+            'id' => $record[0]['id'],
+            'availability' => ($available ? 'true' : 'false'),
+            'availability_message' =>
+                $messages[$available ? 'available' : 'unavailable'],
+            'location' => false,
+            'locationList' => $locationList,
+            'reserve' =>
+                ($record[0]['reserve'] == 'Y' ? 'true' : 'false'),
+            'reserve_message' => $record[0]['reserve'] == 'Y'
+                ? translate('on_reserve') : translate('Not On Reserve'),
+            'callnumber' => false
         );
     }
 

@@ -43,15 +43,41 @@ function doGetStatuses(strings)
                 }
 
                 var locationDiv = getElem('location' + items[i].id);
-                if (locationDiv) {
-                    locationDiv.innerHTML = (items[i].reserves == 'true')
-                        ? items[i].reserve_message : items[i].location;
-                }
-
                 var callnumberDiv = getElem('callnumber' + items[i].id);
-                if (callnumberDiv) {
-                    callnumberDiv.innerHTML = (items[i].callnumber)
-                        ? items[i].callnumber : '';
+                var locationListDiv = getElem('locationDetails' + items[i].id);
+                
+                if (items[i].locationList && locationListDiv) {
+                    // Hide Call Number and Location Holders
+                    if (callnumberDiv) {
+                        callnumberDiv.parentNode.style.display = "none";
+                    }
+                    var locationListHTML = "";
+                    for (x=0; x<items[i].locationList.length; x++) {
+                        locationListHTML += '<div class="groupLocation">';
+                        if (items[i].locationList[x].availability) {
+                            locationListHTML += '<span class="availableLoc">' 
+                                + items[i].locationList[x].location + '</span> ';
+                        } else {
+                            locationListHTML += '<span class="checkedoutLoc">'  
+                                + items[i].locationList[x].location + '</span> ';
+                        }
+                        locationListHTML += '</div>';
+                        locationListHTML += '<div class="groupCallnumber">';
+                        locationListHTML += (items[i].locationList[x].callnumbers) 
+                             ?  items[i].locationList[x].callnumbers : '';
+                        locationListHTML += '</div>';
+                    }
+                    locationListDiv.innerHTML = locationListHTML;
+                    locationListDiv.style.display = "block";
+                } else {
+                    if (locationDiv) {
+                        locationDiv.innerHTML = (items[i].reserves == 'true')
+                            ? items[i].reserve_message : items[i].location;
+                    }
+                    if (callnumberDiv) {
+                        callnumberDiv.innerHTML = (items[i].callnumber)
+                            ? items[i].callnumber : '';
+                    }
                 }
             }
         }
