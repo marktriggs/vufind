@@ -1121,14 +1121,17 @@ class Voyager implements DriverInterface
             "HOLD_RECALL_ITEMS.HOLD_RECALL_STATUS",
             "HOLD_RECALL_ITEMS.QUEUE_POSITION",
             "MFHD_ITEM.ITEM_ENUM",
-            "MFHD_ITEM.YEAR"
+            "MFHD_ITEM.YEAR",
+            "BIB_TEXT.TITLE_BRIEF",
+            "BIB_TEXT.TITLE"
         );
 
         // From
         $sqlFrom = array(
             $this->dbName.".HOLD_RECALL",
             $this->dbName.".HOLD_RECALL_ITEMS",
-            $this->dbName.".MFHD_ITEM"
+            $this->dbName.".MFHD_ITEM",
+            $this->dbName.".BIB_TEXT"
         );
 
         // Where
@@ -1137,7 +1140,8 @@ class Voyager implements DriverInterface
             "HOLD_RECALL.HOLD_RECALL_ID = HOLD_RECALL_ITEMS.HOLD_RECALL_ID(+)",
             "HOLD_RECALL_ITEMS.ITEM_ID = MFHD_ITEM.ITEM_ID(+)",
             "(HOLD_RECALL_ITEMS.HOLD_RECALL_STATUS IS NULL OR " .
-            "HOLD_RECALL_ITEMS.HOLD_RECALL_STATUS < 3)"
+            "HOLD_RECALL_ITEMS.HOLD_RECALL_STATUS < 3)",
+            "BIB_TEXT.BIB_ID = HOLD_RECALL.BIB_ID"
         );
 
         // Bind
@@ -1198,7 +1202,9 @@ class Voyager implements DriverInterface
             'recall_id' => $sqlRow['HOLD_RECALL_ID'],
             'item_id' => $sqlRow['ITEM_ID'],
             'volume' => str_replace("v.", "", $sqlRow['ITEM_ENUM']),
-            'publication_year' => $sqlRow['YEAR']
+            'publication_year' => $sqlRow['YEAR'],
+            'title' => empty($sqlRow['TITLE_BRIEF'])
+                ? $sqlRow['TITLE'] : $sqlRow['TITLE_BRIEF']
         );
     }
 

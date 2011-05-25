@@ -6,7 +6,7 @@
 
           {if $cancelForm}
             <form name="cancelForm" action="{$url|escape}/MyResearch/Holds" method="POST" id="cancelHold">
-              <div class="toolbar">   
+              <div class="toolbar">
                 <ul>
                   <li><input type="submit" class="button holdCancel" name="cancelSelected" value="{translate text="hold_cancel_selected"}" onClick="return confirm('{translate text="confirm_hold_cancel_selected_text}')" /></li>
                   <li><input type="submit" class="button holdCancelAll" name="cancelAll" value="{translate text='hold_cancel_all'}" onClick="return confirm('{translate text="confirm_hold_cancel_all_text}')" /></li>
@@ -42,9 +42,19 @@
               <div class="yui-ge">
                 <div class="yui-u first">
                   <img src="{$path}/bookcover.php?isn={$resource.isbn.0|@formatISBN}&amp;size=small" class="alignleft">
-    
+
                   <div class="resultitem">
-                    <a href="{$url}/Record/{$resource.id|escape:"url"}" class="title">{$resource.title|escape}</a><br>
+                    {* If $resource.id is set, we have the full Solr record loaded and should display a link... *}
+                    {if !empty($resource.id)}
+                      <a href="{$url}/Record/{$resource.id|escape:"url"}" class="title">{$resource.title|escape}</a>
+                    {* If the record is not available in Solr, perhaps the ILS driver sent us a title we can show... *}
+                    {elseif !empty($resource.ils_details.title)}
+                      {$resource.ils_details.title|escape}
+                    {* Last resort -- indicate that no title could be found. *}
+                    {else}
+                      {translate text='Title not available'}
+                    {/if}
+                    <br/>
                     {if $resource.author}
                       {translate text='by'}: <a href="{$url}/Author/Home?author={$resource.author|escape:"url"}">{$resource.author|escape}</a><br>
                     {/if}
@@ -55,7 +65,7 @@
                       {/foreach}
                       <br />
                     {/if}
-                    
+
                     {if $resource.notes}
                       {translate text='Notes'}: {$resource.notes|escape}<br>
                     {/if}
@@ -64,21 +74,21 @@
                       {foreach from=$resource.format item=format}
                         <span class="iconlabel {$format|lower|regex_replace:"/[^a-z0-9]/":""}">{translate text=$format}</span><br />
                       {/foreach}
-                    {else}
+                    {elseif isset($resource.format)}
                       <span class="iconlabel {$resource.format|lower|regex_replace:"/[^a-z0-9]/":""}">{translate text=$resource.format}</span><br />
                     {/if}
-                    
+
                     {if $resource.ils_details.volume}
                       <strong>{translate text='Volume'}:</strong> {$resource.ils_details.volume|escape}<br />
                     {/if}
-                    
+
                     {if $resource.ils_details.publication_year}
                       <strong>{translate text='Year of Publication'}:</strong> {$resource.ils_details.publication_year|escape}<br />
                     {/if}
 
                     {if $pickup}
                       <strong>{translate text='pick_up_location'}:</strong>
-                      {foreach from=$pickup item=library}                
+                      {foreach from=$pickup item=library}
                         {if $library.locationID == $resource.ils_details.location}
                           {translate text=$library.locationDisplay}
                         {/if}
@@ -88,13 +98,13 @@
                     <strong>{translate text='Created'}:</strong> {$resource.ils_details.create|escape} |
                     <strong>{translate text='Expires'}:</strong> {$resource.ils_details.expire|escape}
                     <br />
-                    
+
                     {foreach from=$cancelResults item=cancelResult key=itemId}
                       {if $itemId == $resource.ils_details.item_id && $cancelResult.success == false}
                         <div class="error">{translate text=$cancelResult.status}{if $cancelResult.sysMessage} : {translate text=$cancelResult.sysMessage|escape}{/if}</div>
                       {/if}
                     {/foreach}
-                    
+
                     {if $resource.ils_details.available == true}
                       <div class="userMsg">{translate text="hold_available"}</div>
                     {else}

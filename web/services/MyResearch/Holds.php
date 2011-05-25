@@ -42,7 +42,7 @@ class Holds extends MyResearch
 {
     protected $holdResults;
     protected $cancelResults;
-    
+
     /**
      * Process parameters and display the page.
      *
@@ -60,7 +60,7 @@ class Holds extends MyResearch
             }
             // Is cancelling Holds Available
             if ($this->cancelHolds != false) {
-        
+
                 // Get Message from Hold.php
                 if (isset($_GET['success']) && $_GET['success'] != "") {
                     $this->holdResults = array(
@@ -70,12 +70,12 @@ class Holds extends MyResearch
 
                 // Process Submitted Form
                 if (isset($_POST['cancelSelected']) || isset($_POST['cancelAll'])) {
-                    $this->_cancelHolds($patron);       
+                    $this->_cancelHolds($patron);
                 }
                 $interface->assign('holdResults', $this->holdResults);
                 $interface->assign('cancelResults', $this->cancelResults);
-            }   
-                
+            }
+
             $result = $this->catalog->getMyHolds($patron);
             if (!PEAR::isError($result)) {
                 if (count($result)) {
@@ -90,10 +90,10 @@ class Holds extends MyResearch
                     $libs = $this->catalog->getPickUpLocations($patron);
                     $interface->assign('pickup', $libs);
                     $interface->assign('home_library', $user->home_library);
-                    
+
                     if ($this->cancelHolds != false) {
                         $recordList = $this->_addCancelDetails($recordList);
-                    }                    
+                    }
                     $interface->assign('recordList', $recordList);
                 } else {
                     $interface->assign('recordList', false);
@@ -111,7 +111,7 @@ class Holds extends MyResearch
     /**
      * Private method for cancelling holds
      *
-     * @param array $patron An array of patron information 
+     * @param array $patron An array of patron information
      *
      * @return null
      * @access private
@@ -119,7 +119,7 @@ class Holds extends MyResearch
     private function _cancelHolds($patron)
     {
         global $interface;
-        
+
         $gatheredDetails['details'] = isset($_POST['cancelAll'])
                 ? $_POST['cancelAllIDS'] : $_POST['cancelSelectedIDS'];
         if (is_array($gatheredDetails['details'])) {
@@ -133,7 +133,7 @@ class Holds extends MyResearch
              $interface->assign('errorMsg', 'hold_empty_selection');
         }
     }
-    
+
     /**
      * Adds a link or form details to existing hold details
      *
@@ -147,11 +147,11 @@ class Holds extends MyResearch
         global $interface;
 
         foreach ($recordList as $record) {
-            // Generate Form Details for cancelling Holds if Cancelling Holds 
+            // Generate Form Details for cancelling Holds if Cancelling Holds
             // is enabled
             if ($this->cancelHolds['function'] == "getCancelHoldLink") {
                 // Build OPAC URL
-                $record['ils_details']['cancel_link'] 
+                $record['ils_details']['cancel_link']
                     = $this->catalog->getCancelHoldLink($record['ils_details']);
             } else {
                 // Form Details
@@ -159,7 +159,7 @@ class Holds extends MyResearch
                 $record['ils_details']['cancel_details']
                     = $this->catalog->getCancelHoldDetails($record['ils_details']);
             }
-            $holdList[] = $record;    
+            $holdList[] = $record;
         }
         return $holdList;
     }
