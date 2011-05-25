@@ -1,4 +1,4 @@
-{if count($pickup) > 1 || $defaultPickUpLocation}
+{if count($pickup) > 1}
   {assign var='showHomeLibForm' value=true}
 {else}
   {assign var='showHomeLibForm' value=false}
@@ -45,8 +45,8 @@
       </table>
       {if $showHomeLibForm}
       <input type="submit" value="{translate text='Save Profile'}" />
-      {/if}
       </form>
+      {/if}
     {else}
       {include file="MyResearch/catalog-login.tpl"}
     {/if}

@@ -1,4 +1,4 @@
-{if count($pickup) > 1 || $defaultPickUpLocation}
+{if count($pickup) > 1}
   {assign var='showHomeLibForm' value=true}
 {else}
   {assign var='showHomeLibForm' value=false}
