@@ -108,6 +108,7 @@ class SearchEntry extends DB_DataObject
             "'{$expireDate}'";
         $s = new SearchEntry();
         $s->query($sql);
+        $searches = array();
         if ($s->N) {
             while ($s->fetch()) {
                 $searches[] = clone($s);
