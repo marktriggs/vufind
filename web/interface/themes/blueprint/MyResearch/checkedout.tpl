@@ -43,7 +43,17 @@
             {/if}
           </div>
           <div class="span-10">
-            <a href="{$url}/Record/{$resource.id|escape:"url"}" class="title">{$resource.title|escape}</a><br/>
+            {* If $resource.id is set, we have the full Solr record loaded and should display a link... *}
+            {if !empty($resource.id)}
+              <a href="{$url}/Record/{$resource.id|escape:"url"}" class="title">{$resource.title|escape}</a>
+            {* If the record is not available in Solr, perhaps the ILS driver sent us a title we can show... *}
+            {elseif !empty($resource.ils_details.title)}
+              {$resource.ils_details.title|escape}
+            {* Last resort -- indicate that no title could be found. *}
+            {else}
+              {translate text='Title not available'}
+            {/if}
+            <br/>
             {if $resource.author}
               {translate text='by'}: <a href="{$url}/Author/Home?author={$resource.author|escape:"url"}">{$resource.author|escape}</a><br/>
             {/if}
@@ -61,10 +71,11 @@
               {foreach from=$resource.format item=format}
                 <span class="iconlabel {$format|lower|regex_replace:"/[^a-z0-9]/":""}">{translate text=$format}</span>
               {/foreach}
-            {else}
+              <br/>
+            {elseif isset($resource.format)}
               <span class="iconlabel {$resource.format|lower|regex_replace:"/[^a-z0-9]/":""}">{translate text=$resource.format}</span>
+              <br/>
             {/if}
-            <br/>
             {if $resource.ils_details.volume}
               <strong>{translate text='Volume'}:</strong> {$resource.ils_details.volume|escape}
               <br />

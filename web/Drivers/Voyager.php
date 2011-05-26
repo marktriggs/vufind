@@ -836,21 +836,25 @@ class Voyager implements DriverInterface
             "BIB_ITEM.BIB_ID",
             "CIRC_TRANSACTIONS.ITEM_ID as ITEM_ID",
             "MFHD_ITEM.ITEM_ENUM",
-            "MFHD_ITEM.YEAR"
+            "MFHD_ITEM.YEAR",
+            "BIB_TEXT.TITLE_BRIEF",
+            "BIB_TEXT.TITLE"
         );
 
         // From
         $sqlFrom = array(
             $this->dbName.".CIRC_TRANSACTIONS",
             $this->dbName.".BIB_ITEM",
-            $this->dbName.".MFHD_ITEM"
+            $this->dbName.".MFHD_ITEM",
+            $this->dbName.".BIB_TEXT"
         );
 
         // Where
         $sqlWhere = array(
             "CIRC_TRANSACTIONS.PATRON_ID = :id",
             "BIB_ITEM.ITEM_ID = CIRC_TRANSACTIONS.ITEM_ID",
-            "CIRC_TRANSACTIONS.ITEM_ID = MFHD_ITEM.ITEM_ID(+)"
+            "CIRC_TRANSACTIONS.ITEM_ID = MFHD_ITEM.ITEM_ID(+)",
+            "BIB_TEXT.BIB_ID = BIB_ITEM.BIB_ID"
         );
 
         // Order
@@ -917,7 +921,9 @@ class Voyager implements DriverInterface
             'dueTime' => $dueTime,
             'dueStatus' => $dueStatus,
             'volume' => str_replace("v.", "", $sqlRow['ITEM_ENUM']),
-            'publication_year' => $sqlRow['YEAR']
+            'publication_year' => $sqlRow['YEAR'],
+            'title' => empty($sqlRow['TITLE_BRIEF'])
+                ? $sqlRow['TITLE'] : $sqlRow['TITLE_BRIEF']
         );
     }
 

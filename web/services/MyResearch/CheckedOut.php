@@ -68,13 +68,20 @@ class CheckedOut extends MyResearch
             
             $transList = array();
             foreach ($result as $data) {
-                $record = $this->db->getRecord($data['id']);
-                $transList[] = array('id'      => $data['id'],
-                                     'isbn'    => $record['isbn'],
-                                     'author'  => $record['author'],
-                                     'title'   => $record['title'],
-                                     'format'  => $record['format'],
-                                     'ils_details' => $data);
+                $current = array('ils_details' => $data);
+                if ($record = $this->db->getRecord($data['id'])) {
+                    $current += array(
+                        'id' => $record['id'],
+                        'isbn' => isset($record['isbn']) ? $record['isbn'] : null,
+                        'author' =>
+                            isset($record['author']) ? $record['author'] : null,
+                        'title' =>
+                            isset($record['title']) ? $record['title'] : null,
+                        'format' =>
+                            isset($record['format']) ? $record['format'] : null,
+                    );
+                }
+                $transList[] = $current;
             }
 
             if ($this->checkRenew) {
