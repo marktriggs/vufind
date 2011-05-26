@@ -7,7 +7,7 @@
         <a href="{$url}/Record/{$resource.id|escape:"url"}" class="title">{$resource.title|escape}</a>
       </li>
       <li class="textbox">
-        <b>{translate text='Due'}: {$resource.duedate|escape}</b>
+        <b>{translate text='Due'}: {$resource.ils_details.duedate|escape}</b>
       </li>
     {/foreach}
   {else}

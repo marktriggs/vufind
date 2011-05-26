@@ -20,7 +20,7 @@
               {/foreach}
             </p>
             {/if} 
-            <p><strong>{translate text='Due'}</strong>: {$resource.duedate|escape}</p>
+            <p><strong>{translate text='Due'}</strong>: {$resource.ils_details.duedate|escape}</p>
             </div>
             </a>
           </li>
