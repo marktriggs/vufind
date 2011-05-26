@@ -10,7 +10,7 @@
       <div class="yui-ge">
         <div class="yui-u first">
           <form action="{$url}/MyResearch/Bulk" id="favForm" method="POST">
-          {if $list && $list->id}
+          {if $listEditAllowed && $list && $list->id}
             <input type="hidden" name="listID" value="{$list->id|escape}" />
             <input type="hidden" name="listName" value="{$list->title|escape}" />
 
@@ -43,7 +43,7 @@
             <ul>
               <li><div class="control"><input id="selectAll" type="checkbox" class="checkbox" name="selectAll" onClick="toggleCheck(this, 'favForm', 'ui_checkboxes')" /> <label for="selectAll">{translate text="select_page"}</label></div></li>
               <li><input type="submit" class="button mail" name="email" onClick="processIds('favForm', 'ui_checkboxes', 'makeArray', 'MyResearch', 'Email', '', '', '{translate text="email_selected_favorites"}', 'MyResearch', 'Favorites', ''); return false;" value="{translate text='email_selected'}" /></li>
-              <li><input type="submit" class="button delete" name="delete" onClick="processIds('favForm', 'ui_checkboxes', 'makeArray', 'MyResearch', 'Delete', '{if $list}{$list->id|escape}{/if}', '', '{translate text="delete_selected_favorites"}', 'MyResearch', 'Favorites', ''); return false;" value="{translate text='delete_selected'}"></li>
+              {if $listEditAllowed}<li><input type="submit" class="button delete" name="delete" onClick="processIds('favForm', 'ui_checkboxes', 'makeArray', 'MyResearch', 'Delete', '{if $list}{$list->id|escape}{/if}', '', '{translate text="delete_selected_favorites"}', 'MyResearch', 'Favorites', ''); return false;" value="{translate text='delete_selected'}"></li>{/if}
               {if is_array($exportOptions) && count($exportOptions) > 0}
               <li><input type="submit" class="button export" name="export" onClick="processIds('favForm', 'ui_checkboxes', 'makeArray', 'MyResearch', 'Export', '', '', '{translate text="export_selected_favorites"}', 'MyResearch', 'Favorites', ''); return false;" value="{translate text='export_selected'}"></li>
               {/if}

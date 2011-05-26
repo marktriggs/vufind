@@ -43,6 +43,17 @@ require_once 'RecordDrivers/Factory.php';
 class Export extends MyResearch
 {
     /**
+     * Constructor
+     *
+     * @access public
+     */
+    public function __construct()
+    {
+        // Do not require login for export:
+        parent::__construct(true);
+    }
+
+    /**
      * Process parameters and display the page.
      *
      * @return void
@@ -310,6 +321,9 @@ class Export extends MyResearch
                 $errorMsgDetails[] = $id;
             } else {
                 $recordDetails = RecordDriverFactory::initRecordDriver($record);
+                // Assign core metadata to be sure export has all necessary values
+                // available:
+                $recordDetails->getCoreMetadata();
                 $result = $recordDetails->getExport($format);
                 if (!empty($result)) {
                     $exportDetails[] = $interface->fetch($result);

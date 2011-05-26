@@ -44,6 +44,17 @@ require_once 'RecordDrivers/Factory.php';
 class Email extends MyResearch
 {
     /**
+     * Constructor
+     *
+     * @access public
+     */
+    public function __construct()
+    {
+        // Do not require login for email:
+        parent::__construct(true);
+    }
+
+    /**
      * Process parameters and display the page.
      *
      * @return void

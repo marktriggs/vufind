@@ -29,7 +29,9 @@
 require_once 'services/MyResearch/MyResearch.php';
 
 /**
- * Bulk action for MyResearch module
+ * Bulk action for MyResearch module.  Note that this extends Action rather than
+ * MyResearch -- we will rely on the various included modules to handle login control
+ * rather than doing it here, since the requirements vary by action.
  *
  * @category VuFind
  * @package  Controller_MyResearch
@@ -37,7 +39,7 @@ require_once 'services/MyResearch/MyResearch.php';
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-class Bulk extends MyResearch
+class Bulk extends Action
 {
     /**
      * Process parameters and display the page.

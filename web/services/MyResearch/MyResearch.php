@@ -56,15 +56,17 @@ class MyResearch extends Action
     /**
      * Constructor
      *
+     * @param bool $skipLogin Set to true to bypass the default login requirement.
+     *
      * @access public
      */
-    public function __construct()
+    public function __construct($skipLogin = false)
     {
         global $interface;
         global $configArray;
         global $user;
 
-        if (!UserAccount::isLoggedIn()) {
+        if (!$skipLogin && !UserAccount::isLoggedIn()) {
             include_once 'Login.php';
             Login::launch();
             exit();

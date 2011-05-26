@@ -6,8 +6,10 @@
       <form method="post" name="addForm" action="{$url}/MyResearch/Bulk">
         <input type="hidden" name="listID" value="{$list->id|escape}" />
         <input type="hidden" name="listName" value="{$list->title|escape}" />
-        <input type="submit" class="edit smallButton" name="editList" value="{translate text="edit_list"}" />
-        <input type="submit" class="delete deleteList smallButton" id="deleteList{$list->id|escape}" title="{translate text="delete_list"}" name="deleteList" value="{translate text="delete_list"}" />
+        {if $listEditAllowed}
+          <input type="submit" class="edit smallButton" name="editList" value="{translate text="edit_list"}" />
+          <input type="submit" class="delete deleteList smallButton" id="deleteList{$list->id|escape}" title="{translate text="delete_list"}" name="deleteList" value="{translate text="delete_list"}" />
+        {/if}
       </form>
     </div>
     <h3 class="list">{$list->title|escape:"html"}</h3>
@@ -52,7 +54,7 @@
     <div class="bulkActionButtons">
       <input type="checkbox" class="selectAllCheckboxes floatleft" name="selectAll" id="addFormCheckboxSelectAll"/> <label for="addFormCheckboxSelectAll">{translate text="select_page"}</label>
       <input type="submit" class="mail floatright smallButton" name="email" value="{translate text='email_selected'}" title="{translate text='email_selected'}"/>
-      <input type="submit" class="delete floatright smallButton" name="delete" value="{translate text='delete_selected'}" title="{translate text='delete_selected'}"/>
+      {if $listEditAllowed}<input type="submit" class="delete floatright smallButton" name="delete" value="{translate text='delete_selected'}" title="{translate text='delete_selected'}"/>{/if}
       {if is_array($exportOptions) && count($exportOptions) > 0}
       <input type="submit" class="export floatright smallButton" name="export" value="{translate text='export_selected'}" title="{translate text='export_selected'}"/>
       {/if}
