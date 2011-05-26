@@ -143,9 +143,13 @@ class HoldLogic
                     if ($checkHolds != false) {
                         // Is this copy holdable / linkable
                         if ($copy['addLink']) {
-                            $copy['link'] = $this->_getHoldDetails(
-                                $copy, $checkHolds['HMACKeys']
-                            );
+                            // If the hold is blocked, link to an error page
+                            // instead of the hold form:
+                            $copy['link'] = ($copy['addLink'] == 'block') 
+                                ? "?errorMsg=hold_error_blocked"
+                                : $this->_getHoldDetails(
+                                    $copy, $checkHolds['HMACKeys']
+                                );
                         }
                     }
                     $holdings[$copy['location']][] = $copy;

@@ -206,7 +206,7 @@ class VoyagerRestful extends Voyager
                 $holdType = $this->_determineHoldType(
                     $row['id'], $row['item_id'], $patron['id']
                 );
-                $addLink = $holdType ? true : false;
+                $addLink = $holdType ? $holdType : false;
             } else {
                 $holdType = "auto";
             }
@@ -794,6 +794,11 @@ class VoyagerRestful extends Voyager
      */
     private function _determineHoldType($bibId, $itemId, $patronId)
     {
+        // Check for account Blocks
+        if ($this->_checkAccountBlocks($patronId)) {
+            return "block";
+        }
+        
         // Check Recalls First
         $recall = $this->_checkItemRequests($bibId, $patronId, "recall", $itemId);
 
@@ -854,7 +859,7 @@ class VoyagerRestful extends Voyager
         //Let's determine Hold Type now
         if ($type == "auto") {
             $type = $this->_determineHoldType($bibId, $itemId, $patron['id']);
-            if (!$type) {
+            if (!$type || $type == "block") {
                 return $this->_holdError("hold_error_blocked");
             }
         }
