@@ -288,7 +288,8 @@ class Evergreen implements DriverInterface
      */
     public function patronLogin($barcode, $passwd)
     {
-        $sql = "select usr.id as id " .
+        $sql = "select usr.id as id, usr.first_given_name as firstName, " .
+               "usr.family_name as lastName, usr.email, usrname " .
                "from actor.usr, actor.card " .
                "where usr.card = card.id " .
                "and card.active = true " .
@@ -302,13 +303,21 @@ class Evergreen implements DriverInterface
             $sql .= "and usr.usrname = '$barcode'";
         }
 
-
         try {
             $sqlStmt = $this->_db->prepare($sql);
             $sqlStmt->execute();
             $row = $sqlStmt->fetch(PDO::FETCH_ASSOC);
             if (isset($row['id']) && ($row['id'] != '')) {
-                return array('id' => $row['id']);
+                $return = array();
+                $return['id'] = $row['id'];
+                $return['firstname'] = $row['firstname'];
+                $return['lastname'] = $row['lastname'];
+                $return['cat_username'] = $row['usrname'];
+                $return['cat_password'] = $passwd;
+                $return['email'] = $row['email'];
+                $return['major'] = null;    // Don't know which table this comes from
+                $return['college'] = null;  // Don't know which table this comes from
+                return $return;
             } else {
                 return null;
             }
