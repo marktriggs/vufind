@@ -316,6 +316,50 @@ class XCNCIP2 implements DriverInterface
     }
 
     /**
+     * Build the request XML to log in a user:
+     *
+     * @param string $username Username for login
+     * @param string $password Password for login
+     * @param string $extras   Extra elements to include in the request
+     *
+     * @return string          NCIP request XML
+     * @access private
+     */
+    private function _getLookupUserRequest($username, $password, $extras = array())
+    {
+        return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' .
+            '<ns1:NCIPMessage xmlns:ns1="http://www.niso.org/2008/ncip" ' .
+            'ns1:version="http://www.niso.org/schemas/ncip/v2_0/imp1/' .
+            'xsd/ncip_v2_0.xsd">' .
+                '<ns1:LookupUser>' .
+                    '<ns1:AuthenticationInput>' .
+                        '<ns1:AuthenticationInputData>' .
+                            htmlspecialchars($username) .
+                        '</ns1:AuthenticationInputData>' .
+                        '<ns1:AuthenticationDataFormatType>' .
+                            'text' .
+                        '</ns1:AuthenticationDataFormatType>' .
+                        '<ns1:AuthenticationInputType>' .
+                            'Username' .
+                        '</ns1:AuthenticationInputType>' .
+                    '</ns1:AuthenticationInput>' .
+                    '<ns1:AuthenticationInput>' .
+                        '<ns1:AuthenticationInputData>' .
+                            htmlspecialchars($password) .
+                        '</ns1:AuthenticationInputData>' .
+                        '<ns1:AuthenticationDataFormatType>' .
+                            'text' .
+                        '</ns1:AuthenticationDataFormatType>' .
+                        '<ns1:AuthenticationInputType>' .
+                            'Password' .
+                        '</ns1:AuthenticationInputType>' .
+                    '</ns1:AuthenticationInput>' .
+                    implode('', $extras) .
+                '</ns1:LookupUser>' .
+            '</ns1:NCIPMessage>';
+    }
+
+    /**
      * Patron Login
      *
      * This is responsible for authenticating a patron against the catalog.
@@ -329,7 +373,31 @@ class XCNCIP2 implements DriverInterface
      */
     public function patronLogin($username, $password)
     {
-        // TODO
+        $request = $this->_getLookupUserRequest($username, $password);
+        $response = $this->_sendRequest($request);
+        $id = $response->xpath(
+            'ns1:LookupUserResponse/ns1:UserId/ns1:UserIdentifierValue'
+        );
+        if (!empty($id)) {
+            // Fill in basic patron details:
+            $patron = array(
+                'id' => (string)$id[0],
+                'cat_username' => $username,
+                'cat_password' => $password,
+                'email' => null,
+                'major' => null,
+                'college' => null
+            );
+
+            // Look up additional details:
+            $details = $this->getMyProfile($patron);
+            if (!empty($details)) {
+                $patron['firstname'] = $details['firstname'];
+                $patron['lastname'] = $details['lastname'];
+                return $patron;
+            }
+        }
+
         return null;
     }
 
@@ -398,8 +466,50 @@ class XCNCIP2 implements DriverInterface
      */
     public function getMyProfile($patron)
     {
-        // TODO
-        return array();
+        $extras = array(
+            '<ns1:UserElementType ns1:Scheme="http://www.niso.org/ncip/v1_0/' .
+                'schemes/userelementtype/userelementtype.scm">' .
+                'User Address Information' .
+            '</ns1:UserElementType>',
+            '<ns1:UserElementType ns1:Scheme="http://www.niso.org/ncip/v1_0/' .
+                'schemes/userelementtype/userelementtype.scm">' .
+                'Name Information' .
+            '</ns1:UserElementType>'
+        );
+        $request = $this->_getLookupUserRequest(
+            $patron['cat_username'], $patron['cat_password'], $extras
+        );
+        $response = $this->_sendRequest($request);
+
+        $first = $response->xpath(
+            'ns1:LookupUserResponse/ns1:UserOptionalFields/ns1:NameInformation/' .
+            'ns1:PersonalNameInformation/ns1:StructuredPersonalUserName/' .
+            'ns1:GivenName'
+        );
+        $last = $response->xpath(
+            'ns1:LookupUserResponse/ns1:UserOptionalFields/ns1:NameInformation/' .
+            'ns1:PersonalNameInformation/ns1:StructuredPersonalUserName/' .
+            'ns1:Surname'
+        );
+        
+        // TODO: distinguish between permanent and other types of addresses; look
+        // at the UnstructuredAddressType field and handle multiple options.
+        $address = $response->xpath(
+            'ns1:LookupUserResponse/ns1:UserOptionalFields/' .
+            'ns1:UserAddressInformation/ns1:PhysicalAddress/' .
+            'ns1:UnstructuredAddress/ns1:UnstructuredAddressData'
+        );
+        $address = explode("\n", trim((string)$address[0]));
+        return array(
+            'firstname' => (string)$first[0],
+            'lastname' => (string)$last[0],
+            'address1' => isset($address[0]) ? $address[0] : '',
+            'address2' => (isset($address[1]) ? $address[1] : '') .
+                (isset($address[2]) ? ', ' . $address[2] : ''),
+            'zip' => isset($address[3]) ? $address[3] : '',
+            'phone' => '',  // TODO: phone number support
+            'group' => ''
+        );
     }
 
     /**
