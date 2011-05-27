@@ -1205,7 +1205,7 @@ class Voyager implements DriverInterface
             'create' => $createDate,
             'position' => $sqlRow['QUEUE_POSITION'],
             'available' => $available,
-            'recall_id' => $sqlRow['HOLD_RECALL_ID'],
+            'reqnum' => $sqlRow['HOLD_RECALL_ID'],
             'item_id' => $sqlRow['ITEM_ID'],
             'volume' => str_replace("v.", "", $sqlRow['ITEM_ENUM']),
             'publication_year' => $sqlRow['YEAR'],

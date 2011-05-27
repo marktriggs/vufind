@@ -992,7 +992,7 @@ class VoyagerRestful extends Voyager
      */
     public function getCancelHoldDetails($holdDetails)
     {
-        $cancelDetails = $holdDetails['item_id']."|".$holdDetails['recall_id'];
+        $cancelDetails = $holdDetails['item_id']."|".$holdDetails['reqnum'];
         return $cancelDetails;
     }
 
