@@ -529,7 +529,6 @@ class VoyagerRestful extends Voyager
             foreach ($renewDetails['details'] as $renewID) {
                 // Build an array of item ids which may be of use in the template
                 // file
-                $finalResult['ids'][] = $renewID;
                 $failIDs[$renewID] = "";
 
                 // Build Hierarchy

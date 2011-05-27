@@ -58,14 +58,14 @@ class CheckedOut extends MyResearch
 
             // Renew Items
             if (isset($_POST['renewAll']) || isset($_POST['renewSelected'])) {
-                $this->_renewItems($patron);          
+                $this->_renewItems($patron);
             }
-            
+
             $result = $this->catalog->getMyTransactions($patron);
             if (PEAR::isError($result)) {
                 PEAR::raiseError($result);
-            } 
-            
+            }
+
             $transList = array();
             foreach ($result as $data) {
                 $current = array('ils_details' => $data);
@@ -93,7 +93,7 @@ class CheckedOut extends MyResearch
         $interface->setPageTitle('Checked Out Items');
         $interface->display('layout.tpl');
     }
-    
+
     /**
      * Adds a link or form details to existing checkout details
      *
@@ -108,28 +108,28 @@ class CheckedOut extends MyResearch
 
         foreach ($transList as $key => $item) {
 
-            // Reset $renew_details for next item 
-            $renew_details = ""; 
+            // Reset $renew_details for next item
+            $renew_details = "";
             if ($this->checkRenew['function'] == "renewMyItemsLink") {
                 // Build OPAC URL
-                $transList[$key]['ils_details']['renew_link'] 
+                $transList[$key]['ils_details']['renew_link']
                     = $this->catalog->renewMyItemsLink($item['ils_details']);
             } else {
                 // Form Details
                 if ($transList[$key]['ils_details']['renewable']) {
                     $interface->assign('renewForm', true);
                 }
-                $transList[$key]['ils_details']['renew_details'] 
+                $transList[$key]['ils_details']['renew_details']
                     = $this->catalog->getRenewDetails($item['ils_details']);
             }
         }
-        return $transList;    
+        return $transList;
     }
 
     /**
      * Private method for renewing items
      *
-     * @param array $patron An array of patron information 
+     * @param array $patron An array of patron information
      *
      * @return null
      * @access private
@@ -143,18 +143,15 @@ class CheckedOut extends MyResearch
 
         if (is_array($gatheredDetails['details'])) {
             // Add Patron Data to Submitted Data
-            $gatheredDetails['patron'] = $patron;         
+            $gatheredDetails['patron'] = $patron;
             $renewResult = $this->catalog->renewMyItems($gatheredDetails);
 
             if ($renewResult !== false) {
                 // Assign Blocks to the Template
-                $interface->assign('blocks', $renewResult['block']);   
-                       
+                $interface->assign('blocks', $renewResult['block']);
+
                 // Assign Results to the Template
                 $interface->assign('renewResult', $renewResult['details']);
-
-                // Extract id keys and assign them to the Template
-                $interface->assign('renewArray', $renewResult['ids']);
             } else {
                  $interface->assign('errorMsg', 'renew_system_error');
             }
