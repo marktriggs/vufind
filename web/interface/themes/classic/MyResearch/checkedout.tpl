@@ -94,16 +94,13 @@
                       {if $renewResult[$resource.ils_details.item_id].success}
                         {assign var="showStatus" value="hide"}
                         <strong>{translate text='Due Date'}: {$renewResult[$resource.ils_details.item_id].new_date} {if $renewResult[$resource.ils_details.item_id].new_time}{$renewResult[$resource.ils_details.item_id].new_time|escape}{/if}</strong>
-                        <br />
-                        <span class="userMsg">{translate text='renew_success'}</span>
+                        <div class="userMsg">{translate text='renew_success'}</div>
                       {else}
                         <strong>{translate text='Due Date'}: {$resource.ils_details.duedate|escape} {if $resource.ils_details.dueTime} {$resource.ils_details.dueTime|escape}{/if}</strong>
-                        <br />
-                        <span class="error">{translate text='renew_fail'}{if $renewResult[$resource.ils_details.item_id].sysMessage}: {$renewResult[$resource.ils_details.item_id].sysMessage|escape}{/if}</span>
+                        <div class="error">{translate text='renew_fail'}{if $renewResult[$resource.ils_details.item_id].sysMessage}: {$renewResult[$resource.ils_details.item_id].sysMessage|escape}{/if}</div>
                       {/if}
                     {else}
                       <strong>{translate text='Due Date'}: {$resource.ils_details.duedate|escape} {if $resource.ils_details.dueTime} {$resource.ils_details.dueTime|escape}{/if}</strong>
-                      <br />
                       {if $showStatus == "show"}
                         {if $resource.ils_details.dueStatus == "overdue"}
                           <div class="error">{translate text="renew_item_overdue"}</div>
@@ -113,10 +110,8 @@
                       {/if}
                     {/if}
 
-                    <br />
-                    {if $resource.ils_details.message}
-                      <span class="userMsg">{translate text=$resource.ils_details.message}</span>
-                      <br />
+                    {if $showStatus == "show" && $resource.ils_details.message}
+                      <div class="userMsg">{translate text=$resource.ils_details.message}</div>
                     {/if}
                     {if $resource.ils_details.renewable && $resource.ils_details.renew_link}
                       <a href="{$resource.ils_details.renew_link|escape}">{translate text='renew_item'}</a>
