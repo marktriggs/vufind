@@ -3,7 +3,7 @@
     
   {* display the search button everywhere except /Search/Home *}
   {if !($module == 'Search' && $pageTemplate == 'home.tpl') }
-    <a rel="external" href="{$path}" data-icon="search"  class="ui-btn-right">
+    <a rel="external" href="{$path}/Search/Home" data-icon="search"  class="ui-btn-right">
     {translate text="Search"}
     </a>
   {/if}
