@@ -6,7 +6,9 @@
   <ul>
     {if $recordCount > 0 && ($pageTemplate == 'list.tpl' || $pageTemplate == 'reserves-list.tpl' || $pageTemplate == 'newitem-list.tpl')}
       {* show Bag button on /Search/Results *}
+      {* disabled until fully implemented:
       <li><a href="{$path}/Cart/Home" class="book_bag_btn" data-rel="dialog" data-transition="flip">{translate text="Bag"} (<span class="cart_size">0</span>)</a></li> 
+       *}
     {else}
       {* show Language button everywhere else *}
       <li><a data-rel="dialog" href="#Language-dialog" data-transition="pop">{translate text="Language"}</a></li>      

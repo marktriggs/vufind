@@ -167,3 +167,7 @@ div.footer-text {
     color:#cc0000;
     padding-left:18px
 }
+.add_to_book_bag {
+    /* Hidden until fully implemented */
+    display: none;
+}
