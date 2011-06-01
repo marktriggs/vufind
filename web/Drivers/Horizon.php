@@ -45,14 +45,14 @@ class Horizon implements DriverInterface
 
     /**
      * Constructor
-     * 
+     *
      * @param string $configFile An alternative config file name
      *
      * @access public
      */
     public function __construct($configFile = false)
     {
-        
+
         if (!$configFile) {
             $configFile = "Horizon.ini";
         }
@@ -64,7 +64,7 @@ class Horizon implements DriverInterface
 
         // Connect to database
         $this->_db = mssql_pconnect(
-            $this->config['Catalog']['host'] . ':' 
+            $this->config['Catalog']['host'] . ':'
             . $this->config['Catalog']['port'],
             $this->config['Catalog']['username'],
             $this->config['Catalog']['password']
@@ -72,6 +72,131 @@ class Horizon implements DriverInterface
 
         // Select the databse
         mssql_select_db($this->config['Catalog']['database']);
+    }
+
+    /**
+     * Protected support method for building sql strings.
+     *
+     * @param array $sql An array of keyed sql data
+     *
+     * @return array               An string query string
+     * @access protected
+     */
+    protected function buildSqlFromArray($sql)
+    {
+        $modifier = isset($sql['modifier']) ? $sql['modifier'] . " " : "";
+
+        // Put String Together
+        $sqlString = "select ". $modifier . implode(", ", $sql['expressions']);
+        $sqlString .= " from " .implode(", ", $sql['from']);
+        $sqlString .= (!empty($sql['join']))
+            ? " join " .implode(" join ", $sql['join']) : "";
+        $sqlString .= (!empty($sql['innerJoin']))
+            ? " inner join " .implode(" inner join ", $sql['innerJoin']) : "";
+        $sqlString .= (!empty($sql['leftOuterJoin']))
+            ? " left outer join "
+                . implode(" left outer join ", $sql['leftOuterJoin'])
+            : "";
+        $sqlString .= " where " .implode(" AND ", $sql['where']);
+        $sqlString .= (!empty($sql['order']))
+            ? " ORDER BY " .implode(", ", $sql['order']) : "";
+
+        return $sqlString;
+    }
+
+    /**
+     * Protected support method for getHolding.
+     *
+     * @param array $id A Bibliographic id
+     *
+     * @return array Keyed data for use in an sql query
+     * @access protected
+     */
+    protected function getHoldingSQL($id)
+    {
+        // Query holding information based on id field defined in
+        // import/marc.properties
+        // Expressions
+        $sqlExpressions = array(
+            "item.item# as ITEM_NUM", "item.item_status as STATUS_CODE",
+            "item_status.descr as STATUS", "location.name as LOCATION",
+            "item.call_reconstructed as CALLNUMBER", "item.ibarcode as ITEM_BARCODE",
+            "convert(varchar(12), " .
+            "dateadd(dd,item.due_date,'jan 1 1970')) as DUEDATE",
+            "item.copy_reconstructed as ITEM_SEQUENCE_NUMBER",
+            "substring(collection.pac_descr,5,40) as COLLECTION",
+            "(select count(*) from request where " .
+            "request.bib# = item.bib# and reactivate_date = NULL) as REQUEST"
+        );
+
+        // From
+        $sqlFrom = array("item");
+
+        // inner Join
+        $sqlInnerJoin = array(
+            "item_status on item.item_status = item_status.item_status",
+            "location on item.location = location.location",
+            "collection on item.collection = collection.collection"
+        );
+
+        // Where
+        $sqlWhere = array("item.bib# = " . addslashes($id));
+
+        $sqlArray = array('expressions' => $sqlExpressions,
+                          'from' => $sqlFrom,
+                          'innerJoin' => $sqlInnerJoin,
+                          'where' => $sqlWhere
+                          );
+
+        return $sqlArray;
+    }
+
+    /**
+     * Protected support method for getHolding.
+     *
+     * @param string $id     Bib Id
+     * @param array  $row    SQL Row Data
+     * @param array  $patron Patron Array
+     *
+     * @return array Keyed data
+     * @access protected
+     */
+    protected function processHoldingRow($id, $row, $patron)
+    {
+        $duedate = $row['DUEDATE'];
+        switch ($row['STATUS_CODE']) {
+        case 'i': // checked in
+            $available = 1;
+            $reserve = 'N';
+            break;
+        case 'h': // being held
+            $available = 0;
+            $reserve = 'Y';
+            break;
+        case 'l': // lost
+            $available = 0;
+            $reserve = 'N';
+            $duedate=''; // No due date for lost items
+            break;
+        default:
+            $available = 0;
+            $reserve = 'N';
+            break;
+        }
+
+         return array('id' => $id,
+                      'availability' => $available,
+                      'item_num' => $row['ITEM_NUM'],
+                      'status' => $row['STATUS'],
+                      'location' => $row['LOCATION'],
+                      'reserve' => $reserve,
+                      'callnumber' => $row['CALLNUMBER'],
+                      'collection' => $row['COLLECTION'],
+                      'duedate' => $duedate,
+                      'barcode' => $row['ITEM_BARCODE'],
+                      'number' => $row['ITEM_SEQUENCE_NUMBER'],
+                      'requests_placed' => $row['REQUEST']
+         );
     }
 
     /**
@@ -90,55 +215,14 @@ class Horizon implements DriverInterface
      */
     public function getHolding($id, $patron = false)
     {
-        // Query holding information based on id field defined in
-        // import/marc.properties
-        $sql = "select item.item# as ITEM_NUM, item.item_status as STATUS_CODE, " .
-            "item_status.descr as STATUS, " .
-            "location.name as LOCATION, item.call_reconstructed as CALLNUMBER, " .
-            "item.ibarcode as ITEM_BARCODE, convert(varchar(12), " .
-            "dateadd(dd,item.due_date,'jan 1 1970')) as DUEDATE, " .
-            "item.copy_reconstructed as ITEM_SEQUENCE_NUMBER, ".
-            "substring(collection.pac_descr,5,40) as COLLECTION from item " .
-            "inner join item_status on item.item_status = item_status.item_status " .
-            "inner join location on item.location = location.location " .
-            "inner join collection on item.collection = " .
-            "collection.collection where item.bib# = " . addslashes($id);
+        $sqlArray = $this->getHoldingSql($id);
+        $sql = $this->buildSqlFromArray($sqlArray);
 
         try {
             $holding = array();
             $sqlStmt = mssql_query($sql);
             while ($row = mssql_fetch_assoc($sqlStmt)) {
-                $duedate = $row['DUEDATE'];
-                switch ($row['STATUS_CODE']) {
-                case 'i': // checked in
-                    $available = 1;
-                    $reserve = 'N';
-                    break;
-                case 'h': // being held
-                    $available = 0;
-                    $reserve = 'Y';
-                    break;
-                case 'l': // lost
-                    $available = 0;
-                    $reserve = 'N';
-                    $duedate=''; // No due date for lost items
-                    break;
-                default:
-                    $available = 0;
-                    $reserve = 'N';
-                    break;
-                }
-                $holding[] = array('id' => $id,
-                                   'availability' => $available,
-                                   'item_num' => $row['ITEM_NUM'],
-                                   'status' => $row['STATUS'],
-                                   'location' => $row['LOCATION'],
-                                   'reserve' => $reserve,
-                                   'callnumber' => $row['CALLNUMBER'],
-                                   'collection' => $row['COLLECTION'],
-                                   'duedate' => $duedate,
-                                   'barcode' => $row['ITEM_BARCODE'],
-                                   'number' => $row['ITEM_SEQUENCE_NUMBER']);
+                $holding[] = $this->processHoldingRow($id, $row, $patron);
             }
             return $holding;
         } catch (PDOException $e) {
@@ -250,6 +334,97 @@ class Horizon implements DriverInterface
     }
 
     /**
+     * Protected support method for getMyHolds.
+     *
+     * @param array $patron Patron data for use in an sql query
+     *
+     * @return array Keyed data for use in an sql query
+     * @access protected
+     */
+    protected function getHoldsSQL($patron)
+    {
+        // Expressions
+        $sqlExpressions = array(
+            "bib# as BIB_NUM", "bib_queue_ord as POSITION",
+            "request_location as LOCATION", "request_status as STATUS",
+            "convert(varchar(12),dateadd(dd, hold_exp_date, '1 jan 1970')) " .
+                "as EXPIRE",
+            "convert(varchar(12),dateadd(dd, request_date, '1 jan 1970')) " .
+                "as CREATED"
+        );
+
+        // From
+        $sqlFrom = array("request");
+
+        // Join
+        $sqlJoin = array(
+            "borrower_barcode on borrower_barcode.borrower#=request.borrower#"
+        );
+
+        // Where
+        $sqlWhere = array(
+            "borrower_barcode.bbarcode=\"" . addslashes($patron['id']) .
+               "\""
+        );
+
+        $sqlArray = array(
+            'expressions' => $sqlExpressions,
+            'from' => $sqlFrom,
+            'join' => $sqlJoin,
+            'where' => $sqlWhere
+        );
+
+        return $sqlArray;
+    }
+
+    /**
+     * Protected support method for getMyHolds.
+     *
+     * @param array $row An sql row
+     *
+     * @return array Keyed data
+     * @access protected
+     */
+    protected function processHoldsRow($row)
+    {
+        if ($row['STATUS'] != 6) {
+            $position = ($row['STATUS'] != 1) ? $row['POSITION'] : false;
+            $available = ($row['STATUS'] == 1) ? true : false;
+            $expire = false;
+            $create = false;
+            // Convert Horizon Format to display format
+            if (!empty($row['EXPIRE'])) {
+                $expire = $this->dateFormat->convertToDisplayDate(
+                    "M d Y", trim($row['EXPIRE'])
+                );
+                if (PEAR::isError($expire)) {
+                    return $expire;
+                }
+            } else {
+                $expire = "[Not yet available for pickup]";
+            }
+            if (!empty($row['CREATED'])) {
+                $create = $this->dateFormat->convertToDisplayDate(
+                    "M d Y", trim($row['CREATED'])
+                );
+                if (PEAR::isError($create)) {
+                    return $create;
+                }
+            }
+
+            return array('id' => $row['BIB_NUM'],
+                         'location' => $row['LOCATION'],
+                         'expire' => $expire,
+                         'create' => $create,
+                         'reqnum' => null,
+                         'position' => $position,
+                         'available' => $available
+            );
+        }
+        return false;
+    }
+
+    /**
      * Get Patron Holds
      *
      * This is responsible for retrieving all holds by a specific patron.
@@ -262,27 +437,17 @@ class Horizon implements DriverInterface
      */
     public function getMyHolds($patron)
     {
-        $sql = "select bib# as BIB_NUM, request_location as LOCATION, " .
-               "convert(varchar(12),dateadd(dd, hold_exp_date, '1 jan 1970')) " .
-               "as EXPIRE, " .
-               "convert(varchar(12),dateadd(dd, request_date, '1 jan 1970')) " .
-               "as CREATED from request " .
-               "join borrower_barcode on " .
-               "borrower_barcode.borrower#=request.borrower# " .
-               "where borrower_barcode.bbarcode=\"" .
-               addslashes($patron['id']) . "\"";
+        $sqlArray = $this->getHoldsSQL($patron);
+        $sql = $this->buildSqlFromArray($sqlArray);
 
         try {
             $sqlStmt = mssql_query($sql);
 
             while ($row = mssql_fetch_assoc($sqlStmt)) {
-                $expire = ($row['EXPIRE'])
-                    ? $row['EXPIRE'] : "[Not yet available for pickup]";
-                $holdList[] = array('id' => $row['BIB_NUM'],
-                                    'location' => $row['LOCATION'],
-                                    'expire' => $expire,
-                                    'create' => $row['CREATED'],
-                                    'reqnum' => null );
+                $hold = $this->processHoldsRow($row);
+                if ($hold) {
+                    $holdList[] = $hold;
+                }
             }
             return $holdList;
         } catch (PDOException $e) {
@@ -413,6 +578,98 @@ class Horizon implements DriverInterface
     }
 
     /**
+     * Protected support method for getMyTransactions.
+     *
+     * @param array $patron Patron data for use in an sql query
+     *
+     * @return array Keyed data for use in an sql query
+     * @access protected
+     */
+    protected function getTransactionSQL($patron)
+    {
+        // Expressions
+        $sqlExpressions = array(
+            "item.bib# as BIB_NUM", "item.item# as ITEM_NUM",
+            "item.ibarcode as ITEM_BARCODE",
+            "convert(varchar(12), dateadd(dd, item.due_date, '01 jan 1970'))" .
+                "as DUEDATE",
+            "item.n_renewals as RENEW", "request.bib_queue_ord as REQUEST"
+        );
+
+        // From
+        $sqlFrom = array("circ");
+
+        // Join
+        $sqlJoin = array(
+            "item on item.item#=circ.item#",
+            "borrower on borrower.borrower#=circ.borrower#",
+            "borrower_barcode on borrower_barcode.borrower#=circ.borrower#"
+        );
+
+        // Left Outer Join
+        $sqlLeftOuterJoin = array("request on request.item#=circ.item#");
+
+        // Where
+        $sqlWhere = array(
+            "borrower_barcode.bbarcode=\"" . addslashes($patron['id']) . "\"");
+
+        $sqlArray = array(
+            'expressions' => $sqlExpressions,
+            'from' => $sqlFrom,
+            'join' => $sqlJoin,
+            'leftOuterJoin' => $sqlLeftOuterJoin,
+            'where' => $sqlWhere
+        );
+
+        return $sqlArray;
+    }
+
+    /**
+     * Protected support method for getMyTransactions.
+     *
+     * @param array $row An array of keyed data
+     *
+     * @return array Keyed data for display by template files
+     * @access protected
+     */
+    protected function processTransactionsRow($row)
+    {
+        $dueStatus = false;
+        // Convert Horizon Format to display format
+        if (!empty($row['DUEDATE'])) {
+            $dueDate = $this->dateFormat->convertToDisplayDate(
+                "M d Y", trim($row['DUEDATE'])
+            );
+            if (PEAR::isError($dueDate)) {
+                return $dueDate;
+            } else {
+                $now = time();
+                $dueTimeStamp = $this->dateFormat->convertFromDisplayDate(
+                    "U", $dueDate
+                );
+                if (!PEAR::isError($dueTimeStamp)
+                    && is_numeric($dueTimeStamp)
+                ) {
+                    if ($now > $dueTimeStamp) {
+                        $dueStatus = "overdue";
+                    } else if ($now > $dueTimeStamp-(1*24*60*60)) {
+                        $dueStatus = "due";
+                    }
+                }
+            }
+        }
+
+        return array('id' => $row['BIB_NUM'],
+                     'item_id' => $row['ITEM_NUM'],
+                     'duedate' => $dueDate,
+                     'barcode' => $row['ITEM_BARCODE'],
+                     'renew' => $row['RENEW'],
+                     'request' => $row['REQUEST'],
+                     'dueStatus' => $dueStatus
+        );
+    }
+
+    /**
      * Get Patron Transactions
      *
      * This is responsible for retrieving all transactions (i.e. checked out items)
@@ -426,33 +683,19 @@ class Horizon implements DriverInterface
      */
     public function getMyTransactions($patron)
     {
-        $sql = "select item.bib# as BIB_NUM, item.ibarcode as ITEM_BARCODE, " .
-               "convert(varchar(12), dateadd(dd, item.due_date, '01 jan 1970')) " .
-               "as DUEDATE, " .
-               "item.n_renewals as RENEW, request.bib_queue_ord as REQUEST " .
-               "from circ " .
-               "join item on item.item#=circ.item# " .
-               "join borrower on borrower.borrower#=circ.borrower# " .
-               "join borrower_barcode on borrower_barcode.borrower#=circ.borrower#" .
-               " left outer join request on request.item#=circ.item# " .
-               "where borrower_barcode.bbarcode=\"" . addslashes($patron['id']) .
-               "\"";
+        $transList = array();
+        $sqlArray = $this->getTransactionSQL($patron);
+        $sql = $this->buildSqlFromArray($sqlArray);
 
         try {
             $sqlStmt = mssql_query($sql);
-
             while ($row = mssql_fetch_assoc($sqlStmt)) {
-                $transList[] = array('id' => $row['BIB_NUM'],
-                                     'duedate' => $row['DUEDATE'],
-                                     'barcode' => $row['ITEM_BARCODE'],
-                                     'renew' => $row['RENEW'],
-                                     'request' => $row['REQUEST']);
+                $transList[] = $this->processTransactionRow($row);
             }
             return $transList;
         } catch (PDOException $e) {
             return new PEAR_Error($e->getMessage());
         }
-
     }
 }
 
