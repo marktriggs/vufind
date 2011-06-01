@@ -181,7 +181,9 @@ class Oracle_Connection
             break;
         }
 
-        if (@oci_bind_by_name($parsed, $place_holder, $data, $length, $oracle_data_type)) {
+        if (@oci_bind_by_name(
+            $parsed, $place_holder, $data, $length, $oracle_data_type
+        )) {
             return true;
         } else {
             $this->_handleError('binding', oci_error());
@@ -244,7 +246,9 @@ class Oracle_Connection
             break;
         }
 
-        if (@oci_bind_by_name($parsed, $place_holder, $data, $length, $oracle_data_type)) {
+        if (@oci_bind_by_name(
+            $parsed, $place_holder, $data, $length, $oracle_data_type
+        )) {
             return true;
         } else {
             $this->_handleError('binding', oci_error());
@@ -567,12 +571,16 @@ class Oracle_Connection
         case 'parsing':
             $output .= "=============<br />\n";
             $output .= "Offset into SQL:<br />\n";
-            $output .= substr($this->_lastError['sqltext'], $this->_lastError['offset'])."\n";
+            $output .=
+                substr($this->_lastError['sqltext'], $this->_lastError['offset']).
+                "\n";
             break;
         case 'executing':
             $output .= "=============<br />\n";
             $output .= "Offset into SQL:<br />\n";
-            $output .= substr($this->_lastError['sqltext'], $this->_lastError['offset'])."<br />\n";
+            $output .=
+                substr($this->_lastError['sqltext'], $this->_lastError['offset']).
+                "<br />\n";
             if (count($this->_lastErrorFields) > 0) {
                 $output .= "=============<br />\n";
                 $output .= "Bind Variables:<br />\n";
