@@ -135,7 +135,7 @@ class CatalogConnection
 
         if ($this->getHoldsMode() != "none"
             && method_exists($this->driver, 'placeHold')
-            && $functionConfig['HMACKeys'] != ""
+            && isset($functionConfig['HMACKeys'])
         ) {
             $response = array('function' => "placeHold");
             $response['HMACKeys'] = explode(":", $functionConfig['HMACKeys']);
