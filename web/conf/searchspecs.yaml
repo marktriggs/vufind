@@ -374,6 +374,15 @@ TitleBrowse:
     - title_full:
       - [onephrase, ~]
 
+DeweyBrowse:
+  QueryFields:
+    - dewey-raw:
+      - [onephrase, ~]
+
+LccBrowse:
+  QueryFields:
+    - callnumber-a:
+      - [onephrase, ~]
 
 CallNumber:
   # We use two similar munges here -- one for exact matches, which will get
