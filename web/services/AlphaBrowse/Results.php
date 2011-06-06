@@ -61,7 +61,7 @@ class Results extends Home
             ? $configArray['AlphaBrowse']['page_size'] : 20;
 
         // If required parameters are present, load results:
-        if ($source && $from) {
+        if ($source && $from !== false) {
             // Load Solr data or die trying:
             $result = $db->alphabeticBrowse($source, $from, $page, $limit, true);
             $this->_checkError($result);
