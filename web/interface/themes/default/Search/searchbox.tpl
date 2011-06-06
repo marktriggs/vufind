@@ -2,7 +2,7 @@
   {if $searchType == 'advanced'}
     <a href="{$path}/Search/Advanced?edit={$searchId}" class="small">{translate text="Edit this Advanced Search"}</a> |
     <a href="{$path}/Search/Advanced" class="small">{translate text="Start a new Advanced Search"}</a> |
-    <a href="{$path}" class="small">{translate text="Start a new Basic Search"}</a>
+    <a href="{$path}/" class="small">{translate text="Start a new Basic Search"}</a>
     <br>{translate text="Your search terms"} : "<b>{$lookfor|escape:"html"}</b>"
   {else}
     <form method="GET" action="{$path}/Search/Results" name="searchForm" id="searchForm" class="search">
