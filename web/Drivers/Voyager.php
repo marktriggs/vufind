@@ -206,6 +206,166 @@ class Voyager implements DriverInterface
     }
 
     /**
+     * Protected support method for getStatus -- get components required for standard
+     * status lookup SQL.
+     *
+     * @param array $id A Bibliographic id
+     *
+     * @return array Keyed data for use in an sql query
+     * @access protected
+     */
+    protected function getStatusSQL($id)
+    {
+        // Expressions
+        $sqlExpressions = array(
+            "BIB_ITEM.BIB_ID", "ITEM.ITEM_ID",
+            "ITEM.ON_RESERVE", "ITEM_STATUS_DESC as status",
+            "LOCATION.LOCATION_DISPLAY_NAME as location",
+            "MFHD_MASTER.DISPLAY_CALL_NO as callnumber"
+        );
+
+        // From
+        $sqlFrom = array(
+            $this->dbName.".BIB_ITEM", $this->dbName.".ITEM",
+            $this->dbName.".ITEM_STATUS_TYPE",
+            $this->dbName.".ITEM_STATUS",
+            $this->dbName.".LOCATION", $this->dbName.".MFHD_ITEM",
+            $this->dbName.".MFHD_MASTER"
+        );
+
+        // Where
+        $sqlWhere = array(
+            "BIB_ITEM.BIB_ID = :id",
+            "BIB_ITEM.ITEM_ID = ITEM.ITEM_ID",
+            "ITEM.ITEM_ID = ITEM_STATUS.ITEM_ID",
+            "ITEM_STATUS.ITEM_STATUS = ITEM_STATUS_TYPE.ITEM_STATUS_TYPE",
+            "LOCATION.LOCATION_ID = ITEM.PERM_LOCATION",
+            "MFHD_ITEM.ITEM_ID = ITEM.ITEM_ID",
+            "MFHD_MASTER.MFHD_ID = MFHD_ITEM.MFHD_ID",
+            "MFHD_MASTER.SUPPRESS_IN_OPAC='N'"
+        );
+
+        // Bind
+        $sqlBind = array(':id' => $id);
+
+        $sqlArray = array(
+            'expressions' => $sqlExpressions,
+            'from' => $sqlFrom,
+            'where' => $sqlWhere,
+            'bind' => $sqlBind,
+        );
+
+        return $sqlArray;
+    }
+
+    /**
+     * Protected support method for getStatus -- get components for status lookup
+     * SQL to use when a bib record has no items.
+     *
+     * @param array $id A Bibliographic id
+     *
+     * @return array Keyed data for use in an sql query
+     * @access protected
+     */
+    protected function getStatusNoItemsSQL($id)
+    {
+        // Expressions
+        $sqlExpressions = array("BIB_MFHD.BIB_ID",
+                                "1 as ITEM_ID", "'N' as ON_RESERVE",
+                                "'No information available' as status",
+                                "LOCATION.LOCATION_DISPLAY_NAME as location",
+                                "MFHD_MASTER.DISPLAY_CALL_NO as callnumber",
+                               );
+
+        // From
+        $sqlFrom = array($this->dbName.".BIB_MFHD", $this->dbName.".LOCATION",
+                         $this->dbName.".MFHD_MASTER"
+                        );
+
+        // Where
+        $sqlWhere = array("BIB_MFHD.BIB_ID = :id",
+                          "LOCATION.LOCATION_ID = MFHD_MASTER.LOCATION_ID",
+                          "MFHD_MASTER.MFHD_ID = BIB_MFHD.MFHD_ID",
+                          "MFHD_MASTER.SUPPRESS_IN_OPAC='N'"
+                         );
+
+        // Bind
+        $sqlBind = array(':id' => $id);
+
+        $sqlArray = array('expressions' => $sqlExpressions,
+                          'from' => $sqlFrom,
+                          'where' => $sqlWhere,
+                          'bind' => $sqlBind,
+                          );
+
+        return $sqlArray;
+    }
+
+    /**
+     * Protected support method for getStatus -- process rows returned by SQL
+     * lookup.
+     *
+     * @param array $sqlRows Sql Data
+     *
+     * @return array Keyed data
+     * @access protected
+     */
+    protected function getStatusData($sqlRows)
+    {
+        $data = array();
+
+        foreach ($sqlRows as $row) {
+            if (!isset($data[$row['ITEM_ID']])) {
+                $data[$row['ITEM_ID']] = array(
+                    'id' => $row['BIB_ID'],
+                    'status' => $row['STATUS'],
+                    'status_array' => array($row['STATUS']),
+                    'location' => htmlentities($row['LOCATION']),
+                    'reserve' => $row['ON_RESERVE'],
+                    'callnumber' => $row['CALLNUMBER']
+                );
+            } else {
+                if (!in_array(
+                    $row['STATUS'], $data[$row['ITEM_ID']]['status_array']
+                )) {
+                    $data[$row['ITEM_ID']]['status_array'][] = $row['STATUS'];
+                }
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * Protected support method for getStatus -- process all details collected by
+     * getStatusData().
+     *
+     * @param array $data SQL Row Data
+     *
+     * @return array Keyed data
+     * @access protected
+     */
+    protected function processStatusData($data)
+    {
+        // Process the raw data into final status information:
+        $status = array();
+        foreach ($data as $current) {
+            // Get availability/status info based on the array of status codes:
+            $availability = $this->determineAvailability($current['status_array']);
+
+            // If we found other statuses, we should override the display value
+            // appropriately:
+            if (count($availability['otherStatuses']) > 0) {
+                $current['status']
+                    = $this->pickStatus($availability['otherStatuses']);
+            }
+            $current['availability'] = $availability['available'];
+            $status[] = $current;
+        }
+
+        return $status;
+    }
+
+    /**
      * Get Status
      *
      * This is responsible for retrieving the status information of a certain
@@ -224,90 +384,38 @@ class Voyager implements DriverInterface
         // The first (and most common) obtains information from a combination of
         // items and holdings records.  The second (a rare case) obtains
         // information from the holdings record when no items are available.
-        $items = "select ITEM.ITEM_ID, ITEM.ON_RESERVE, " .
-                 "ITEM_STATUS_DESC as status, " .
-                 "LOCATION.LOCATION_DISPLAY_NAME as location, " .
-                 "MFHD_MASTER.DISPLAY_CALL_NO as callnumber " .
-                 "from $this->dbName.BIB_ITEM, $this->dbName.ITEM, " .
-                 "$this->dbName.ITEM_STATUS_TYPE, $this->dbName.ITEM_STATUS, " .
-                 "$this->dbName.LOCATION, $this->dbName.MFHD_ITEM, " .
-                 "$this->dbName.MFHD_MASTER " .
-                 "where BIB_ITEM.BIB_ID = :id " .
-                 "and BIB_ITEM.ITEM_ID = ITEM.ITEM_ID " .
-                 "and ITEM.ITEM_ID = ITEM_STATUS.ITEM_ID " .
-                 "and ITEM_STATUS.ITEM_STATUS = ITEM_STATUS_TYPE.ITEM_STATUS_TYPE " .
-                 "and LOCATION.LOCATION_ID = ITEM.PERM_LOCATION " .
-                 "and MFHD_ITEM.ITEM_ID = ITEM.ITEM_ID " .
-                 "and MFHD_MASTER.SUPPRESS_IN_OPAC='N' " .
-                 "and MFHD_MASTER.MFHD_ID = MFHD_ITEM.MFHD_ID";
-        $noItems = "select 1 as ITEM_ID, 'N' as ON_RESERVE, " .
-                   "'No information available' as status, " .
-                   "LOCATION.LOCATION_DISPLAY_NAME as location, " .
-                   "MFHD_MASTER.DISPLAY_CALL_NO as callnumber " .
-                   "from $this->dbName.BIB_MFHD, $this->dbName.LOCATION, ".
-                   "$this->dbName.MFHD_MASTER " .
-                   "where BIB_MFHD.BIB_ID = :id " .
-                   "and LOCATION.LOCATION_ID = MFHD_MASTER.LOCATION_ID " .
-                   "and MFHD_MASTER.SUPPRESS_IN_OPAC='N' " .
-                   "and MFHD_MASTER.MFHD_ID = BIB_MFHD.MFHD_ID";
-        $possibleQueries = array($items, $noItems);
+        $sqlArrayItems = $this->getStatusSQL($id);
+        $sqlArrayNoItems = $this->getStatusNoItemsSQL($id);
+        $possibleQueries = array(
+            $this->buildSqlFromArray($sqlArrayItems),
+            $this->buildSqlFromArray($sqlArrayNoItems)
+        );
 
-        // Loop through the possible queries and try each in turn --
-        // the first one that yields results will cause the function to return.
+        // Loop through the possible queries and try each in turn -- the first one
+        // that yields results will cause us to break out of the loop.
         foreach ($possibleQueries as $sql) {
             // Execute SQL
             try {
-                $sqlStmt = $this->db->prepare($sql);
-                $sqlStmt->execute(array(':id' => $id));
+                $sqlStmt = $this->db->prepare($sql['string']);
+                $sqlStmt->execute($sql['bind']);
             } catch (PDOException $e) {
                 return new PEAR_Error($e->getMessage());
             }
 
-            // Build Array of Item Information
-            $data = array();
+            $sqlRows = array();
             while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
-                if (!isset($data[$row['ITEM_ID']])) {
-                    $data[$row['ITEM_ID']] = array(
-                        'id' => $id,
-                        'status' => $row['STATUS'],
-                        'status_array' => array($row['STATUS']),
-                        'location' => htmlentities($row['LOCATION']),
-                        'reserve' => $row['ON_RESERVE'],
-                        'callnumber' => $row['CALLNUMBER']
-                    );
-                } else {
-                    if (!in_array(
-                        $row['STATUS'], $data[$row['ITEM_ID']]['status_array']
-                    )) {
-                        $data[$row['ITEM_ID']]['status_array'][] = $row['STATUS'];
-                    }
-                }
+                $sqlRows[] = $row;
             }
 
-            // If we found any information, break out of the foreach loop;
-            // we don't need to try any more queries.
+            $data = $this->getStatusData($sqlRows);
+
+            // If we found data, we can leave the foreach loop -- we don't need to
+            // try any more queries.
             if (count($data) > 0) {
                 break;
             }
         }
-
-        // Process the raw data into final status information:
-        $status = array();
-        foreach ($data as $current) {
-            // Get availability/status info based on the array of status codes:
-            $availability = $this->determineAvailability($current['status_array']);
-
-            // If we found other statuses, we should override the display value
-            // appropriately:
-            if (count($availability['otherStatuses']) > 0) {
-                $current['status']
-                    = $this->pickStatus($availability['otherStatuses']);
-            }
-            $current['availability'] = $availability['available'];
-            $status[] = $current;
-        }
-
-        return $status;
+        return $this->processStatusData($data);
     }
 
     /**
@@ -658,9 +766,9 @@ class Voyager implements DriverInterface
                     'duedate' => $dueDate,
                     'number' => $number,
                     'requests_placed' => $requests_placed,
-                    'returnDate' => $returnDate 
+                    'returnDate' => $returnDate
                 );
-                
+
                 // Parse Holding Record
                 if ($row['RECORD_SEGMENT']) {
                     $marcDetails
