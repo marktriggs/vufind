@@ -415,7 +415,12 @@ class XCNCIP2 implements DriverInterface
      */
     public function getMyTransactions($patron)
     {
-        // TODO
+        $extras = array('<ns1:LoanedItemsDesired/>');
+        $request = $this->_getLookupUserRequest(
+            $patron['cat_username'], $patron['cat_password'], $extras
+        );
+        $response = $this->_sendRequest($request);
+        // TODO: process response
         return array();
     }
 
@@ -432,8 +437,44 @@ class XCNCIP2 implements DriverInterface
      */
     public function getMyFines($patron)
     {
-        // TODO
-        return array();
+        $extras = array('<ns1:UserFiscalAccountDesired/>');
+        $request = $this->_getLookupUserRequest(
+            $patron['cat_username'], $patron['cat_password'], $extras
+        );
+        $response = $this->_sendRequest($request);
+
+        $list = $response->xpath(
+            'ns1:LookupUserResponse/ns1:UserFiscalAccount/ns1:AccountDetails'
+        );
+        
+        $fines = array();
+        foreach ($list as $current) {
+            $tmp = $current->xpath(
+                'ns1:FiscalTransactionInformation/ns1:Amount/ns1:MonetaryValue'
+            );
+            $amount = (string)$tmp[0];
+            $tmp = $current->xpath('ns1:AccrualDate');
+            $date = (string)$tmp[0];
+            $tmp = $current->xpath(
+                'ns1:FiscalTransactionInformation/ns1:FiscalTransactionType'
+            );
+            $desc = (string)$tmp[0];
+            $tmp = $current->xpath(
+                'ns1:FiscalTransactionInformation/ns1:ItemDetails/' .
+                'ns1:ItemId/ns1:ItemIdentifierValue'
+            );
+            $id = (string)$tmp[0];
+            $fines[] = array(
+                'amount' => $amount,
+                'balance' => $amount,
+                'checkout' => '',
+                'fine' => $desc,
+                'duedate' => '',
+                'createdate' => $date,
+                'id' => $id
+            );
+        }
+        return $fines;
     }
 
     /**
@@ -449,7 +490,12 @@ class XCNCIP2 implements DriverInterface
      */
     public function getMyHolds($patron)
     {
-        // TODO
+        $extras = array('<ns1:RequestedItemsDesired/>');
+        $request = $this->_getLookupUserRequest(
+            $patron['cat_username'], $patron['cat_password'], $extras
+        );
+        $response = $this->_sendRequest($request);
+        // TODO: process response
         return array();
     }
 
