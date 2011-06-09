@@ -276,7 +276,6 @@ class Export extends MyResearch
             // Assign Item Info
             $interface->assign('errorMsg', $this->errorMsg);
             $interface->assign('infoMsg', $this->infoMsg);
-            $interface->assign('showExport', $showExport);
             $interface->setPageTitle(translate('Export Favorites'));
             $interface->assign('subTemplate', 'export.tpl');
             $interface->assign('exportIDS', $ids);
