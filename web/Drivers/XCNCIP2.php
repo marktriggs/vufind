@@ -112,10 +112,14 @@ class XCNCIP2 implements DriverInterface
             'ns1:ItemOptionalFields/ns1:CirculationStatus'
         );
         $status = empty($status) ? '' : (string)$status[0];
+
+        $id = false;
+        /* This is an item ID, not a bib ID, so it's not actually useful:
         $id = $current->xpath(
             'ns1:BibliographicId/ns1:BibliographicItemId/' .
             'ns1:BibliographicItemIdentifier'
         );
+         */
 
         // Pick out the permanent location (TODO: better smarts for dealing with
         // temporary locations and multi-level location names):
