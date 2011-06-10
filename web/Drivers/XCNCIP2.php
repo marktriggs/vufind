@@ -421,8 +421,20 @@ class XCNCIP2 implements DriverInterface
             $patron['cat_username'], $patron['cat_password'], $extras
         );
         $response = $this->_sendRequest($request);
-        // TODO: process response
-        return array();
+
+        $retVal = array();
+        $list = $response->xpath('ns1:LookupUserResponse/ns1:LoanedItem');
+        foreach ($list as $current) {
+            $due = $current->xpath('ns1:DateDue');
+            $title = $current->xpath('ns1:Title');
+            $retVal[] = array(
+                'id' => false,
+                'duedate' => (string)$due[0],
+                'title' => (string)$title[0]
+            );
+        }
+
+        return $retVal;
     }
 
     /**
@@ -499,8 +511,23 @@ class XCNCIP2 implements DriverInterface
             $patron['cat_username'], $patron['cat_password'], $extras
         );
         $response = $this->_sendRequest($request);
-        // TODO: process response
-        return array();
+
+        $retVal = array();
+        $list = $response->xpath('ns1:LookupUserResponse/ns1:RequestedItem');
+        foreach ($list as $current) {
+            $created = $current->xpath('ns1:DatePlaced');
+            $title = $current->xpath('ns1:Title');
+            $pos = $current->xpath('ns1:HoldQueuePosition');
+            $retVal[] = array(
+                'id' => false,
+                'create' => (string)$created[0],
+                'expire' => '',
+                'title' => (string)$title[0],
+                'position' => (string)$pos[0]
+            );
+        }
+
+        return $retVal;
     }
 
     /**
