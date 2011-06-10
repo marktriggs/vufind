@@ -113,13 +113,10 @@ class XCNCIP2 implements DriverInterface
         );
         $status = empty($status) ? '' : (string)$status[0];
 
-        $id = false;
-        /* This is an item ID, not a bib ID, so it's not actually useful:
         $id = $current->xpath(
             'ns1:BibliographicId/ns1:BibliographicItemId/' .
             'ns1:BibliographicItemIdentifier'
         );
-         */
 
         // Pick out the permanent location (TODO: better smarts for dealing with
         // temporary locations and multi-level location names):
@@ -463,11 +460,14 @@ class XCNCIP2 implements DriverInterface
                 'ns1:FiscalTransactionInformation/ns1:FiscalTransactionType'
             );
             $desc = (string)$tmp[0];
+            /* This is an item ID, not a bib ID, so it's not actually useful:
             $tmp = $current->xpath(
                 'ns1:FiscalTransactionInformation/ns1:ItemDetails/' .
                 'ns1:ItemId/ns1:ItemIdentifierValue'
             );
             $id = (string)$tmp[0];
+             */
+            $id = '';
             $fines[] = array(
                 'amount' => $amount,
                 'balance' => $amount,
