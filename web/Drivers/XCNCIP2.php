@@ -181,12 +181,13 @@ class XCNCIP2 implements DriverInterface
     /**
      * Build NCIP2 request XML for item status information.
      *
-     * @param array $idList IDs to look up.
+     * @param array  $idList     IDs to look up.
+     * @param string $resumption Resumption token (null for first page of set).
      *
-     * @return string       XML request
+     * @return string            XML request
      * @access private
      */
-    private function _getStatusRequest($idList)
+    private function _getStatusRequest($idList, $resumption = null)
     {
         // Build a list of the types of information we want to retrieve:
         $desiredParts = array(
@@ -225,6 +226,12 @@ class XCNCIP2 implements DriverInterface
                 htmlspecialchars($current) . '</ns1:ItemElementType>';
         }
 
+        // Add resumption token if necessary:
+        if (!empty($resumption)) {
+            $xml .= '<ns1:NextItemToken>' . htmlspecialchars($resumption) .
+                '</ns1:NextItemToken>';
+        }
+
         // Close the XML and send it to the caller:
         $xml .= '</ns1:LookupItemSet></ns1:Ext></ns1:NCIPMessage>';
         return $xml;
@@ -244,27 +251,36 @@ class XCNCIP2 implements DriverInterface
      */
     public function getStatuses($idList)
     {
-        $request = $this->_getStatusRequest($idList);
-        $response = $this->_sendRequest($request);
-        $avail = $response->xpath(
-            'ns1:Ext/ns1:LookupItemSetResponse/ns1:BibInformation'
-        );
-
-        // Build the array of statuses:
         $status = array();
-        foreach ($avail as $current) {
-            // Get data on the current chunk of data:
-            $chunk = $this->_getHoldingsForChunk($current);
+        $resumption = null;
+        do {
+            $request = $this->_getStatusRequest($idList, $resumption);
+            $response = $this->_sendRequest($request);
+            $avail = $response->xpath(
+                'ns1:Ext/ns1:LookupItemSetResponse/ns1:BibInformation'
+            );
 
-            // Each bibliographic ID has its own key in the $status array; make sure
-            // we initialize new arrays when necessary and then add the current
-            // chunk to the right place:
-            $id = $chunk['id'];
-            if (!isset($status[$id])) {
-                $status[$id] = array();
+            // Build the array of statuses:
+            foreach ($avail as $current) {
+                // Get data on the current chunk of data:
+                $chunk = $this->_getHoldingsForChunk($current);
+
+                // Each bibliographic ID has its own key in the $status array; make
+                // sure we initialize new arrays when necessary and then add the
+                // current chunk to the right place:
+                $id = $chunk['id'];
+                if (!isset($status[$id])) {
+                    $status[$id] = array();
+                }
+                $status[$id][] = $chunk;
             }
-            $status[$id][] = $chunk;
-        }
+
+            // Check for resumption token:
+            $resumption = $response->xpath(
+                'ns1:Ext/ns1:LookupItemSetResponse/ns1:NextItemToken'
+            );
+            $resumption = count($resumption) > 0 ? (string)$resumption[0] : null;
+        } while (!empty($resumption));
         return $status;
     }
 
@@ -459,7 +475,7 @@ class XCNCIP2 implements DriverInterface
         $list = $response->xpath(
             'ns1:LookupUserResponse/ns1:UserFiscalAccount/ns1:AccountDetails'
         );
-        
+
         $fines = array();
         foreach ($list as $current) {
             $tmp = $current->xpath(
@@ -568,7 +584,7 @@ class XCNCIP2 implements DriverInterface
             'ns1:PersonalNameInformation/ns1:StructuredPersonalUserName/' .
             'ns1:Surname'
         );
-        
+
         // TODO: distinguish between permanent and other types of addresses; look
         // at the UnstructuredAddressType field and handle multiple options.
         $address = $response->xpath(
