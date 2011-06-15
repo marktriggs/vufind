@@ -80,8 +80,6 @@ class VoyagerRestful extends Voyager
      */
     public function getConfig($function)
     {
-        global $configArray;
-
         if (isset($this->config[$function]) ) {
             $functionConfig = $this->config[$function];
         } else {
