@@ -442,6 +442,8 @@ class Demo implements DriverInterface
                     'renew'   => $renew,
                     'request' => $req,
                     "id"      => $this->_getRandomBibId(),
+                    'item_id' => $i,
+                    'renewable' => true
                 );
             }
             $_SESSION['demoData']['transactions'] = $transList;
@@ -642,6 +644,72 @@ class Demo implements DriverInterface
     public function getCancelHoldDetails($holdDetails)
     {
         return $holdDetails['reqnum'];
+    }
+
+    /**
+     * Renew My Items
+     *
+     * Function for attempting to renew a patron's items.  The data in
+     * $renewDetails['details'] is determined by getRenewDetails().
+     *
+     * @param array $renewDetails An array of data required for renewing items
+     * including the Patron ID and an array of renewal IDS
+     *
+     * @return array              An array of renewal information keyed by item ID
+     * @access public
+     */
+    public function renewMyItems($renewDetails)
+    {
+        // Set up return value -- no blocks in demo driver currently.
+        $finalResult = array('blocks' => array(), 'details' => array());
+
+        foreach ($_SESSION['demoData']['transactions'] as $i => $current) {
+            // Only renew requested items:
+            if (in_array($current['item_id'], $renewDetails['details'])) {
+                if (rand() % 2) {
+                    $old = $_SESSION['demoData']['transactions'][$i]['duedate'];
+                    $_SESSION['demoData']['transactions'][$i]['duedate']
+                        = date("j-M-y", strtotime($old . " + 7 days"));
+
+                    $finalResult['details'][$current['item_id']] = array(
+                        "success" => true,
+                        "new_date" =>
+                            $_SESSION['demoData']['transactions'][$i]['duedate'],
+                        "new_time" => '',
+                        "item_id" => $current['item_id'],
+                    );
+                } else {
+                    $finalResult['details'][$current['item_id']] = array(
+                        "success" => false,
+                        "new_date" => false,
+                        "item_id" => $current['item_id'],
+                        "sysMessage" => 
+                            'Demonstrating failure; keep trying and ' .
+                            'it will work eventually.'
+                    );
+                }
+            }
+        }
+
+        return $finalResult;
+    }
+
+    /**
+     * Get Renew Details
+     *
+     * In order to renew an item, Voyager requires the patron details and an item
+     * id. This function returns the item id as a string which is then used
+     * as submitted form data in checkedOut.php. This value is then extracted by
+     * the RenewMyItems function.
+     *
+     * @param array $checkOutDetails An array of item data
+     *
+     * @return string Data for use in a form field
+     * @access public
+     */
+    public function getRenewDetails($checkOutDetails)
+    {
+        return $checkOutDetails['item_id'];
     }
 }
 ?>
