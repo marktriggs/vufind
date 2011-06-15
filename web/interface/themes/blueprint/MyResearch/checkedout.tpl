@@ -28,7 +28,7 @@
     {foreach from=$transList item=resource name="recordLoop"}
       <li class="result{if ($smarty.foreach.recordLoop.iteration % 2) == 0} alt{/if}">
       {if $renewForm}
-        {if $resource.ils_details.renewable && $resource.ils_details.renew_details}
+        {if $resource.ils_details.renewable && isset($resource.ils_details.renew_details)}
             <label for="checkbox_{$resource.id|regex_replace:'/[^a-z0-9]/':''|escape}" class="offscreen">{translate text="Select this record"}</label>
             <input type="checkbox" name="renewSelectedIDS[]" value="{$resource.ils_details.renew_details}" class="checkbox" style="margin-left: 0" id="checkbox_{$resource.id|regex_replace:'/[^a-z0-9]/':''|escape}" />
             <input type="hidden" name="renewAllIDS[]" value="{$resource.ils_details.renew_details}" />

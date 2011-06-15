@@ -35,7 +35,7 @@
             <li class="result">
             {/if}
             {if $renewForm}
-              {if $resource.ils_details.renewable && $resource.ils_details.renew_details}
+              {if $resource.ils_details.renewable && isset($resource.ils_details.renew_details)}
                 <div class="hiddenLabel"><label for="checkbox_{$resource.id|regex_replace:'/[^a-z0-9]/':''|escape}">{translate text="Select this record"}</label></div>
                 <input type="checkbox" name="renewSelectedIDS[]" value="{$resource.ils_details.renew_details}" class="ui_checkboxes" id="checkbox_{$resource.id|regex_replace:'/[^a-z0-9]/':''|escape}" />
                 <input type="hidden" name="renewAllIDS[]" value="{$resource.ils_details.renew_details}" />
