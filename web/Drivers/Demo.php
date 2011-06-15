@@ -2,6 +2,10 @@
 /**
  * Advanced Dummy ILS Driver -- Returns sample values based on Solr index.
  *
+ * Note that some sample values (holds, transactions, fines) are stored in
+ * the session.  You can log out and log back in to get a different set of
+ * values.
+ *
  * PHP version 5
  *
  * Copyright (C) Villanova University 2007.
@@ -41,6 +45,18 @@ class Demo implements DriverInterface
     // Used when getting random bib ids from solr
     private $_db;
     private $_totalRecords;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        // Establish an array in the session for persisting fake data (to save
+        // on Solr hits):
+        if (!isset($_SESSION['demoData'])) {
+            $_SESSION['demoData'] = array();
+        }
+    }
 
     /**
      * Generate a fake location name.
@@ -300,34 +316,39 @@ class Demo implements DriverInterface
      */
     public function getMyFines($patron)
     {
-        // How many items are there?
-        // %20 - 2 = 10% chance of none, 90% of 1-18 (give or take some odd maths)
-        $fines = rand()%20 - 2;
+        if (!isset($_SESSION['demoData']['fines'])) {
+            // How many items are there? %20 - 2 = 10% chance of none,
+            // 90% of 1-18 (give or take some odd maths)
+            $fines = rand()%20 - 2;
 
-        // Do some initial work in solr so we aren't repeating it inside this loop.
-        $this->_prepSolr();
+            // Do some initial work in solr so we aren't repeating it inside this
+            // loop.
+            $this->_prepSolr();
 
-        $fineList = array();
-        for ($i = 0; $i < $fines; $i++) {
-            // How many days overdue is the item?
-            $day_overdue = rand()%30 + 5;
-            // Calculate checkout date:
-            $checkout = strtotime("now - ".($day_overdue+14)." days");
-            // 50c a day fine?
-            $fine = $day_overdue * 0.50;
+            $fineList = array();
+            for ($i = 0; $i < $fines; $i++) {
+                // How many days overdue is the item?
+                $day_overdue = rand()%30 + 5;
+                // Calculate checkout date:
+                $checkout = strtotime("now - ".($day_overdue+14)." days");
+                // 50c a day fine?
+                $fine = $day_overdue * 0.50;
 
-            $fineList[] = array(
-                "amount"   => $fine * 100,
-                "checkout" => date("j-M-y", $checkout),
-                // After 20 days it becomes 'Long Overdue'
-                "fine"     => $day_overdue > 20 ? "Long Overdue" : "Overdue",
-                // 50% chance they've paid half of it
-                "balance"  => (rand()%100 > 49 ? $fine/2 : $fine) * 100,
-                "duedate"  => date("j-M-y", strtotime("now - $day_overdue days")),
-                "id"       => $this->_getRandomBibId()
-            );
+                $fineList[] = array(
+                    "amount"   => $fine * 100,
+                    "checkout" => date("j-M-y", $checkout),
+                    // After 20 days it becomes 'Long Overdue'
+                    "fine"     => $day_overdue > 20 ? "Long Overdue" : "Overdue",
+                    // 50% chance they've paid half of it
+                    "balance"  => (rand()%100 > 49 ? $fine/2 : $fine) * 100,
+                    "duedate"  =>
+                        date("j-M-y", strtotime("now - $day_overdue days")),
+                    "id"       => $this->_getRandomBibId()
+                );
+            }
+            $_SESSION['demoData']['fines'] = $fineList;
         }
-        return $fineList;
+        return $_SESSION['demoData']['fines'];
     }
 
     /**
@@ -343,24 +364,29 @@ class Demo implements DriverInterface
      */
     public function getMyHolds($patron)
     {
-        // How many items are there?
-        // %10 - 1 = 10% chance of none, 90% of 1-9 (give or take some odd maths)
-        $holds = rand()%10 - 1;
+        if (!isset($_SESSION['demoData']['holds'])) {
+            // How many items are there?  %10 - 1 = 10% chance of none,
+            // 90% of 1-9 (give or take some odd maths)
+            $holds = rand()%10 - 1;
 
-        // Do some initial work in solr so we aren't repeating it inside this loop.
-        $this->_prepSolr();
+            // Do some initial work in solr so we aren't repeating it inside this
+            // loop.
+            $this->_prepSolr();
 
-        $holdList = array();
-        for ($i = 0; $i < $holds; $i++) {
-            $holdList[] = array(
-                "id"       => $this->_getRandomBibId(),
-                "location" => $this->_getFakeLoc(),
-                "expire"   => date("j-M-y", strtotime("now + 30 days")),
-                "create"   => date("j-M-y", strtotime("now - ".(rand()%10)." days")),
-                "reqnum"   => sprintf("%06d", rand()%9999)
-            );
+            $holdList = array();
+            for ($i = 0; $i < $holds; $i++) {
+                $holdList[] = array(
+                    "id"       => $this->_getRandomBibId(),
+                    "location" => $this->_getFakeLoc(),
+                    "expire"   => date("j-M-y", strtotime("now + 30 days")),
+                    "create"   =>
+                        date("j-M-y", strtotime("now - ".(rand()%10)." days")),
+                    "reqnum"   => sprintf("%06d", rand()%9999)
+                );
+            }
+            $_SESSION['demoData']['holds'] = $holdList;
         }
-        return $holdList;
+        return $_SESSION['demoData']['holds'];
     }
 
     /**
@@ -377,45 +403,49 @@ class Demo implements DriverInterface
      */
     public function getMyTransactions($patron)
     {
-        // How many items are there?
-        // %10 - 1 = 10% chance of none, 90% of 1-9 (give or take some odd maths)
-        $trans = rand()%10 - 1;
+        if (!isset($_SESSION['demoData']['transactions'])) {
+            // How many items are there?  %10 - 1 = 10% chance of none,
+            // 90% of 1-9 (give or take some odd maths)
+            $trans = rand()%10 - 1;
 
-        // Do some initial work in solr so we aren't repeating it inside this loop.
-        $this->_prepSolr();
+            // Do some initial work in solr so we aren't repeating it inside this
+            // loop.
+            $this->_prepSolr();
 
-        $transList = array();
-        for ($i = 0; $i < $trans; $i++) {
-            // When is it due? +/- up to 15 days
-            $due_relative = rand()%30 - 15;
-            // Due date
-            if ($due_relative >= 0) {
-                $due_date = date("j-M-y", strtotime("now +$due_relative days"));
-            } else {
-                $due_date = date("j-M-y", strtotime("now $due_relative days"));
+            $transList = array();
+            for ($i = 0; $i < $trans; $i++) {
+                // When is it due? +/- up to 15 days
+                $due_relative = rand()%30 - 15;
+                // Due date
+                if ($due_relative >= 0) {
+                    $due_date = date("j-M-y", strtotime("now +$due_relative days"));
+                } else {
+                    $due_date = date("j-M-y", strtotime("now $due_relative days"));
+                }
+
+                // Times renewed    : 0,0,0,0,0,1,2,3,4,5
+                $renew = rand()%10 - 5;
+                if ($renew < 0) {
+                    $renew = 0;
+                }
+
+                // Pending requests : 0,0,0,0,0,1,2,3,4,5
+                $req = rand()%10 - 5;
+                if ($req < 0) {
+                    $req = 0;
+                }
+
+                $transList[] = array(
+                    'duedate' => $due_date,
+                    'barcode' => sprintf("%08d", rand()%50000),
+                    'renew'   => $renew,
+                    'request' => $req,
+                    "id"      => $this->_getRandomBibId(),
+                );
             }
-
-            // Times renewed    : 0,0,0,0,0,1,2,3,4,5
-            $renew = rand()%10 - 5;
-            if ($renew < 0) {
-                $renew = 0;
-            }
-
-            // Pending requests : 0,0,0,0,0,1,2,3,4,5
-            $req = rand()%10 - 5;
-            if ($req < 0) {
-                $req = 0;
-            }
-
-            $transList[] = array(
-                'duedate' => $due_date,
-                'barcode' => sprintf("%08d", rand()%50000),
-                'renew'   => $renew,
-                'request' => $req,
-                "id"      => $this->_getRandomBibId(),
-            );
+            $_SESSION['demoData']['transactions'] = $transList;
         }
-        return $transList;
+        return $_SESSION['demoData']['transactions'];
     }
 
     /**
