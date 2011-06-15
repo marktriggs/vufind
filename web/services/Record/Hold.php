@@ -179,13 +179,14 @@ class Hold extends Record
                 $this->gatheredDetails[$details] = $_GET[$details];
                 // Build Logon URL
                 if ($i == 0) {
-                    $this->logonURL = "?".$details."=".$_GET[$details];
+                    $this->logonURL = "?".$details."=".urlencode($_GET[$details]);
                 } else {
-                    $this->logonURL .= "&".$details."=".$_GET[$details];
+                    $this->logonURL .= "&".$details."=".urlencode($_GET[$details]);
                 }
                 $i++;
             }
-            $this->logonURL .= "&hashKey=".$hashKey;
+            $this->logonURL .= ($i == 0 ? '?' : '&') .
+                "hashKey=".urlencode($hashKey);
         }
         return true;
     }
