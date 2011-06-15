@@ -145,7 +145,7 @@ class HoldLogic
                         if ($copy['addLink']) {
                             // If the hold is blocked, link to an error page
                             // instead of the hold form:
-                            $copy['link'] = ($copy['addLink'] == 'block') 
+                            $copy['link'] = (strcmp($copy['addLink'], 'block') == 0)
                                 ? "?errorMsg=hold_error_blocked"
                                 : $this->_getHoldDetails(
                                     $copy, $checkHolds['HMACKeys']
