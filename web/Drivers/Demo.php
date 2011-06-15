@@ -381,7 +381,8 @@ class Demo implements DriverInterface
                     "expire"   => date("j-M-y", strtotime("now + 30 days")),
                     "create"   =>
                         date("j-M-y", strtotime("now - ".(rand()%10)." days")),
-                    "reqnum"   => sprintf("%06d", rand()%9999)
+                    "reqnum"   => sprintf("%06d", $i),
+                    "item_id" => $i
                 );
             }
             $_SESSION['demoData']['holds'] = $holdList;
@@ -577,6 +578,70 @@ class Demo implements DriverInterface
             $retVal[] = array('BIB_ID' => $current);
         }
         return $retVal;
+    }
+
+    /**
+     * Cancel Holds
+     *
+     * Attempts to Cancel a hold or recall on a particular item. The
+     * data in $cancelDetails['details'] is determined by getCancelHoldDetails().
+     *
+     * @param array $cancelDetails An array of item and patron data
+     *
+     * @return array               An array of data on each request including
+     * whether or not it was successful and a system message (if available)
+     * @access public
+     */
+    public function cancelHolds($cancelDetails)
+    {
+        // Rewrite the holds in the session, removing those the user wants to
+        // cancel.
+        $newHolds = array();
+        $retVal = array('count' => 0);
+        foreach ($_SESSION['demoData']['holds'] as $current) {
+            if (!in_array($current['reqnum'], $cancelDetails['details'])) {
+                $newHolds[] = $current;
+            } else {
+                // 50% chance of cancel failure for testing purposes
+                if (rand() % 2) {
+                    $retVal['count']++;
+                    $retVal[$current['item_id']] = array(
+                        'success' => true,
+                        'status' => 'hold_cancel_success'
+                    );
+                } else {
+                    $newHolds[] = $current;
+                    $retVal[$current['item_id']] = array(
+                        'success' => false,
+                        'status' => 'hold_cancel_fail',
+                        'sysMessage' =>
+                            'Demonstrating failure; keep trying and ' .
+                            'it will work eventually.'
+                    );
+                }
+            }
+        }
+
+        $_SESSION['demoData']['holds'] = $newHolds;
+        return $retVal;
+    }
+
+    /**
+     * Get Cancel Hold Details
+     *
+     * In order to cancel a hold, Voyager requires the patron details an item ID
+     * and a recall ID. This function returns the item id and recall id as a string
+     * separated by a pipe, which is then submitted as form data in Hold.php. This
+     * value is then extracted by the CancelHolds function.
+     *
+     * @param array $holdDetails An array of item data
+     *
+     * @return string Data for use in a form field
+     * @access public
+     */
+    public function getCancelHoldDetails($holdDetails)
+    {
+        return $holdDetails['reqnum'];
     }
 }
 ?>
