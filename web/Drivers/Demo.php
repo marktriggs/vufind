@@ -184,7 +184,9 @@ class Demo implements DriverInterface
                 'location'     => $this->_getFakeLoc(),
                 'reserve'      => (rand()%100 > 49) ? 'Y' : 'N',
                 'callnumber'   => $this->_getFakeCallNum(),
-                'duedate'      => ''
+                'duedate'      => '',
+                'is_holdable'  => true,
+                'addLink'      => rand()%10 == 0 ? 'block' : true
             );
         }
         return $holding;
@@ -710,6 +712,71 @@ class Demo implements DriverInterface
     public function getRenewDetails($checkOutDetails)
     {
         return $checkOutDetails['item_id'];
+    }
+
+    /**
+     * Place Hold
+     *
+     * Attempts to place a hold or recall on a particular item and returns
+     * an array with result details or a PEAR error on failure of support classes
+     *
+     * @param array $holdDetails An array of item and patron data
+     *
+     * @return mixed An array of data on the request including
+     * whether or not it was successful and a system message (if available) or a
+     * PEAR error on failure of support classes
+     * @access public
+     */
+    public function placeHold($holdDetails)
+    {
+        // Simulate failure:
+        if (rand() % 2) {
+            return array(
+                "success" => false,
+                "sysMessage" => 
+                    'Demonstrating failure; keep trying and ' .
+                    'it will work eventually.'
+            );
+        }
+
+        if (!isset($_SESSION['demoData']['holds'])) {
+            $_SESSION['demoData']['holds'] = array();
+        }
+        $lastHold = count($_SESSION['demoData']['holds']) - 1;
+        $nextId = $lastHold >= 0
+            ? $_SESSION['demoData']['holds'][$lastHold]['item_id'] + 1
+            : 0;
+
+        $_SESSION['demoData']['holds'][] = array(
+            "id"       => $holdDetails['id'],
+            "location" => $this->_getFakeLoc(),
+            "expire"   => date("j-M-y", strtotime("now + 30 days")),
+            "create"   =>
+                date("j-M-y"),
+            "reqnum"   => sprintf("%06d", $nextId),
+            "item_id" => $nextId
+        );
+
+        return array('success' => true);
+    }
+
+    /**
+     * Public Function which specifies renew, hold and cancel settings.
+     *
+     * @param string $function The name of the feature to be checked
+     *
+     * @return array An array with key-value pairs.
+     * @access public
+     */
+    public function getConfig($function)
+    {
+        if ($function == 'Holds') {
+            return array(
+                'HMACKeys' => array('id'),
+                'extraHoldFields' => 'comments'
+            );
+        }
+        return array();
     }
 }
 ?>
