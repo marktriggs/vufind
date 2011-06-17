@@ -99,7 +99,7 @@
                     <strong>{translate text='Expires'}:</strong> {$resource.ils_details.expire|escape}
                     <br />
 
-                    {foreach from=$cancelResults item=cancelResult key=itemId}
+                    {foreach from=$cancelResults.items item=cancelResult key=itemId}
                       {if $itemId == $resource.ils_details.item_id && $cancelResult.success == false}
                         <div class="error">{translate text=$cancelResult.status}{if $cancelResult.sysMessage} : {translate text=$cancelResult.sysMessage|escape}{/if}</div>
                       {/if}

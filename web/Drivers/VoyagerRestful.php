@@ -931,7 +931,8 @@ class VoyagerRestful extends Voyager
         $details = $cancelDetails['details'];
         $patron = $cancelDetails['patron'];
         $count = 0;
-
+        $response = array();
+        
         foreach ($details as $cancelDetails) {
             list($itemId, $cancelCode) = explode("|", $cancelDetails);
 
@@ -960,17 +961,22 @@ class VoyagerRestful extends Voyager
                 $cancel = $cancel->children();
                 $node = "reply-text";
                 $reply = (string)$cancel->$node;
-
-                $result[$itemId]['success'] = ($reply == "ok") ? true : false;
-                $result[$itemId]['status'] = ($result[$itemId]['success'])
-                    ? "hold_cancel_success" : "hold_cancel_fail";
-                $result[$itemId]['sysMessage'] = ($reply == "ok") ? false : $reply;
-                $count = $result['count'] = ($reply == "ok") ? $count+1 : $count;
+                $count = ($reply == "ok") ? $count+1 : $count;
+                
+                $response[$itemId] = array(
+                    'success' => ($reply == "ok") ? true : false,
+                    'status' => ($result[$itemId]['success'])
+                        ? "hold_cancel_success" : "hold_cancel_fail",
+                    'sysMessage' => ($reply == "ok") ? false : $reply,
+                );
+                
             } else {
-                $result[$itemId]['success'] = false;
-                $result[$itemId]['status'] = "hold_cancel_fail";
+                $response[$itemId] = array(
+                    'success' => false, 'status' => "hold_cancel_fail"
+                );
             }
         }
+        $result = array('count' => $count, 'items' => $response);
         return $result;
     }
 

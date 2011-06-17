@@ -601,7 +601,7 @@ class Demo implements DriverInterface
         // Rewrite the holds in the session, removing those the user wants to
         // cancel.
         $newHolds = array();
-        $retVal = array('count' => 0);
+        $retVal = array('count' => 0, 'items' => array());
         foreach ($_SESSION['demoData']['holds'] as $current) {
             if (!in_array($current['reqnum'], $cancelDetails['details'])) {
                 $newHolds[] = $current;
@@ -609,13 +609,13 @@ class Demo implements DriverInterface
                 // 50% chance of cancel failure for testing purposes
                 if (rand() % 2) {
                     $retVal['count']++;
-                    $retVal[$current['item_id']] = array(
+                    $retVal['items'][$current['item_id']] = array(
                         'success' => true,
                         'status' => 'hold_cancel_success'
                     );
                 } else {
                     $newHolds[] = $current;
-                    $retVal[$current['item_id']] = array(
+                    $retVal['items'][$current['item_id']] = array(
                         'success' => false,
                         'status' => 'hold_cancel_fail',
                         'sysMessage' =>

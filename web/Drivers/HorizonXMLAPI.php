@@ -535,6 +535,8 @@ class HorizonXMLAPI extends Horizon
 
     private function _cancelRequest($session, $data)
     {
+        $responseItems = array();
+        
         foreach ($data as $values) {
             $bibData[] = $values['bib_id'];
             $items[] = $values['item_id'];
@@ -571,15 +573,15 @@ class HorizonXMLAPI extends Horizon
                 $itemID = $values['item_id'];
                 // If the bib id is matched, the cancel must have failed
                 if (in_array($values['bib_id'], $keys)) {
-                    $result[$itemID] = array(
+                    $responseItems[$itemID] = array(
                         'success' => false, 'status' => "hold_cancel_fail"
                     );
                 } else {
-                    $result[$itemID] = array(
+                    $responseItems[$itemID] = array(
                         'success' => true, 'status' => "hold_cancel_success",
 
                     );
-                    $count = $result['count'] = $count+1;
+                    $count = $count+1;
                 }
             }
         } else {
@@ -588,14 +590,14 @@ class HorizonXMLAPI extends Horizon
                 $message = (string)$response->error->message;
             }
             foreach ($items as $itemID) {
-                $result[$itemID] = array(
+                $responseItems[$itemID] = array(
                     'success' => false,
                     'status' => "hold_cancel_fail",
                     'sysMessage' => $message
                 );
             }
         }
-
+        $result = array('count' => $count, 'items' => $responseItems);
         return $result;
     }
 
