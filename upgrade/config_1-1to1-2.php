@@ -3,8 +3,8 @@
  * Script to upgrade VuFind configuration files.
  *
  * command line arguments:
- *   * path to 1.0.x installation
- *   * path to 1.1 config.ini file (optional)
+ *   * path to previous version installation
+ *   * path to new version config.ini file (optional)
  *
  * PHP version 5
  *
@@ -34,7 +34,10 @@
 // Make sure required parameter is present:
 $old_config_path = isset($argv[1]) ? $argv[1] : '';
 if (empty($old_config_path)) {
-    die("Usage: {$argv[0]} [1.0.x base path] [1.1 config.ini file (optional)]\n");
+    die(
+        "Usage: {$argv[0]} [previous version base path] " .
+        "[new version config.ini file (optional)]\n"
+    );
 }
 
 // Build input file paths:
@@ -45,7 +48,7 @@ foreach ($files as $current) {
     $old_inputs[$current] = str_replace(
         array('//',"\\"), '/', $old_config_path . '/web/conf/' . $current . '.ini'
     );
-    
+
     // Special case for config.ini, since it can be overridden via command line:
     if ($current == 'config') {
         $new_inputs[$current] = empty($argv[2]) ? 'web/conf/config.ini' : $argv[2];
@@ -75,7 +78,7 @@ foreach ($new_inputs as $file) {
 #### configuration file upgrade ####
 
 This script will upgrade some of your configuration files in web/conf/. It
-reads values from your 1.0.x files and puts them into the new 1.1 versions.
+reads values from your previous version's files and puts them into the new version's.
 This is an automated process, so the results may require some manual cleanup.
 
 **** PROCESSING FILES... ****
@@ -104,8 +107,8 @@ Known issues to watch for:
 
 - Disabled settings may get turned back on.  You will have to comment
   them back out again.
-- Comments from your 1.0.x files will be lost and replaced with the new
-  default comments from the 1.1 files -- if you have important
+- Comments from your previous files will be lost and replaced with the new
+  default comments from the latest files -- if you have important
   information embedded there, you will need to merge it by hand.
 - Boolean "true" will map to "1" and "false" will map to "".  This
   is functionally equivalent, but you may want to adjust the file
@@ -123,11 +126,20 @@ over the equivalent *.ini files (i.e. replace config.ini with config.ini.new).
 function checkDependencies()
 {
     $problems = 0;
-    
+
     // Is the mbstring library missing?
     if (!function_exists('mb_substr')) {
         echo "Your PHP installation appears to be missing the mbstring plug-in.\n";
         echo "For better language support, it is recommended that you add this.\n";
+        echo "For details on how to do this, see http://vufind.org/wiki/installation";
+        echo "\nand look at the PHP installation instructions for your platform.\n\n";
+        $problems++;
+    }
+
+    // Is the GD library missing?
+    if (!is_callable('imagecreatefromstring')) {
+        echo "Your PHP installation appears to be missing the GD plug-in.\n";
+        echo "For better graphics support, it is recommended that you add this.\n";
         echo "For details on how to do this, see http://vufind.org/wiki/installation";
         echo "\nand look at the PHP installation instructions for your platform.\n\n";
         $problems++;
@@ -181,6 +193,10 @@ function fixConfigIni($old_config_input, $new_config_input)
         }
     }
 
+    // Brazilian Portuguese language file is now disabled by default (since
+    // it is very incomplete, and regular Portuguese file is now available):
+    unset($new_config['Languages']['pt-br']);
+
     // save the file
     if (!writeIniFile($new_config, $new_comments, $new_config_file)) {
         die("Error: Problem writing to {$new_config_file}.");
@@ -201,10 +217,14 @@ function fixConfigIni($old_config_input, $new_config_input)
  */
 function fixFacetsIni($old_facets_input, $new_facets_input)
 {
+    // No changes this release -- just copy the old file into place!
+    $new_config_file = 'web/conf/facets.ini.new';
+    copyUnchangedConfig($old_facets_input, $new_config_file);
+
+    /* retained more complex logic (not needed in this release) for future reference:
     $old_config = parse_ini_file($old_facets_input, true);
     $new_config = parse_ini_file($new_facets_input, true);
     $new_comments = readIniComments($new_facets_input);
-    $new_config_file = 'web/conf/facets.ini.new';
 
     // override new version's defaults with matching settings from old version:
     foreach ($old_config as $section => $subsection) {
@@ -213,20 +233,12 @@ function fixFacetsIni($old_facets_input, $new_facets_input)
         }
     }
 
-    // we need to do some special handling for facet groups -- we want to keep
-    // them almost exactly as-is, except that we need to rename era facets and
-    // add the new publication date option.
+    // we want to retain the old installation's various facet groups
+    // exactly as-is
     $facetGroups = array('Results', 'ResultsTop', 'Advanced', 'Author');
     foreach ($facetGroups as $group) {
-        $new_config[$group] = array();
-        foreach ($old_config[$group] as $key => $value) {
-            if ($key == 'era') {
-                $key = 'era_facet';
-            }
-            $new_config[$group][$key] = $value;
-        }
+        $new_config[$group] = $old_config[$group];
     }
-    $new_config['Results']['publishDate'] = "adv_search_year";
 
     // save the file
     if (!writeIniFile($new_config, $new_comments, $new_config_file)) {
@@ -236,6 +248,7 @@ function fixFacetsIni($old_facets_input, $new_facets_input)
     // report success
     echo "\nInput:  {$old_facets_input}\n";
     echo "Output: {$new_config_file}\n";
+     */
 }
 
 /**
@@ -285,10 +298,14 @@ function fixSearchIni($old_search_input, $new_search_input)
  */
 function fixSummonIni($old_input, $new_input)
 {
+    // No changes this release -- just copy the old file into place!
+    $new_config_file = 'web/conf/Summon.ini.new';
+    copyUnchangedConfig($old_input, $new_config_file);
+
+    /* retained more complex logic (not needed in this release) for future reference:
     $old_config = parse_ini_file($old_input, true);
     $new_config = parse_ini_file($new_input, true);
     $new_comments = readIniComments($new_input);
-    $new_config_file = 'web/conf/Summon.ini.new';
 
     // override new version's defaults with matching settings from old version:
     foreach ($old_config as $section => $subsection) {
@@ -312,6 +329,7 @@ function fixSummonIni($old_input, $new_input)
     // report success
     echo "\nInput:  {$old_input}\n";
     echo "Output: {$new_config_file}\n";
+     */
 }
 
 /**
@@ -326,13 +344,7 @@ function fixSMSIni($old_input, $new_input)
 {
     // No changes this release -- just copy the old file into place!
     $new_config_file = 'web/conf/sms.ini.new';
-    if (!copy($old_input, $new_config_file)) {
-        die("Error: Could not copy {$old_input} to {$new_config_file}.");
-    }
-
-    // report success
-    echo "\nInput:  {$old_input}\n";
-    echo "Output: {$new_config_file}\n";
+    copyUnchangedConfig($old_input, $new_config_file);
 }
 
 /**
@@ -347,6 +359,20 @@ function fixWorldCatIni($old_input, $new_input)
 {
     // No changes this release -- just copy the old file into place!
     $new_config_file = 'web/conf/WorldCat.ini.new';
+    copyUnchangedConfig($old_input, $new_config_file);
+}
+
+/**
+ * Support function to handle an unmodified file.
+ *
+ * @param string $old_input       The old input file
+ * @param string $new_config_file The new target file to write
+ *
+ * @return void
+ */
+function copyUnchangedConfig($old_input, $new_config_file)
+{
+    // attempt to copy the file
     if (!copy($old_input, $new_config_file)) {
         die("Error: Could not copy {$old_input} to {$new_config_file}.");
     }
@@ -392,7 +418,7 @@ function writeIniFileFormatLine($key, $value, $tab = 17)
     for ($i = strlen($key); $i < $tab; $i++) {
         $tabStr .= ' ';
     }
-    
+
     return $key . $tabStr . "= ". writeIniFileFormatValue($value);
 }
 
@@ -426,7 +452,7 @@ function writeIniFile($assoc_arr, $comments, $path)
             }
             if (is_array($elem2)) {
                 for ($i = 0; $i < count($elem2); $i++) {
-                    $content .= 
+                    $content .=
                         writeIniFileFormatLine($key2 . "[]", $elem2[$i]) . "\n";
                 }
             } else {
@@ -438,9 +464,9 @@ function writeIniFile($assoc_arr, $comments, $path)
             $content .= "\n";
         }
     }
-    
+
     $content .= $comments['after'];
-    
+
     if (!$handle = fopen($path, 'w')) {
         return false;
     }
@@ -479,20 +505,20 @@ function writeIniFile($assoc_arr, $comments, $path)
 function readIniComments($filename)
 {
     $lines = file($filename);
-    
+
     // Initialize our return value:
     $comments = array('sections' => array(), 'after' => '');
-    
+
     // Initialize variables for tracking status during parsing:
     $currentSection = '';
     $currentSetting = '';
     $currentComments = '';
-    
+
     foreach ($lines as $line) {
         // To avoid redundant processing, create a trimmed version of the current
         // line:
         $trimmed = trim($line);
-        
+
         // Is the current line a comment?  If so, add to the currentComments string.
         // Note that we treat blank lines as comments.
         if (substr($trimmed, 0, 1) == ';' || empty($trimmed)) {
@@ -511,8 +537,8 @@ function readIniComments($filename)
                     $inline = '';
                 }
                 $comments['sections'][$currentSection] = array(
-                    'before' => $currentComments, 
-                    'inline' => $inline, 
+                    'before' => $currentComments,
+                    'inline' => $inline,
                     'settings' => array());
                 $currentComments = '';
             }
@@ -537,7 +563,7 @@ function readIniComments($filename)
                     $comments['sections'][$currentSection]['settings'][$currentSetting]
                         = array('before' => $currentComments, 'inline' => $inline);
                 } else {
-                    $comments['sections'][$currentSection]['settings'][$currentSetting]['before'] .= 
+                    $comments['sections'][$currentSection]['settings'][$currentSetting]['before'] .=
                         $currentComments;
                     $comments['sections'][$currentSection]['settings'][$currentSetting]['inline'] .=
                         "\n" . $inline;
@@ -546,10 +572,10 @@ function readIniComments($filename)
             }
         }
     }
-    
+
     // Store any leftover comments following the last setting:
     $comments['after'] = $currentComments;
-    
+
     return $comments;
 }
 

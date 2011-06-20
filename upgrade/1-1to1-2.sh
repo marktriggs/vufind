@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # Make sure the user is really ready to run this process
-echo "VuFind 1.0.x to 1.1 Upgrade Script"
+echo "VuFind 1.1 to 1.2 Upgrade Script"
 echo ""
 echo "Before you run this script, make sure you have done these things:"
 echo ""
 echo "1) Take VuFind offline to prevent new data being created during"
 echo "   the upgrade process."
-echo "2) Move your 1.0.x directory to a new location, and unpack 1.1 into"
-echo "   the old 1.0.x location.  DO NOT UNPACK 1.1 ON TOP OF 1.0.x.  It is"
-echo "   very important that you maintain separate directories.  Your 1.0.x"
+echo "2) Move your 1.1 directory to a new location, and unpack 1.2 into"
+echo "   the old 1.1 location.  DO NOT UNPACK 1.2 ON TOP OF 1.1.  It is"
+echo "   very important that you maintain separate directories.  Your 1.1"
 echo "   directory will not be modified by this process, so you can revert"
 echo "   fairly easily if you need to by simply moving directories around."
 echo "3) Back up your MySQL database.  This script makes only minor, harmless"
@@ -37,7 +37,7 @@ cd $upgrade_script_dir/..
 VUFIND_PATH=`pwd`
 
 # first adjust some paths
-read -p "VuFind 1.1 is installed in $VUFIND_PATH, correct? [Y/n] " YN
+read -p "VuFind 1.2 is installed in $VUFIND_PATH, correct? [Y/n] " YN
 if [ "$YN" != "Y" -a "$YN" != "y" -a "$YN" != "" ];then
    read -p "Please enter the correct path: " VUFIND_PATH
    cd $VUFIND_PATH
@@ -54,7 +54,7 @@ echo "Using $VUFIND_PATH as installation path"
 
 echo ""
 
-echo "Where is your old VuFind 1.0.x installed?"
+echo "Where is your old VuFind 1.1 installed?"
 read -p "Please enter the path to the installation directory: " OLD_VUFIND_PATH
 while [ ! -e $OLD_VUFIND_PATH/vufind.sh ]; do
   echo "There is no VuFind installation in $OLD_VUFIND_PATH"
@@ -81,7 +81,7 @@ if [ -z $MYSQLADMUSER ]; then
     MYSQLADMUSER=root
 fi
 
-php upgrade/db_1-0to1-1.php $MYSQLADMUSER $MYSQLADMPASS $OLD_VUFIND_PATH
+php upgrade/db_1-1to1-2.php $MYSQLADMUSER $MYSQLADMPASS $OLD_VUFIND_PATH
 
 read -p "Hit ENTER to proceed";
 
@@ -95,7 +95,7 @@ mv httpd-vufind.conf.new httpd-vufind.conf
 
 # update paths in config.ini and then merge in settings from old version:
 sed -e "s!${PATTERN}!${VUFIND_PATH}!" web/conf/config.ini > web/conf/config.ini.tmp
-php upgrade/config_1-0to1-1.php $OLD_VUFIND_PATH web/conf/config.ini.tmp
+php upgrade/config_1-1to1-2.php $OLD_VUFIND_PATH web/conf/config.ini.tmp
 
 # delete temporary intermediate ini file:
 rm web/conf/config.ini.tmp

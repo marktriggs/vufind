@@ -5,7 +5,7 @@
  * command line arguments:
  *   * MySQL admin username
  *   * MySQL admin password
- *   * path to 1.0.x installation
+ *   * path to previous version installation
  *
  * PHP version 5
  *
@@ -52,9 +52,9 @@ $configArray = parse_ini_file($iniFile, true);
 
 #### Database upgrade ####
 
-This script will upgrade your VuFind database from 1.0.x to 1.1.
-It is recommended that you make a backup before proceeding with this script, just
-to be on the safe side!
+This script will upgrade your VuFind database from the previous version to the new
+release.  It is recommended that you make a backup before proceeding with this
+script, just to be on the safe side!
 
 <?php
 
@@ -113,7 +113,9 @@ addNewTables();
 // adjust existing tables:
 updateExistingTables();
 
-// clean up anonymous tags:
+// clean up anonymous tags (this should not be necessary after release 1.1, but
+// it doesn't hurt to retain the check just in case the data gets corrupted or
+// this cleanup step was skipped during a previous upgrade process):
 cleanUpAnonymousTags();
 
 /**
@@ -192,6 +194,8 @@ function cleanUpAnonymousTags()
  */
 function addNewTables()
 {
+    /* No new tables in this release, but retaining code from previous
+       upgrade script for future reference...
     // Get a list of all existing tables (so we can avoid duplicates):
     $sql = executeSQL("SHOW TABLES;");
     $tmp = $sql->fetchAll();
@@ -229,6 +233,7 @@ function addNewTables()
     }
 
     echo "Done creating tables.\n\n";
+     */
 }
 
 /**
@@ -238,9 +243,25 @@ function addNewTables()
  */
 function updateExistingTables()
 {
-    echo "Making more room for IDs in the database... ";
-    executeSQL("ALTER TABLE resource MODIFY record_id VARCHAR(60);");
-    echo "done!\n\n";
+    // Get list of fields in user table:
+    $check = executeSQL("DESCRIBE user");
+    $tmp = $check->fetchAll();
+    $fields = array();
+    foreach ($tmp as $current) {
+        $fields[] = $current['Field'];
+    }
+
+    // Add home_library field if not already present:
+    if (!in_array('home_library', $fields)) {
+        echo "Adding home library column to user table... ";
+        executeSQL(
+            "ALTER TABLE user ADD COLUMN home_library varchar(100) " .
+            "NOT NULL DEFAULT '';"
+        );
+        echo "done!\n\n";
+    } else {
+        echo "No table updates necessary.\n\n";
+    }
 }
 
 /**

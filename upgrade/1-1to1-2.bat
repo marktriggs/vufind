@@ -9,15 +9,15 @@ goto end
 :extensionsokay
 
 rem Make sure the user is really ready to run this process
-echo VuFind 1.0.x to 1.1 Upgrade Script
+echo VuFind 1.1 to 1.2 Upgrade Script
 echo.
 echo Before you run this script, make sure you have done these things:
 echo.
 echo 1) Take VuFind offline to prevent new data being created during
 echo    the upgrade process.
-echo 2) Move your 1.0.x directory to a new location, and unpack 1.1 into
-echo    the old 1.0.x location.  DO NOT UNPACK 1.1 ON TOP OF 1.0.x.  It is
-echo    very important that you maintain separate directories.  Your 1.0.x
+echo 2) Move your 1.1 directory to a new location, and unpack 1.2 into
+echo    the old 1.1 location.  DO NOT UNPACK 1.2 ON TOP OF 1.1.  It is
+echo    very important that you maintain separate directories.  Your 1.1
 echo    directory will not be modified by this process, so you can revert
 echo    fairly easily if you need to by simply moving directories around.
 echo 3) Back up your MySQL database.  This script makes only minor, harmless
@@ -41,7 +41,7 @@ cd /d %0\..\..
 set VUFIND_PATH=%CD%
 
 rem first adjust some paths
-set /p YN=VuFind 1.1 is installed in %VUFIND_PATH%, correct? [Y/n] 
+set /p YN=VuFind 1.2 is installed in %VUFIND_PATH%, correct? [Y/n] 
 if "%YN%"=="Y" goto havenewpath
 if "%YN%"=="y" goto havenewpath
 if "%YN%"=="" goto havenewpath
@@ -59,7 +59,7 @@ cd /d %VUFIND_PATH%
 
 echo Using %VUFIND_PATH% as installation path
 echo.
-echo Where is your old VuFind 1.0.x installed?
+echo Where is your old VuFind 1.1 installed?
 :getoldpath
 set /p OLD_VUFIND_PATH=Please enter the path to the installation directory: 
 if exist %OLD_VUFIND_PATH%\vufind.sh goto oldpathchecked
@@ -85,7 +85,7 @@ if not "%MYSQLADMUSER%"=="" goto admuserset
 set MYSQLADMUSER=root
 :admuserset
 
-php upgrade\db_1-0to1-1.php %MYSQLADMUSER% %MYSQLADMPASS% %OLD_VUFIND_PATH%
+php upgrade\db_1-1to1-2.php %MYSQLADMUSER% %MYSQLADMPASS% %OLD_VUFIND_PATH%
 
 set /p JUNK=Hit ENTER to proceed
 
@@ -97,7 +97,7 @@ echo @set VUFIND_HOME=%VUFIND_PATH%>%VUFIND_PATH%\vufind.bat
 echo @call run_vufind.bat %%1 %%2 %%3 %%4 %%5 %%6 %%7 %%8 %%9>>%VUFIND_PATH%\vufind.bat
 
 rem update config.ini with settings from the old version:
-php upgrade\config_1-0to1-1.php %OLD_VUFIND_PATH%
+php upgrade\config_1-1to1-2.php %OLD_VUFIND_PATH%
 
 set /p JUNK=Hit ENTER to proceed
 
