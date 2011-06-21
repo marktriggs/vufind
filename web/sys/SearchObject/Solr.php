@@ -130,6 +130,11 @@ class SearchObject_Solr extends SearchObject_Base
         ) {
             $this->defaultSortByType = $searchSettings['DefaultSortingByType'];
         }
+        if (isset($searchSettings['HiddenFilters'])) {
+            foreach ($searchSettings['HiddenFilters'] as $field => $subfields) {
+                $this->addHiddenFilter($field.':'.'"'.$subfields.'"');
+            }
+        }
         if (isset($searchSettings['Basic_Searches'])) {
             $this->basicTypes = $searchSettings['Basic_Searches'];
         }
