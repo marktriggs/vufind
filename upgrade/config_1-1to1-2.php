@@ -129,19 +129,21 @@ function checkDependencies()
 
     // Is the mbstring library missing?
     if (!function_exists('mb_substr')) {
-        echo "Your PHP installation appears to be missing the mbstring plug-in.\n";
-        echo "For better language support, it is recommended that you add this.\n";
-        echo "For details on how to do this, see http://vufind.org/wiki/installation";
-        echo "\nand look at the PHP installation instructions for your platform.\n\n";
+        echo "Your PHP installation appears to be missing the mbstring plug-in.\n" .
+            "For better language support, it is recommended that you add this.\n" .
+            "For details on how to do this, see " .
+            "http://vufind.org/wiki/installation\n" .
+            "and look at the PHP installation instructions for your platform.\n\n";
         $problems++;
     }
 
     // Is the GD library missing?
     if (!is_callable('imagecreatefromstring')) {
-        echo "Your PHP installation appears to be missing the GD plug-in.\n";
-        echo "For better graphics support, it is recommended that you add this.\n";
-        echo "For details on how to do this, see http://vufind.org/wiki/installation";
-        echo "\nand look at the PHP installation instructions for your platform.\n\n";
+        echo "Your PHP installation appears to be missing the GD plug-in.\n" .
+            "For better graphics support, it is recommended that you add this.\n" .
+            "For details on how to do this, see " .
+            "http://vufind.org/wiki/installation\n" .
+            "and look at the PHP installation instructions for your platform.\n\n";
         $problems++;
     }
 
@@ -507,12 +509,12 @@ function readIniComments($filename)
     $lines = file($filename);
 
     // Initialize our return value:
-    $comments = array('sections' => array(), 'after' => '');
+    $retVal = array('sections' => array(), 'after' => '');
 
     // Initialize variables for tracking status during parsing:
-    $currentSection = '';
-    $currentSetting = '';
-    $currentComments = '';
+    $section = '';
+    $setting = '';
+    $comments = '';
 
     foreach ($lines as $line) {
         // To avoid redundant processing, create a trimmed version of the current
@@ -522,31 +524,31 @@ function readIniComments($filename)
         // Is the current line a comment?  If so, add to the currentComments string.
         // Note that we treat blank lines as comments.
         if (substr($trimmed, 0, 1) == ';' || empty($trimmed)) {
-            $currentComments .= $line;
+            $comments .= $line;
         } else if (substr($trimmed, 0, 1) == '['
             && ($closeBracket = strpos($trimmed, ']')) > 1
         ) {
             // Is the current line the start of a section?  If so, create the
             // appropriate section of the return value:
-            $currentSection = substr($trimmed, 1, $closeBracket - 1);
-            if (!empty($currentSection)) {
+            $section = substr($trimmed, 1, $closeBracket - 1);
+            if (!empty($section)) {
                 // Grab comments at the end of the line, if any:
                 if (($semicolon = strpos($trimmed, ';')) !== false) {
                     $inline = trim(substr($trimmed, $semicolon));
                 } else {
                     $inline = '';
                 }
-                $comments['sections'][$currentSection] = array(
-                    'before' => $currentComments,
+                $retVal['sections'][$section] = array(
+                    'before' => $comments,
                     'inline' => $inline,
                     'settings' => array());
-                $currentComments = '';
+                $comments = '';
             }
         } else if (($equals = strpos($trimmed, '=')) !== false) {
             // Is the current line a setting?  If so, add to the return value:
-            $currentSetting = trim(substr($trimmed, 0, $equals));
-            $currentSetting = trim(str_replace('[]', '', $currentSetting));
-            if (!empty($currentSection) && !empty($currentSetting)) {
+            $setting = trim(substr($trimmed, 0, $equals));
+            $setting = trim(str_replace('[]', '', $setting));
+            if (!empty($section) && !empty($setting)) {
                 // Grab comments at the end of the line, if any:
                 if (($semicolon = strpos($trimmed, ';')) !== false) {
                     $inline = trim(substr($trimmed, $semicolon));
@@ -559,24 +561,24 @@ function readIniComments($filename)
                 // and inline comments together for arrays.  Since we don't actually
                 // use arrays in the config.ini file, this isn't a big concern, but
                 // we should improve it if we ever need to.
-                if (!isset($comments['sections'][$currentSection]['settings'][$currentSetting])) {
-                    $comments['sections'][$currentSection]['settings'][$currentSetting]
-                        = array('before' => $currentComments, 'inline' => $inline);
+                if (!isset($retVal['sections'][$section]['settings'][$setting])) {
+                    $retVal['sections'][$section]['settings'][$setting]
+                        = array('before' => $comments, 'inline' => $inline);
                 } else {
-                    $comments['sections'][$currentSection]['settings'][$currentSetting]['before'] .=
-                        $currentComments;
-                    $comments['sections'][$currentSection]['settings'][$currentSetting]['inline'] .=
+                    $retVal['sections'][$section]['settings'][$setting]['before'] .=
+                        $comments;
+                    $retVal['sections'][$section]['settings'][$setting]['inline'] .=
                         "\n" . $inline;
                 }
-                $currentComments = '';
+                $comments = '';
             }
         }
     }
 
     // Store any leftover comments following the last setting:
-    $comments['after'] = $currentComments;
+    $retVal['after'] = $comments;
 
-    return $comments;
+    return $retVal;
 }
 
 ?>
