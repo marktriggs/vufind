@@ -34,9 +34,11 @@ function getLightbox(module, action, id, lookfor, message, followupModule, follo
                     // check if the dialog was successful, if so, load the followup action
                     if (__dialogHandle.processFollowup && __dialogHandle.followupModule
                             && __dialogHandle.followupAction && __dialogHandle.recordId) {
+                        $(this).remove();
                         getLightbox(__dialogHandle.followupModule, __dialogHandle.followupAction,
                                 __dialogHandle.recordId, null, message);
                     }
+                    $(this).remove();
                 }
             });
 
