@@ -141,3 +141,10 @@ function initAutocomplete() {
     });
 }
 
+function htmlEncode(value){
+    if (value) {
+        return jQuery('<div />').text(value).html();
+    } else {
+        return '';
+    }
+}

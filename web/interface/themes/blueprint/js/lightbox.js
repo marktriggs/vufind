@@ -310,7 +310,7 @@ function refreshTagList(id) {
             if (response.status == 'OK') {
                 $.each(response.data, function(i, tag) {
                     var href = path + '/Search/Results?' + $.param({tag:tag.tag});
-                    var html = (i>0 ? ', ' : ' ') + '<a href="' + href + '">' + tag.tag +'</a> (' + tag.cnt + ')';
+                    var html = (i>0 ? ', ' : ' ') + '<a href="' + htmlEncode(href) + '">' + htmlEncode(tag.tag) +'</a> (' + htmlEncode(tag.cnt) + ')';
                     $('#tagList').append(html);
                 });
             } else if (response.data && response.data.length > 0) {
