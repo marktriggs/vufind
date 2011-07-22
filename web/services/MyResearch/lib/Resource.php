@@ -102,21 +102,24 @@ class Resource extends DB_DataObject
      */
     public function addTag($tag, $user)
     {
-        include_once 'services/MyResearch/lib/Tags.php';
-        include_once 'services/MyResearch/lib/Resource_tags.php';
+        $tag = trim($tag);
+        if (!empty($tag)) {
+            include_once 'services/MyResearch/lib/Tags.php';
+            include_once 'services/MyResearch/lib/Resource_tags.php';
 
-        $tags = new Tags();
-        $tags->tag = $tag;
-        if (!$tags->find(true)) {
-            $tags->insert();
-        }
+            $tags = new Tags();
+            $tags->tag = $tag;
+            if (!$tags->find(true)) {
+                $tags->insert();
+            }
 
-        $rTag = new Resource_tags();
-        $rTag->resource_id = $this->id;
-        $rTag->tag_id = $tags->id;
-        if (!$rTag->find()) {
-            $rTag->user_id = $user->id;
-            $rTag->insert();
+            $rTag = new Resource_tags();
+            $rTag->resource_id = $this->id;
+            $rTag->tag_id = $tags->id;
+            if (!$rTag->find()) {
+                $rTag->user_id = $user->id;
+                $rTag->insert();
+            }
         }
 
         return true;
