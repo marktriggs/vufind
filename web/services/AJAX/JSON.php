@@ -843,7 +843,7 @@ class JSON extends Action
      * Generate the "salt" used in the salt'ed login request.
      *
      * @return string
-     * @access public
+     * @access private
      */
     private function _generateSalt()
     {
