@@ -33,7 +33,8 @@ require_once 'sys/Proxy_Request.php';
  *
  * IMPORTANT: To use this driver you need to download the SirsiDynix API driver.pl
  * from http://code.google.com/p/vufind-unicorn/ and install it on your Sirsi
- * Unicorn/Symphony server.
+ * Unicorn/Symphony server. Please note: currently you will need to download 
+ * the driver.pl in the yorku branch on google code to use this driver.
  *
  * @category VuFind
  * @package  ILS_Drivers
