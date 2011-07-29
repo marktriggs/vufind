@@ -465,9 +465,11 @@ class Unicorn implements DriverInterface
                 = explode('|', $item);
 
             // the amount and balance are in cents, so we need to turn them into
-            // dollars
-            $amount = (floatval($amount) / 100.00);
-            $balance = (floatval($balance) / 100.00);
+            // dollars if configured
+            if (!$this->ilsConfigArray['Catalog']['leaveFinesAmountsInCents']) {
+                $amount = (floatval($amount) / 100.00);
+                $balance = (floatval($balance) / 100.00);
+            }
 
             $date_billed = $this->_parseDateTime($date_billed);
             $date_charged = $this->_parseDateTime($date_charged);
