@@ -248,35 +248,47 @@ class ExternalReviews
      * If your library does not like a reviewer, remove it.  If there are more
      * syndetics reviewers add another entry.
      *
-     * @param string $id Client access key
+     * @param string $id     Client access key
+     * @param bool   $s_plus Are we operating in Syndetics Plus mode?
      *
      * @return array     Returns array with review data, otherwise a PEAR_Error.
      * @access private
      * @author Joel Timothy Norman <joel.t.norman@wmich.edu>
      * @author Andrew Nagy <vufind-tech@lists.sourceforge.net>
      */
-    private function _syndetics($id)
+    private function _syndetics($id, $s_plus=false)
     {
         global $configArray;
 
         //list of syndetic reviews
         $sourceList = array(
             'CHREVIEW' => array('title' => 'Choice Review',
-                                'file' => 'CHREVIEW.XML'),
+                                'file' => 'CHREVIEW.XML',
+                                'div' => '<div id="syn_chreview"></div>'),
+            'NYREVIEW' => array('title' => 'New York Times Review',
+                                'file' => 'NYREVIEW.XML',
+                                'div' => '<div id="syn_nyreview"></div>'),
             'BLREVIEW' => array('title' => 'Booklist Review',
-                                'file' => 'BLREVIEW.XML'),
+                                'file' => 'BLREVIEW.XML',
+                                'div' => '<div id="syn_blreview"></div>'),
             'PWREVIEW' => array('title' => "Publisher's Weekly Review",
-                                'file' => 'PWREVIEW.XML'),
+                                'file' => 'PWREVIEW.XML',
+                                'div' => '<div id="syn_pwreview"></div>'),
             'LJREVIEW' => array('title' => 'Library Journal Review',
-                                'file' => 'LJREVIEW.XML'),
+                                'file' => 'LJREVIEW.XML',
+                                'div' => '<div id="syn_ljreview"></div>'),
             'SLJREVIEW' => array('title' => 'School Library Journal Review',
-                                'file' => 'SLJREVIEW.XML'),
+                                'file' => 'SLJREVIEW.XML',
+                                'div' => '<div id="syn_sljreview"></div>'),
             'HBREVIEW' => array('title' => 'Horn Book Review',
-                                'file' => 'HBREVIEW.XML'),
+                                'file' => 'HBREVIEW.XML',
+                                'div' => '<div id="syn_hbreview"></div>'),
             'KIRKREVIEW' => array('title' => 'Kirkus Book Review',
-                                'file' => 'KIRKREVIEW.XML'),
+                                'file' => 'KIRKREVIEW.XML',
+                                'div' => '<div id="syn_kireview"></div>'),
             'CRITICASREVIEW' => array('title' => 'Criticas Review',
-                                'file' => 'CRITICASREVIEW.XML'),
+                                'file' => 'CRITICASREVIEW.XML',
+                                'div' => '<div id="syn_criticasreview"></div>'),
             // These last two entries are probably typos -- retained for legacy
             // compatibility just in case they're actually used for something!
             'KIREVIEW' => array('title' => 'Kirkus Book Review',
@@ -323,33 +335,41 @@ class ExternalReviews
                     return new PEAR_Error('Invalid XML');
                 }
 
-                // Get the marc field for reviews (520)
-                $nodes = $xmldoc2->GetElementsbyTagName("Fld520");
-                if (!$nodes->length) {
-                    // Skip reviews with missing text
-                    continue;
-                }
-                // Decode the content and strip unwanted <a> tags:
-                $review[$i]['Content'] = preg_replace(
-                    '/<a>|<a [^>]*>|<\/a>/', '',
-                    html_entity_decode($xmldoc2->saveXML($nodes->item(0)))
-                );
-
-                // Get the marc field for copyright (997)
-                $nodes = $xmldoc2->GetElementsbyTagName("Fld997");
-                if ($nodes->length) {
-                    $review[$i]['Copyright']
-                        = html_entity_decode($xmldoc2->saveXML($nodes->item(0)));
+                // If we have syndetics plus, we don't actually want the content
+                // we'll just stick in the relevant div
+                if ($s_plus) {
+                    $review[$i]['Content'] = $sourceInfo['div'];
                 } else {
-                    $review[$i]['Copyright'] = null;
-                }
 
-                if ($review[$i]['Copyright']) {  //stop duplicate copyrights
-                    $location
-                        = strripos($review[0]['Content'], $review[0]['Copyright']);
-                    if ($location > 0) {
-                        $review[$i]['Content']
-                            = substr($review[0]['Content'], 0, $location);
+                    // Get the marc field for reviews (520)
+                    $nodes = $xmldoc2->GetElementsbyTagName("Fld520");
+                    if (!$nodes->length) {
+                        // Skip reviews with missing text
+                        continue;
+                    }
+                    // Decode the content and strip unwanted <a> tags:
+                    $review[$i]['Content'] = preg_replace(
+                        '/<a>|<a [^>]*>|<\/a>/', '',
+                        html_entity_decode($xmldoc2->saveXML($nodes->item(0)))
+                    );
+
+                    // Get the marc field for copyright (997)
+                    $nodes = $xmldoc2->GetElementsbyTagName("Fld997");
+                    if ($nodes->length) {
+                        $review[$i]['Copyright']
+                            = html_entity_decode($xmldoc2->saveXML($nodes->item(0)));
+                    } else {
+                        $review[$i]['Copyright'] = null;
+                    }
+
+                    if ($review[$i]['Copyright']) {  //stop duplicate copyrights
+                        $location = strripos(
+                            $review[0]['Content'], $review[0]['Copyright']
+                        );
+                        if ($location > 0) {
+                            $review[$i]['Content']
+                                = substr($review[0]['Content'], 0, $location);
+                        }
                     }
                 }
 
@@ -364,6 +384,18 @@ class ExternalReviews
         }
 
         return $review;
+    }
+
+    /**
+     * Wrapper around _syndetics to provide Syndetics Plus functionality.
+     *
+     * @param string $id Client access key
+     *
+     * @return array     Returns array with auth notes data, otherwise a PEAR_Error.
+     */
+    private function _syndeticsplus($id) 
+    {
+        return $this->_syndetics($id, true);
     }
 
     /**
