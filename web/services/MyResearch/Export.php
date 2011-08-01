@@ -204,29 +204,47 @@ class Export extends MyResearch
     }
 
     /**
-     * Support method -- get details about records based on an array of IDs.
+     * Support method -- assign details about records based on an array of IDs.
      *
      * @param array $ids IDs to look up.
      *
-     * @return array
+     * @return void
      * @access private
      */
-    private function _getExportList($ids)
+    private function _assignExportList($ids)
     {
+        global $interface;
+
         $exportList = array();
+
+        // Extract the current set of export options from the interface (they were
+        // assigned by the parent class based on config settings).  We'll filter
+        // them down based on what the selected records actually support.
+        $formats = $interface->get_template_vars('exportOptions');
 
         foreach ($ids as $id) {
             $record = $this->db->getRecord($id);
+            $driver = RecordDriverFactory::initRecordDriver($record);
             $exportList[] = array(
                 'id'      => $id,
                 'isbn'    => $record['isbn'],
                 'author'  => $record['author'],
-                'title'   => $record['title'],
+                'title'   => $driver->getBreadcrumb(),
                 'format'  => $record['format']
             );
+
+            // Filter out unsupported export formats:
+            $newFormats = array();
+            foreach ($formats as $current) {
+                if (in_array($current, $driver->getExportFormats())) {
+                    $newFormats[] = $current;
+                }
+            }
+            $formats = $newFormats;
         }
 
-        return $exportList;
+        $interface->assign('exportOptions', $formats);
+        $interface->assign('exportList', $exportList);
     }
 
     /**
@@ -243,7 +261,7 @@ class Export extends MyResearch
         if (!empty($_POST['ids'])) {
             // Assign Item Info
             $interface->assign('exportIDS', $_POST['ids']);
-            $interface->assign('exportList', $this->_getExportList($_POST['ids']));
+            $this->_assignExportList($_POST['ids']);
             $interface->assign('title', $_GET['message']);
             return $interface->fetch('MyResearch/export.tpl');
         } else {
@@ -279,7 +297,7 @@ class Export extends MyResearch
             $interface->setPageTitle(translate('Export Favorites'));
             $interface->assign('subTemplate', 'export.tpl');
             $interface->assign('exportIDS', $ids);
-            $interface->assign('exportList', $this->_getExportList($ids));
+            $this->_assignExportList($ids);
             // If we're on a particular list, save the ID so we can redirect to
             // the appropriate page after exporting.
             if (isset($_REQUEST['listID']) && !empty($_REQUEST['listID'])) {
