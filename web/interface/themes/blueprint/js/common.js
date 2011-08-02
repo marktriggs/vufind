@@ -148,3 +148,8 @@ function htmlEncode(value){
         return '';
     }
 }
+
+// mostly lifted from http://docs.jquery.com/Frequently_Asked_Questions#How_do_I_select_an_element_by_an_ID_that_has_characters_used_in_CSS_notation.3F
+function jqEscape(myid) {
+    return myid.replace(/(:|\.)/g,'\\$1');
+}
