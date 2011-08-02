@@ -515,13 +515,20 @@ class JSON extends Action
      */
     public function exportFavorites()
     {
+        include_once 'services/MyResearch/Export.php';
+
         global $configArray;
         $_SESSION['exportIDS'] =  $_POST['ids'];
         $_SESSION['exportFormat'] = $_POST['format'];
 
-        $html = '<p><a class="save" onclick="hideLightbox();" href="'
-           . $configArray['Site']['url'] . '/MyResearch/Bulk?exportInit">'
-           . translate('Download') . '</a></p>';
+        $url = Export::getExportUrl();
+        $html = '<p><a class="save" onclick="hideLightbox();" href="';
+        if (strtolower($_POST['format']) == 'refworks') {
+            $html .= $url . '" target="_blank">' . translate('export_refworks') .
+                '</a></p>';
+        } else {
+            $html .= $url . '">' . translate('export_download') . '</a></p>';
+        }
         $this->output(
             array('result'=>translate('Done'), 'result_additional'=>$html),
             JSON::STATUS_OK

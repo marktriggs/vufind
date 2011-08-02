@@ -98,6 +98,35 @@ class Export extends MyResearch
     }
 
     /**
+     * Get the URL for exporting the current set of resources.
+     *
+     * @return string
+     * @access public
+     */
+    public static function getExportUrl()
+    {
+        global $configArray;
+
+        if (strtolower($_POST['format']) == 'refworks') {
+            // can't pass the ids through the session, so need to stringify
+            $id_str = '';
+            foreach ($_POST['ids'] as $id) {
+                $id_str .= '&ids[]='.urlencode($id);
+            }
+            // Build the URL to pass data to RefWorks:
+            $exportUrl = $configArray['Site']['url'] . '/MyResearch/Bulk' .
+                '?export=true&exportInit=true&exportToRefworks=true' . $id_str;
+            // Build up the RefWorks URL:
+            return $configArray['RefWorks']['url'] . '/express/expressimport.asp' .
+                '?vendor=' . urlencode($configArray['RefWorks']['vendor']) .
+                '&filter=RefWorks%20Tagged%20Format&url=' . urlencode($exportUrl);
+        }
+
+        // Default case:
+        return $configArray['Site']['url'] . '/MyResearch/Export?exportInit';
+    }
+
+    /**
      * Support method - process incoming parameters.
      *
      * @return void
@@ -111,10 +140,17 @@ class Export extends MyResearch
             $_SESSION['exportFormat'] = $_POST['format'];
 
             if ($_SESSION['exportIDS'] && $_SESSION['exportFormat']) {
-                header(
-                    "Location: " . $this->followupUrl .
-                    "?infoMsg=export_success&showExport=true"
-                );
+                // Special case -- for RefWorks, go directly there;
+                // for everything else, provide a save dialog.
+                if (strtolower($_POST['format']) == 'refworks') {
+                    header('Location: ' . self::getExportUrl());
+                } else {
+                    header(
+                        "Location: " . $this->followupUrl .
+                        "?infoMsg=export_success&showExport=" .
+                        urlencode(self::getExportUrl())
+                    );
+                }
                 exit();
             } else {
                 $this->errorMsg = 'bulk_fail';
@@ -140,7 +176,7 @@ class Export extends MyResearch
         // testing is needed).  For now, as a work-around, let's always use the
         // text/plain content type when we're dealing with IE and SSL -- the
         // file extension should still allow the browser to do the right thing.
-        if ($_SERVER['HTTPS'] == 'on'
+        if (array_key_exists('HTTPS', $_SERVER) && ($_SERVER['HTTPS'] == 'on')
             && strstr($_SERVER['HTTP_USER_AGENT'], 'MSIE')
         ) {
             $type = 'text/plain';
@@ -183,6 +219,9 @@ class Export extends MyResearch
                     break;
                 case 'marc':
                     $this->_exportHeaders('application/MARC', 'VuFindExport.mrc');
+                    break;
+                case 'refworks_data':
+                    // No extra work necessary.
                     break;
                 default:
                     $export = false;
@@ -294,7 +333,7 @@ class Export extends MyResearch
             // Assign Item Info
             $interface->assign('errorMsg', $this->errorMsg);
             $interface->assign('infoMsg', $this->infoMsg);
-            $interface->setPageTitle(translate('Export Favorites'));
+            $interface->setPageTitle('Export Favorites');
             $interface->assign('subTemplate', 'export.tpl');
             $interface->assign('exportIDS', $ids);
             $this->_assignExportList($ids);
