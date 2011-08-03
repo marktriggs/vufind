@@ -84,9 +84,12 @@ function lessFacets(name) {
     $("#narrowGroupHidden_"+name).addClass("offscreen");
 }
 
-function filterAll(element) {
+function filterAll(element, formId) {
     //  Look for filters (specifically checkbox filters)
-    $("#searchForm :input[type='checkbox'][name='filter[]']")
+    if (formId == null) {
+        formId = "searchForm";
+    }
+    $("#" + formId + " :input[type='checkbox'][name='filter[]']")
         .attr('checked', element.checked);
 }
 
