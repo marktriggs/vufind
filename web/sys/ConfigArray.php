@@ -96,15 +96,19 @@ function iniMerge($config_ini, $custom_ini)
  * Support function -- load the main configuration options, overriding with
  * custom local settings if applicable.
  *
+ * @param string $basePath Optional base path to config files.
+ *
  * @return array The desired config.ini settings in array format.
  */
-function readConfig()
+function readConfig($basePath = 'conf')
 {
-    $mainArray = parse_ini_file('conf/config.ini', true);
+    $mainArray = parse_ini_file($basePath . '/config.ini', true);
     if (isset($mainArray['Extra_Config'])
         && isset($mainArray['Extra_Config']['local_overrides'])
     ) {
-        $file = trim('conf/' . $mainArray['Extra_Config']['local_overrides']);
+        $file = trim(
+            $basePath . '/' . $mainArray['Extra_Config']['local_overrides']
+        );
         $localOverride = @parse_ini_file($file, true);
         if ($localOverride) {
             return iniMerge($mainArray, $localOverride);
