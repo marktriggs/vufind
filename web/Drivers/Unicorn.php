@@ -124,7 +124,7 @@ class Unicorn implements DriverInterface
             // copy number; use create_function to create anonymous comparison
             // function for php 5.2 compatibility
             $cmp = create_function(
-                'a,b',
+                '$a,$b',
                 'if ($a["shelving_key"] == $b["shelving_key"]) '
                 .     'return $a["number"] - $b["number"];'
                 . 'return $a["shelving_key"] < $b["shelving_key"] ? 1 : -1;'
