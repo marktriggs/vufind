@@ -97,7 +97,7 @@ class JSON_Browse extends JSON
         global $interface;
 
         $letters = array();
-        if ($_GET['include_numbers']) {
+        if (isset($_GET['include_numbers']) && $_GET['include_numbers']) {
             $letters = array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
         }
         for ($i=0; $i<26; $i++) {
