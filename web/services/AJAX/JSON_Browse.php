@@ -64,8 +64,14 @@ class JSON_Browse extends JSON
         
         if (isset($_GET['next_query_field']) && !empty($_GET['next_query_field'])) {
             $interface->assign('next_query_field', $_GET['next_query_field']);
-            $interface->assign('next_facet_field', $_GET['next_facet_field']);
-            $interface->assign('next_target', $_GET['next_target']);
+            $interface->assign(
+                'next_facet_field',
+                isset($_GET['next_facet_field']) ? $_GET['next_facet_field'] : null
+            );
+            $interface->assign(
+                'next_target',
+                isset($_GET['next_target']) ? $_GET['next_target'] : null
+            );
         }
         $this->output($this->_processSearch('Browse/options.tpl'), JSON::STATUS_OK);
     }
@@ -104,8 +110,12 @@ class JSON_Browse extends JSON
             $letters[] = chr(65 + $i);
         }
         $interface->assign('letters', $letters);
-        $interface->assign('query_field', $_GET['query_field']);
-        $interface->assign('facet_field', $_GET['facet_field']);
+        $interface->assign(
+            'query_field', isset($_GET['query_field']) ? $_GET['query_field'] : null
+        );
+        $interface->assign(
+            'facet_field', isset($_GET['facet_field']) ? $_GET['facet_field'] : null
+        );
         $this->output($interface->fetch('Browse/alphabet.tpl'), JSON::STATUS_OK);
     }
 
@@ -141,8 +151,12 @@ class JSON_Browse extends JSON
         
         $facets = $result['facet_counts']['facet_fields'][$_GET['facet_field']];
         $interface->assign('facets', $facets);
-        $interface->assign('query_field', $_GET['query_field']);
-        $interface->assign('facet_field', $_GET['facet_field']);
+        $interface->assign(
+            'query_field', isset($_GET['query_field']) ? $_GET['query_field'] : null
+        );
+        $interface->assign(
+            'facet_field', isset($_GET['facet_field']) ? $_GET['facet_field'] : null
+        );
         $interface->assign('query', $query);
 
         return $interface->fetch($template);
