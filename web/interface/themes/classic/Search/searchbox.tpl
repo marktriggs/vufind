@@ -1,5 +1,4 @@
 <div class="searchbox yui-skin-sam">
-  <div class="yui-b">
   {if $searchType == 'advanced'}
     <a href="{$path}/Search/Advanced?edit={$searchId}" class="small">{translate text="Edit this Advanced Search"}</a> |
     <a href="{$path}/Search/Advanced" class="small">{translate text="Start a new Advanced Search"}</a> |
@@ -67,5 +66,4 @@
       {if $lastSort}<input type="hidden" name="sort" value="{$lastSort|escape}" />{/if}
     </form>
   {/if}
-  </div>
 </div>

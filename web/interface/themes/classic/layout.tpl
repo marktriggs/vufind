@@ -26,14 +26,14 @@
   </head>
 
   <body>
-  
+
     {* LightBox *}
     <div id="lightboxLoading" style="display: none;">{translate text="Loading"}...</div>
     <div id="lightboxError" style="display: none;">{translate text="lightbox_error"}</div>
     <div id="lightbox" onClick="hideLightbox(); return false;"></div>
     <div id="popupbox" class="popupBox"></div>
     {* End LightBox *}
-  
+
     {* Change id for page width, class for menu layout. *}
     <div id="doc2" class="yui-t5">
 
@@ -43,21 +43,11 @@
           <a href="{$url}"><img src="{$path}/images/vufind.jpg" alt="vufinder"></a>
         {/if}
       </div>
-    
+
       {* Search box. This should really be coming from the include. *}
-      <div id="bd">
-        <div id="yui-main">
-        {if $showTopSearchBox}
-          {if $pageTemplate != 'advanced.tpl'}
-            {if $module=="Summon" || $module=="WorldCat" || $module=="Authority"}
-              {include file="`$module`/searchbox.tpl"}
-            {else}
-              {include file="Search/searchbox.tpl"}
-            {/if}
-          {/if}
-        {/if}
-        </div>
-          <div class="yui-b">
+      <div class="searchheader">
+        <div class="searchcontent">
+          <div class="alignright">
             <div id="logoutOptions"{if !$user} style="display: none;"{/if}>
               <a href="{$path}/MyResearch/Home">{translate text="Your Account"}</a> |
               <a href="{$path}/MyResearch/Logout">{translate text="Log Out"}</a>
@@ -70,18 +60,30 @@
               {/if}
             </div>
             {if is_array($allLangs) && count($allLangs) > 1}
-            <form method="post" name="langForm" action="">
-            <div class="hiddenLabel"><label for="mylang">{translate text="Language"}:</label></div>
-            <select id="mylang" name="mylang" onChange="document.langForm.submit();">
-              {foreach from=$allLangs key=langCode item=langName}
-              <option value="{$langCode}"{if $userLang == $langCode} selected{/if}>{translate text=$langName}</option>
-              {/foreach}
-            </select>
-            <noscript><input type="submit" value="{translate text="Set"}" /></noscript>
-            </form>
+              <form method="post" name="langForm" action="">
+                <div class="hiddenLabel"><label for="mylang">{translate text="Language"}:</label></div>
+                <select id="mylang" name="mylang" onChange="document.langForm.submit();">
+                  {foreach from=$allLangs key=langCode item=langName}
+                    <option value="{$langCode}"{if $userLang == $langCode} selected{/if}>{translate text=$langName}</option>
+                  {/foreach}
+                </select>
+                <noscript><input type="submit" value="{translate text="Set"}" /></noscript>
+              </form>
             {/if}
           </div>
+
+        {if $showTopSearchBox}
+          {if $pageTemplate != 'advanced.tpl'}
+            {if $module=="Summon" || $module=="WorldCat" || $module=="Authority"}
+              {include file="`$module`/searchbox.tpl"}
+            {else}
+              {include file="Search/searchbox.tpl"}
+            {/if}
+          {/if}
+        {/if}
+
         </div>
+      </div>
 
       {if $useSolr || $useWorldcat || $useSummon}
       <div id="toptab">
