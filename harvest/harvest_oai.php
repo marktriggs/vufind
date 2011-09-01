@@ -560,7 +560,7 @@ class HarvestOAI
         if (!empty($this->_harvestedIdLog) && !empty($harvestedIds)) {
             $file = fopen($this->_basePath . $this->_harvestedIdLog, 'a')
                 or die ("Problem opening {$this->_harvestedIdLog}.\n");
-            fputs($file, implode("\n", $harvestedIds));
+            fputs($file, implode(PHP_EOL, $harvestedIds));
             fclose($file);
         }
     }
