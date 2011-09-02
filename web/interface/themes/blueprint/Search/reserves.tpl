@@ -1,4 +1,4 @@
-<div class="span-18">
+<div class="span-18{if $sidebarOnLeft} push-5 last{/if}">
   <h3>{translate text='Search For Items on Reserve'}</h3>
   <form method="get" action="{$url}/Search/Reserves" name="searchForm" class="search">
     <label class="span-3" for="reserves_by_course">{translate text='By Course'}:</label>
@@ -37,7 +37,7 @@
   </form>
 </div>
 
-<div class="span-5 last">
+<div class="span-5 {if $sidebarOnLeft}pull-18 sidebarOnLeft{else}last{/if}">
 </div>
 
 <div class="clear"></div>      

@@ -1,5 +1,5 @@
 <form method="get" action="{$url}/Summon/Search" id="advSearchForm" name="searchForm" class="search">
-  <div class="span-18">
+  <div class="span-18{if $sidebarOnLeft} push-5 last{/if}">
     <h3>{translate text='Advanced Search'}</h3>
     <div class="advSearchContent">
       {if $editErr}
@@ -111,7 +111,7 @@
     {if $lastSort}<input type="hidden" name="sort" value="{$lastSort|escape}" />{/if}
   </div>
   
-  <div class="span-5 last">
+  <div class="span-5 {if $sidebarOnLeft}pull-18 sidebarOnLeft{else}last{/if}">
     {if $searchFilters}
       <div class="filterList">
         <h3>{translate text="adv_search_filters"}<br/><span>({translate text="adv_search_select_all"} <input type="checkbox" checked="checked" onclick="filterAll(this, 'advSearchForm');" />)</span></h3>

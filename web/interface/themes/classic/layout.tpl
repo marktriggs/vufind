@@ -35,7 +35,7 @@
     {* End LightBox *}
 
     {* Change id for page width, class for menu layout. *}
-    <div id="doc2" class="yui-t5">
+    <div id="doc2" class="yui-t{if $sidebarOnLeft}3{else}5{/if}">
 
       <div id="hd">
         {* Your header. Could be an include. *}

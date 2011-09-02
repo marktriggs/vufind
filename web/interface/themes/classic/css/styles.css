@@ -55,6 +55,15 @@ html, body {
     margin-top:10px;
     margin-right:15px;
 }
+/* overrides to support "sidebar on left" layout: */
+.yui-t3 .contentbox {
+    margin-left:0px;
+    margin-right:15px;
+}
+.yui-t3 .submenu {
+    margin-left:15px;
+    margin-right:0px;
+}
 .submenu h4 {
     border-bottom: 1px solid #eee;
     padding-bottom: 3px;
