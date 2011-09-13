@@ -175,12 +175,13 @@ class Demo implements DriverInterface
 
         // Create a fake entry for each one
         for ($i = 0; $i < $records; $i++) {
+            $status = $this->_getFakeStatus();
             $holding[] = array(
                 'id'           => $id,
                 'number'       => $i+1,
                 'barcode'      => sprintf("%08d", rand()%50000),
-                'availability' => (rand()%100 > 50) ? true : false,
-                'status'       => $this->_getFakeStatus(),
+                'availability' => $status == 'Available',
+                'status'       => $status,
                 'location'     => $this->_getFakeLoc(),
                 'reserve'      => (rand()%100 > 49) ? 'Y' : 'N',
                 'callnumber'   => $this->_getFakeCallNum(),
