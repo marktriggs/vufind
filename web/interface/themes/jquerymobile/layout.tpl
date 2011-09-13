@@ -13,10 +13,10 @@
     //]]>
     </script>
 
-    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.0a4/jquery.mobile-1.0a4.min.css" />
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.5.1.min.js"></script>
+    {css filename="jquery.mobile-1.0a4.min.css"}
+    {js filename="jquery-1.5.1.min.js"}
     {js filename="common.js"}
-    <script type="text/javascript" src="http://code.jquery.com/mobile/1.0a4/jquery.mobile-1.0a4.min.js"></script>
+    {js filename="jquery.mobile-1.0a4.min.js"}
     {js filename="jquery.cookie.js"}
     {js filename="cart_cookie.js"}
     {js filename="cart.js"}    
