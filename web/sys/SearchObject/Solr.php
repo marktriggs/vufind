@@ -1372,10 +1372,12 @@ class SearchObject_Solr extends SearchObject_Base
             $this->limit = 50;
 
             // If an RSS-specific search option is configured, override the current
-            // setting by prepending the specified value:
+            // setting by prepending the specified value (unless the request
+            // specifically says not to):
             $searchSettings = getExtraConfigArray('searches');
             if (isset($searchSettings['RSS']['sort'])
                 && !empty($searchSettings['RSS']['sort'])
+                && !isset($_REQUEST['skip_rss_sort'])
             ) {
                 $this->sort = (empty($this->sort) || $this->sort == 'relevance') ?
                     $searchSettings['RSS']['sort'] :

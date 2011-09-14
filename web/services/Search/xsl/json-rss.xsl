@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:exist="http://exist.sourceforge.net/NS/exist" xmlns:marc="http://www.loc.gov/MARC21/slim" xmlns:php="http://php.net/xsl">
+<xsl:stylesheet version="1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:exist="http://exist.sourceforge.net/NS/exist" xmlns:marc="http://www.loc.gov/MARC21/slim" xmlns:php="http://php.net/xsl">
 
   <xsl:output encoding="UTF-8" indent="yes" omit-xml-declaration="no"/>
 
@@ -56,6 +56,20 @@
                 </pubDate>
               </xsl:when>
             </xsl:choose>
+            <xsl:for-each select="./author">
+              <dc:creator><xsl:value-of select="."/></dc:creator>
+            </xsl:for-each>
+            <xsl:if test="./format">
+              <dc:format>
+                <xsl:for-each select="./format">
+                  <xsl:if test="position()&gt;1"><xsl:value-of select="string(' / ')"/></xsl:if>
+                  <xsl:value-of select="."/>
+                </xsl:for-each>
+              </dc:format>
+            </xsl:if>
+            <xsl:if test="./publishDate">
+              <dc:date><xsl:value-of select="./publishDate"/></dc:date>
+            </xsl:if>
           </item>
         </xsl:for-each>
       </channel>
