@@ -107,6 +107,9 @@ class Hold extends Record
                         $this->_placeHold($patron);
                     }
                 }
+                $interface->setPageTitle(
+                    translate('request_place_text') . ': ' . $this->recordDriver->getBreadcrumb()
+                );
                 // Display Hold Form
                 $interface->assign('subTemplate', 'hold-submit.tpl');
 
