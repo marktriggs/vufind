@@ -1834,7 +1834,8 @@ class Voyager implements DriverInterface
 
         $reserveWhere = empty($reserveWhere) ?
             "" : "where (" . implode(' AND ', $reserveWhere) . ")";
-
+        /* OLD SQL -- simpler but without support for the Solr-based reserves
+         * module:
         $sql = " select MFHD_MASTER.DISPLAY_CALL_NO, BIB_TEXT.BIB_ID, " .
                " BIB_TEXT.AUTHOR, BIB_TEXT.TITLE, " .
                " BIB_TEXT.PUBLISHER, BIB_TEXT.PUBLISHER_DATE " .
@@ -1860,6 +1861,44 @@ class Voyager implements DriverInterface
                "    (select distinct reserve_list_courses.reserve_list_id from " .
                "      $this->dbName.reserve_list_courses $reserveWhere )) )) " .
                "  ) ";
+         */
+        $sql = " select MFHD_MASTER.DISPLAY_CALL_NO, BIB_TEXT.BIB_ID, " .
+               " BIB_TEXT.AUTHOR, BIB_TEXT.TITLE, " .
+               " BIB_TEXT.PUBLISHER, BIB_TEXT.PUBLISHER_DATE, subquery.COURSE_ID, " .
+               " subquery.INSTRUCTOR_ID, subquery.DEPARTMENT_ID " .
+               " FROM $this->dbName.BIB_TEXT " .
+               " JOIN $this->dbName.BIB_MFHD ON BIB_TEXT.BIB_ID=BIB_MFHD.BIB_ID " .
+               " JOIN $this->dbName.MFHD_MASTER " .
+               " ON BIB_MFHD.MFHD_ID = MFHD_MASTER.MFHD_ID" .
+               " JOIN " .
+               "  ( ".
+               "  ((select distinct eitem.mfhd_id, subsubquery1.COURSE_ID, " .
+               "     subsubquery1.INSTRUCTOR_ID, subsubquery1.DEPARTMENT_ID " .
+               "     from $this->dbName.eitem join " .
+               "    (select distinct reserve_list_eitems.eitem_id, " .
+               "     RESERVE_LIST_COURSES.COURSE_ID, " .
+               "     RESERVE_LIST_COURSES.INSTRUCTOR_ID, " .
+               "     RESERVE_LIST_COURSES.DEPARTMENT_ID from " .
+               "     $this->dbName.reserve_list_eitems" .
+               "     JOIN $this->dbName.reserve_list_courses ON " .
+               "      reserve_list_courses.reserve_list_id = " .
+               "      reserve_list_eitems.reserve_list_id" .
+               "      $reserveWhere ) subsubquery1 ON " .
+               "      subsubquery1.eitem_id = eitem.eitem_id)) union " .
+               "  ((select distinct mfhd_item.mfhd_id, subsubquery2.COURSE_ID, " .
+               "    subsubquery2.INSTRUCTOR_ID, subsubquery2.DEPARTMENT_ID " .
+               "    from $this->dbName.mfhd_item join" .
+               "    (select distinct reserve_list_items.item_id, " .
+               "     RESERVE_LIST_COURSES.COURSE_ID, " .
+               "     RESERVE_LIST_COURSES.INSTRUCTOR_ID, " .
+               "     RESERVE_LIST_COURSES.DEPARTMENT_ID from " .
+               "    $this->dbName.reserve_list_items" .
+               "    JOIN $this->dbName.reserve_list_courses on " .
+               "    reserve_list_items.reserve_list_id = " .
+               "    reserve_list_courses.reserve_list_id" .
+               "    $reserveWhere) subsubquery2 ON " .
+               "    subsubquery2.item_id = mfhd_item.item_id )) " .
+               "  ) subquery ON mfhd_master.mfhd_id = subquery.mfhd_id ";
 
         try {
             $sqlStmt = $this->db->prepare($sql);

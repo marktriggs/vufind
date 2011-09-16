@@ -17,10 +17,14 @@
       <strong>{$recordStart}</strong> - <strong>{$recordEnd}</strong>
       {translate text='of'} <strong>{$recordCount}</strong>
       {translate text='Reserves'}
+      {if $instructor || $course}
+      ({if $instructor}{translate text='Instructor'}: <strong>{$instructor|escape}</strong>{if $course}, {/if}{/if}
+      {if $course}{translate text='Course'}: <strong>{$course|escape}</strong>{/if})
+      {/if}
     </div>
-  
+
     <div class="span-5 last">
-      <div class="limitSelect"> 
+      <div class="limitSelect">
         {if $limitList|@count gt 1}
           <form action="{$path}/Search/LimitResults" method="post">
             <label for="limit">{translate text='Results per page'}</label>
@@ -46,21 +50,21 @@
     <div class="clear"></div>
   </div>
   {* End Listing Options *}
-  
+
   {if $subpage}
     {include file=$subpage}
   {else}
     {$pageContent}
   {/if}
-  
+
   {if $pageLinks.all}<div class="pagination">{$pageLinks.all}</div>{/if}
     <div class="searchtools">
       <strong>{translate text='Search Tools'}:</strong>
-      <a href="{$url}/Search/{$action}?lookfor={$lookfor|escape}&amp;type={$type}&amp;view=rss" class="feed">{translate text='Get RSS Feed'}</a>
+      <a href="{$rssLink}" class="feed">{translate text='Get RSS Feed'}</a>
       <a href="{$url}/Search/Email" class="mailSearch mail" title="{translate text='Email this Search'}">{translate text='Email this Search'}</a>
     </div>
   {/if}
-</div>      
+</div>
 {* End Main Listing *}
 
 {* Narrow Search Options *}

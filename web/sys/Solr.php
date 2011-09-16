@@ -1165,6 +1165,20 @@ class Solr implements IndexEngine
     {
         $this->_solrShards = $shards;
     }
+    
+    /**
+     * Submit REST Request to write data (protected wrapper to allow child classes
+     * to use this mechanism -- we should eventually phase out private _update).
+     *
+     * @param string $xml The command to execute
+     *
+     * @return mixed      Boolean true on success or PEAR_Error
+     * @access protected
+     */
+    protected function update($xml)
+    {
+        return $this->_update($xml);
+    }
 
     /**
      * Strip facet settings that are illegal due to shard settings.
