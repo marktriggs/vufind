@@ -1452,6 +1452,54 @@ class SearchObject_Solr extends SearchObject_Base
         // Process and return the xml through the style sheet
         return $xsl->transformToXML($xml);
     }
+
+    /**
+     * Get complete facet counts for several index fields
+     *
+     * @param array $facetfields  name of the Solr fields to return facets for
+     * @param bool  $removeFilter Clear existing filters from selected fields (true)
+     * or retain them (false)?
+     *
+     * @return array an array with the facet values for each index field
+     * @access public
+     */
+    public function getFullFieldFacets($facetfields, $removeFilter = true)
+    {
+        // Save prior facet configuration:
+        $oldConfig = $this->facetConfig;
+        $oldList = $this->filterList;
+        $oldLimit = $this->facetLimit;
+
+        // Manipulate facet settings temporarily:
+        $this->facetConfig = array();
+        $this->facetLimit = -1;
+        foreach ($facetfields as $facetName) {
+            $this->addFacet($facetName);
+
+            // Clear existing filters for the selected field if necessary:
+            if ($removeFilter) {
+                $this->filterList[$facetName] = array();
+            }
+        }
+
+        // Do search
+        $result = $this->processSearch();
+
+        // Reformat into a hash:
+        $returnFacets = $result['facet_counts']['facet_fields'];
+        foreach ($returnFacets as $key => $value) {
+            unset($returnFacets[$key]);
+            $returnFacets[$key]['data'] = $value;
+        }
+
+        // Restore saved information:
+        $this->facetConfig = $oldConfig;
+        $this->filterList = $oldList;
+        $this->facetLimit = $oldLimit;
+
+        // Send back data:
+        return $returnFacets;
+    }
 }
 
 /**

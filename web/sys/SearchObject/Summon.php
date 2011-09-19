@@ -467,9 +467,9 @@ class SearchObject_Summon extends SearchObject_Base
      * @param string $field Facet field name.
      *
      * @return string       Human-readable description of field.
-     * @access protected
+     * @access public
      */
-    protected function getFacetLabel($field)
+    public function getFacetLabel($field)
     {
         // The default use of "Other" for undefined facets doesn't work well with
         // checkbox facets -- we'll use field names as the default within the Summon

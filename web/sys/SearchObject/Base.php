@@ -240,9 +240,9 @@ abstract class SearchObject_Base
      * @param string $field Facet field name.
      *
      * @return string       Human-readable description of field.
-     * @access protected
+     * @access public
      */
-    protected function getFacetLabel($field)
+    public function getFacetLabel($field)
     {
         return isset($this->facetConfig[$field]) ?
             $this->facetConfig[$field] : "Other";
@@ -813,6 +813,19 @@ abstract class SearchObject_Base
         // Join all parameters with an escaped ampersand,
         //   add to the base url and return
         return $url . join("&", $params);
+    }
+
+    /**
+     * render the URL search parameters of the current search
+     *
+     * @return string URL parameter string
+     * @access public
+     */
+    public function renderSearchUrlParams()
+    {
+        $url = $this->renderSearchUrl();
+        $parts = explode('?', $url);
+        return isset($parts[1]) ? $parts[1] : '';
     }
 
     /**
