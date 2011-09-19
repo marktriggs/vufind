@@ -1,6 +1,7 @@
 <?php
 /**
- * Common AJAX functions for the Recommender Visualisation module using JSON as output format.
+ * Common AJAX functions for the Recommender Visualisation module using JSON as
+ * output format.
  *
  * PHP version 5
  *
@@ -29,7 +30,8 @@
 require_once 'JSON.php';
 
 /**
- * Common AJAX functions for the Recommender Visualisation module using JSON as output format.
+ * Common AJAX functions for the Recommender Visualisation module using JSON as
+ * output format.
  *
  * @category VuFind
  * @package  Controller_AJAX
@@ -58,6 +60,8 @@ class JSON_Vis extends JSON
     /**
      * Get data and output in JSON
      *
+     * @param array $fields Fields to process
+     *
      * @return void
      * @access public
      */
@@ -69,14 +73,16 @@ class JSON_Vis extends JSON
             $this->_searchObject->init();
             $fields = $this->_processDateFacets($this->_searchObject->getFilters());
             $facets = $this->_searchObject->getFullFieldFacets(array_keys($fields));
-            foreach($fields as $field => $val) {
+            foreach ($fields as $field => $val) {
                 $facets[$field]['min'] = $val[0] > 0 ? $val[0] : 0;
                 $facets[$field]['max'] = $val[1] > 0 ? $val[1] : 2100;
-                $facets[$field]['removalURL'] = $this->_searchObject->renderLinkWithoutFilter("$field:[" . $val[0] . " TO " . $val[1] ."]");
+                $facets[$field]['removalURL']
+                    = $this->_searchObject->renderLinkWithoutFilter(
+                        "$field:[" . $val[0] . " TO " . $val[1] ."]"
+                    );
             }
             $this->output($facets, JSON::STATUS_OK);
-        }
-        else {
+        } else {
             $this->output("", JSON::STATUS_ERROR);
         }
     }

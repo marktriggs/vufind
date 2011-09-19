@@ -93,14 +93,18 @@ class PubDateVisAjax implements RecommendationInterface
         global $interface;
 
         // currently only works with Solr SearchObject
-        if(is_a($this->_searchObject, 'SearchObject_Solr')) {
-            $visFacets = $this->_processDateFacets($this->_searchObject->getFilters());
+        if (is_a($this->_searchObject, 'SearchObject_Solr')) {
+            $visFacets = $this->_processDateFacets(
+                $this->_searchObject->getFilters()
+            );
             $interface->assign(
                 'visFacets',
                 $visFacets
             );
             $interface->assign('facetFields', implode(':', $this->_dateFacets));
-            $interface->assign('searchParams', $this->_searchObject->renderSearchUrlParams());
+            $interface->assign(
+                'searchParams', $this->_searchObject->renderSearchUrlParams()
+            );
         }
     }
 
@@ -119,6 +123,14 @@ class PubDateVisAjax implements RecommendationInterface
         return 'Search/Recommend/TopPubDateVisAjax.tpl';
     }
 
+    /**
+     * Support method for getVisData() -- extract details from applied filters.
+     *
+     * @param array $filters Current filter list
+     *
+     * @return array
+     * @access private
+     */
     private function _processDateFacets($filters)
     {
         $result = array();
@@ -134,7 +146,8 @@ class PubDateVisAjax implements RecommendationInterface
                 }
             }
             $result[$current] = array($from, $to);
-            $result[$current]['label'] = $this->_searchObject->getFacetLabel($current);
+            $result[$current]['label']
+                = $this->_searchObject->getFacetLabel($current);
         }
         return $result;
     }
