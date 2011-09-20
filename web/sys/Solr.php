@@ -622,7 +622,8 @@ class Solr implements IndexEngine
             $dmParams = '';
             if (isset($ss['DismaxParams']) && is_array($ss['DismaxParams'])) {
                 foreach ($ss['DismaxParams'] as $current) {
-                    $dmParams .= ' ' . $current[0] . '="' . $current[1] . '"';
+                    $dmParams .= ' ' . $current[0] . "='" .
+                        addcslashes($current[1], "'") . "'";
                 }
             }
             $dismaxQuery = '{!dismax qf="' . $qf . '"' . $dmParams . '}' . $lookfor;
@@ -877,7 +878,21 @@ class Solr implements IndexEngine
                 // Load any custom Dismax parameters from the YAML search spec file:
                 if (isset($ss['DismaxParams']) && is_array($ss['DismaxParams'])) {
                     foreach ($ss['DismaxParams'] as $current) {
-                        $options[$current[0]] = $current[1];
+                        // The way we process the current parameter depends on
+                        // whether or not we have previously encountered it.  If
+                        // we have multiple values for the same parameter, we need
+                        // to turn its entry in the $options array into a subarray;
+                        // otherwise, one-off parameters can be safely represented
+                        // as single values.
+                        if (isset($options[$current[0]])) {
+                            if (!is_array($options[$current[0]])) {
+                                $options[$current[0]]
+                                    = array($options[$current[0]]);
+                            }
+                            $options[$current[0]][] = $current[1];
+                        } else {
+                            $options[$current[0]] = $current[1];
+                        }
                     }
                 }
 
