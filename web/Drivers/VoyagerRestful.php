@@ -193,9 +193,7 @@ class VoyagerRestful extends Voyager
     protected function processHoldingData($data, $patron = false)
     {
         $holding = parent::processHoldingData($data, $patron);
-        $mode = CatalogConnection::getHoldsMode();
-        $v = 0;
-        
+
         foreach ($holding as $i => $row) {
             $is_borrowable = $this->isBorrowable($row['_fullRow']['ITEM_TYPE_ID']);
             $is_holdable = $this->isHoldable($row['_fullRow']['STATUS_ARRAY']);
@@ -210,17 +208,11 @@ class VoyagerRestful extends Voyager
 
             // Hold Type - If we have patron data, we can use it to dermine if a
             // hold link should be shown
-            if ($patron && $mode == "driver") {
-                // The limit is set to 25 as the api is slow to return the results
-                if ($v < 25) {
-                    $holdType = $this->determineHoldType(
-                        $row['id'], $row['item_id'], $patron['id']
-                    );
-                    $addLink = $holdType ? $holdType : false;
-                } else {
-                    $holdType = "auto";
-                    $addLink = "check";
-                }
+            if ($patron) {
+                $holdType = $this->determineHoldType(
+                    $row['id'], $row['item_id'], $patron['id']
+                );
+                $addLink = $holdType ? $holdType : false;
             } else {
                 $holdType = "auto";
             }
@@ -231,30 +223,8 @@ class VoyagerRestful extends Voyager
                 'addLink' => $addLink
             );
             unset($holding[$i]['_fullRow']);
-            $v++;
         }
         return $holding;
-    }
-
-    /**
-     * checkRequestIsValid
-     *
-     * This is responsible for determining if an item is requestable
-     *
-     * @param string $id     The Bib ID
-     * @param array  $data   An Array of item data
-     * @param patron $patron An array of patron data
-     *
-     * @return string "Hold" is item is holdable, "Recall" if item is recallable,
-     *                false if neither
-     * @access protected
-     */
-    
-    public function checkRequestIsValid($id, $data, $patron)
-    {
-        return $this->determineHoldType(
-            $id, $data['item_id'], $patron['id']
-        );
     }
 
     /**
