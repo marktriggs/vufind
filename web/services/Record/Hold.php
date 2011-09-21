@@ -42,6 +42,9 @@ require_once 'Crypt/generateHMAC.php';
  */
 class Hold extends Record
 {
+    protected $gatheredDetails;
+    protected $logonURL;
+    
     /**
      * Process incoming parameters and display the page.
      *
