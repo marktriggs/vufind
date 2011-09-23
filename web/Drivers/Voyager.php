@@ -221,7 +221,8 @@ class Voyager implements DriverInterface
             "BIB_ITEM.BIB_ID", "ITEM.ITEM_ID",
             "ITEM.ON_RESERVE", "ITEM_STATUS_DESC as status",
             "LOCATION.LOCATION_DISPLAY_NAME as location",
-            "MFHD_MASTER.DISPLAY_CALL_NO as callnumber"
+            "MFHD_MASTER.DISPLAY_CALL_NO as callnumber",
+            "ITEM.TEMP_LOCATION"
         );
 
         // From
@@ -275,6 +276,7 @@ class Voyager implements DriverInterface
                                 "'No information available' as status",
                                 "LOCATION.LOCATION_DISPLAY_NAME as location",
                                 "MFHD_MASTER.DISPLAY_CALL_NO as callnumber",
+                                "0 AS TEMP_LOCATION"
                                );
 
         // From
@@ -320,7 +322,11 @@ class Voyager implements DriverInterface
                     'id' => $row['BIB_ID'],
                     'status' => $row['STATUS'],
                     'status_array' => array($row['STATUS']),
-                    'location' => htmlentities($row['LOCATION']),
+                    'location' => htmlentities(
+                        $row['TEMP_LOCATION'] > 0
+                        ? $this->getLocationName($row['TEMP_LOCATION'])
+                        : $row['LOCATION']
+                    ),
                     'reserve' => $row['ON_RESERVE'],
                     'callnumber' => $row['CALLNUMBER']
                 );
@@ -458,6 +464,7 @@ class Voyager implements DriverInterface
             "ITEM_STATUS_TYPE.ITEM_STATUS_DESC as status",
             "MFHD_DATA.RECORD_SEGMENT", "MFHD_ITEM.ITEM_ENUM",
             "LOCATION.LOCATION_DISPLAY_NAME as location",
+            "ITEM.TEMP_LOCATION",
             "MFHD_MASTER.DISPLAY_CALL_NO as callnumber",
             "to_char(CIRC_TRANSACTIONS.CURRENT_DUE_DATE, 'MM-DD-YY') as duedate",
             "(SELECT TO_CHAR(MAX(CIRC_TRANS_ARCHIVE.DISCHARGE_DATE), " .
@@ -682,6 +689,31 @@ class Voyager implements DriverInterface
     }
 
     /**
+     * Look up a location name by ID.
+     *
+     * @param int $id Location ID to look up
+     *
+     * @return string
+     */
+    protected function getLocationName($id)
+    {
+        static $cache = array();
+
+        // Fill cache if empty:
+        if (!isset($cache[$id])) {
+            $sql = "SELECT LOCATION_NAME FROM {$this->dbName}.LOCATION " .
+                "WHERE LOCATION_ID=:id";
+            $bind = array('id' => $id);
+            $sqlStmt = $this->db->prepare($sql);
+            $sqlStmt->execute($bind);
+            $sqlRow = $sqlStmt->fetch(PDO::FETCH_ASSOC);
+            $cache[$id] = $sqlRow['LOCATION_NAME'];
+        }
+
+        return $cache[$id];
+    }
+
+    /**
      * Protected support method for getHolding.
      *
      * @param array $sqlRow SQL Row Data
@@ -694,7 +726,11 @@ class Voyager implements DriverInterface
         return array(
             'id' => $sqlRow['BIB_ID'],
             'status' => $sqlRow['STATUS'],
-            'location' => htmlentities($sqlRow['LOCATION']),
+            'location' => htmlentities(
+                $sqlRow['TEMP_LOCATION'] > 0
+                ? $this->getLocationName($sqlRow['TEMP_LOCATION'])
+                : $sqlRow['LOCATION']
+            ),
             'reserve' => $sqlRow['ON_RESERVE'],
             'callnumber' => $sqlRow['CALLNUMBER'],
             'barcode' => $sqlRow['ITEM_BARCODE']
