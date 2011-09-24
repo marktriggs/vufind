@@ -34,6 +34,7 @@ $oaiSettings = @parse_ini_file('oai.ini', true);
 if (empty($oaiSettings)) {
     die("Please add OAI-PMH settings to oai.ini.\n");
 }
+date_default_timezone_set($configArray['Site']['timezone']);
 
 // If first command line parameter is set, see if we can limit to just the
 // specified OAI harvester:
