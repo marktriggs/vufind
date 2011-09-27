@@ -56,6 +56,9 @@
                     <field name="topic">
                         <xsl:value-of select="normalize-space()"/>
                     </field>
+                    <field name="topic_facet">
+                        <xsl:value-of select="normalize-space()"/>
+                    </field>
                 </xsl:for-each>
 
                 <!-- DESCRIPTION -->
