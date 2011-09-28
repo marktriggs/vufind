@@ -310,6 +310,17 @@ class SearchObject_Solr extends SearchObject_Base
         } else if ($module == 'MyResearch') {
             $this->spellcheck = false;
             $this->searchType = ($action == 'Favorites') ? 'favorites' : 'list';
+        } else if ($module == 'AJAX') {
+            //special AJAX Search check if it's for MapInfo
+            if ($action == 'ResultGoogleMapInfo') {
+                $this->limitOptions = array(5);
+                $this->initLimit();
+                // We don't spellcheck this screen
+                //it's not for free user intput anyway
+                $this->spellcheck  = false;
+                // Only get what's needed:
+                $this->fields = array('id, title, author, format, issn' );
+            }
         }
 
         // If a query override has been specified, log it here

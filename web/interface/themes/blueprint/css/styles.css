@@ -1301,3 +1301,49 @@ tr:nth-child(even) td.gridMouseOver {
 .limitSelect {
     text-align: right;
 }
+
+/* Google map */
+.mapClusterToggle{
+    position: relative;
+    float: right;
+    top: -474px;
+    left: -88px;
+    width: 63px;
+    height: 19px;
+    background-color:#F8F8F8;
+    padding: 0px 4px 0px 4px;
+    border: 1px outset;
+    border-color:#000;
+}
+.mapInfoWrapper{
+    min-width: 450px;
+    max-width: 450px;
+    overflow: hidden;
+    display: block;
+    max-height: 275px;
+}
+.mapInfoResult {
+    min-width: 440px;
+    max-width: 440px;
+    background-color:#EEEEEE;
+    padding:2px 2px 2px 2px;
+}
+.mapInfoResult.alt {
+    background-color:#FFF;
+}
+.mapSeeAllDiv{
+    font-size:1.2em;
+    font-weight: bold;
+    text-align:center;
+}
+.mapInfoResults{
+    float: left;
+    border:1px solid #EEEEEE;
+}
+.mapInfoResultThumb {
+    float: right;
+}
+.mapInfoResultThumbImg {
+    height: 32px;
+    width: 32px;
+}
