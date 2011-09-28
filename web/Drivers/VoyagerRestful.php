@@ -657,8 +657,9 @@ class VoyagerRestful extends Voyager
      * @return boolean         true if the request can be made, false if it cannot
      * @access protected
      */
-    protected function checkItemRequests($bibId, $patronId, $request, $itemId = false)
-    {
+    protected function checkItemRequests($bibId, $patronId, $request, 
+        $itemId = false
+    ) {
         if (!empty($bibId) && !empty($patronId) && !empty($request) ) {
 
             $hierarchy = array();
