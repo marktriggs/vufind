@@ -78,6 +78,16 @@ ClusterIcon.prototype.onAdd = function () {
   });
 };
 
+/**
+ * Overriding the image path for ssl
+ *
+ * The default root name for the marker cluster images.
+ *
+ * @type {string}
+ * @constant
+ */
+MarkerClusterer.IMAGE_PATH = "https://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclustererplus/images/m";
+
 var markers;
 var mc;
 var markersData;
@@ -91,7 +101,9 @@ var infowindow = new google.maps.InfoWindow({maxWidth: 480, minWidth: 480});
         success: function(transaction){
           data = JSON.parse(transaction.responseText);
           markersData = data['data'];
-
+          if (markersData.length <= 0) {
+                return;
+          }
           latlng = new google.maps.LatLng(0, 0);
           myOptions = {
                 zoom: 1,
@@ -184,13 +196,10 @@ var infowindow = new google.maps.InfoWindow({maxWidth: 480, minWidth: 480});
 
 </script>
 {/literal}
-<div class="authorbox">
-  <strong>{translate text="$facetField"}</strong>
   {*map goes here*}
 <div id="mapWrap" onload="initialize()" style="width: 729px; height: 479px; display:none;">
   <div id="map_canvas" style="width: 100%; height: 100%"></div>
   <div class="mapClusterToggle" id="useCluster" style="display:none;">
     <input type="checkbox" id="usegmm" checked="true" onclick="refreshMap();" style="vertical-align:middle;"></input><label for="usegmm" style="padding-left:2px;">{translate text='google_map_cluster'}</label>
   </div>
-</div>
 </div>

@@ -1476,6 +1476,10 @@ ul.suggestion li{
 }
 
 /* map */
+#mapWrap {
+    margin-right: auto;
+    margin-left: auto;
+}
 .mapClusterToggle{
     position: relative;
     float: right;

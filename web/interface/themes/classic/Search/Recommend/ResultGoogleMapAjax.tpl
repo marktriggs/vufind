@@ -78,6 +78,16 @@ ClusterIcon.prototype.onAdd = function () {
   });
 };
 
+/**
+ * Overriding the image path for ssl
+ *
+ * The default root name for the marker cluster images.
+ *
+ * @type {string}
+ * @constant
+ */
+MarkerClusterer.IMAGE_PATH = "https://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclustererplus/images/m";
+
 var markers;
 var mc;
 var markersData;
@@ -91,7 +101,9 @@ var infowindow = new google.maps.InfoWindow({maxWidth: 480, minWidth: 480});
         success: function(transaction){
           data = JSON.parse(transaction.responseText);
           markersData = data['data'];
-
+          if (markersData.length <= 0){
+                return;
+          }
           latlng = new google.maps.LatLng(0, 0);
           myOptions = {
                 zoom: 1,
