@@ -1302,6 +1302,65 @@ tr:nth-child(even) td.gridMouseOver {
     text-align: right;
 }
 
+/* Rss Recommendations */
+div.suggestionHeader {
+    min-height:30px;
+    padding-top: 5px;
+    border: 2px solid #EEE;
+}
+
+div.submenuSuggestion {
+    margin-top: 10px;
+}
+
+.submenuSuggestion h4 {
+    font-family: Georgia,"Times New Roman",Serif;
+    color: #7c1416;
+    padding-top:12px;
+}
+
+.suggestionLogo {
+    float:right;
+    margin-bottom:2px;
+}
+.suggestionWhatsThis {
+    color: #7C1416;
+    font-family: Georgia,"Times New Roman",Serif;
+    font-size: 10px;
+    float:right;
+    clear:right;
+}
+.suggestedResult {
+    background-color:#EEEEEE;
+    padding:10px 0px 10px 0px;
+}
+.suggestedResult.alt {
+    background-color:#FFF;
+}
+
+ul.suggestion {
+    border: 0px solid #EEE;
+    list-style: none;
+    margin: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+ul.suggestion li{
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+/* Europeana recommendation images */
+.europeanaImage {
+    width:65px; 
+    border: 1px solid white;
+}
+
+.europeanaImg {
+    float:left; 
+    margin-right: 10px;
+}
+
 /* Google map */
 .mapClusterToggle{
     position: relative;
