@@ -89,6 +89,11 @@
                 <a href="{$url}/Record/{$id|escape:"url"}/Excerpt#tabnav" class="first"><span></span>{translate text='Excerpt'}</a>
               </li>
               {/if}
+              {if $hasMap}
+                <li{if $tab == 'Map'} class="active"{/if}>
+                  <a href="{$url}/Record/{$id|escape:"url"}/Map#tabnav" class="first"><span></span>{translate text='Map View'}</a>
+                </li>
+              {/if}
               <li{if $tab == 'Details'} class="active"{/if}>
                 <a href="{$url}/Record/{$id|escape:"url"}/Details#tabnav" class="first"><span></span>{translate text='Staff View'}</a>
               </li>

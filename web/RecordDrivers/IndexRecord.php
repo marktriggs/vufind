@@ -488,8 +488,8 @@ class IndexRecord implements RecordInterface
             if (!UserAccount::isLoggedIn()) {
                 $interface->assign('showLoginMsg', true);
             }
-        }  
-        
+        }
+
         // Only display OpenURL link if the option is turned on and we have
         // an ISSN.  We may eventually want to make this rule more flexible,
         // but for now the ISSN restriction is designed to be consistent with
@@ -557,6 +557,22 @@ class IndexRecord implements RecordInterface
         $interface->assign('listEditAllowed', $allowEdit);
 
         return 'RecordDrivers/Index/listentry.tpl';
+    }
+
+    /**
+     * getMapView - gets the map view template.
+     *
+     * @return string template name
+     * @access public
+     */
+    public function getMapView()
+    {
+        global $configArray;
+        global $interface;
+        if ($configArray['Content']['recordMap'] == 'google') {
+            $interface->assign('map_marker', $this->getGoogleMapMarker());
+        }
+        return 'view-'. $configArray['Content']['recordMap'] . 'map.tpl';
     }
 
     /**
@@ -705,7 +721,7 @@ class IndexRecord implements RecordInterface
      * search results.
      *
      * @param string $view The current view.
-     * 
+     *
      * @return string      Name of Smarty template file to display.
      * @access public
      */
@@ -894,6 +910,25 @@ class IndexRecord implements RecordInterface
     public function hasImages()
     {
         // Images are not supported yet.
+        return false;
+    }
+
+    /**
+     * hasMap - checks the long_lat field to determine if this record can be
+     * displayed on a map.
+     *
+     * @return bool
+     * @access public
+     */
+    public function hasMap()
+    {
+        global $configArray;
+
+        if (isset($configArray['Content']['recordMap'])
+            && isset($this->fields['long_lat'])
+        ) {
+            return true;
+        }
         return false;
     }
 
@@ -1799,6 +1834,26 @@ class IndexRecord implements RecordInterface
                 urlencode($isbn) . '&size=' . urlencode($size);
         }
         return false;
+    }
+
+    /**
+     * getGoogleMapMarker - gets the JSON needed to display the record on a google
+     * map.
+     *
+     * @return string JSON
+     * @access protected
+     */
+    protected function getGoogleMapMarker()
+    {
+        $longLat = explode(',', $this->fields['long_lat']);
+        $markers = array(
+            array(
+                'title' => (string)$this->fields['title'],
+                'lon' => $longLat[0],
+                'lat' => $longLat[1]
+            )
+        );
+        return json_encode($markers);
     }
 }
 
