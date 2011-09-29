@@ -8,7 +8,7 @@ import org.marc4j.marc.DataField;
  * @param  Record    record
  * @return Double    "longitude, latitude"
  */
-public String LongLat(Record record) {
+public String getLongLat(Record record) {
     // Check 034 subfield d and f
     List fields = record.getVariableFields("034");
     Iterator fieldsIter = fields.iterator();
