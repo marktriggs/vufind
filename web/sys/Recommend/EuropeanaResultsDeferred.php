@@ -74,7 +74,7 @@ class EuropeanaResultsDeferred
         if (empty($this->_lookfor) && is_object($searchObject)) {
             $this->_lookfor = $searchObject->extractAdvancedTerms();
         }
-        $this->_lookfor = urlencode(trim($this->_lookfor));
+        $this->_lookfor = trim($this->_lookfor);
 
         $this->_params = implode(':', $paramsArray);
     }
