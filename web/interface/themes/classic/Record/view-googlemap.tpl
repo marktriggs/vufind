@@ -1,4 +1,4 @@
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.5&sensor=false"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.5&sensor=false&language={$userLang}"></script>
 {literal}
 <script type="text/javascript">
 
