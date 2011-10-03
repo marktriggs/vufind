@@ -393,12 +393,12 @@ abstract class SearchObject_Base
         case $this->advancedSearchType:
             $params[] = "join=" . urlencode($this->searchTerms[0]['join']);
             for ($i = 0; $i < count($this->searchTerms); $i++) {
-                $params[] = "bool".$i."[]=" .
+                $params[] = urlencode("bool{$i}[]") . "=" .
                     urlencode($this->searchTerms[$i]['group'][0]['bool']);
                 for ($j = 0; $j < count($this->searchTerms[$i]['group']); $j++) {
-                    $params[] = "lookfor".$i."[]=" .
+                    $params[] = urlencode("lookfor{$i}[]") . "=" .
                         urlencode($this->searchTerms[$i]['group'][$j]['lookfor']);
-                    $params[] = "type".$i."[]=" .
+                    $params[] = urlencode("type{$i}[]") . "=" .
                         urlencode($this->searchTerms[$i]['group'][$j]['field']);
                 }
             }
@@ -779,7 +779,8 @@ abstract class SearchObject_Base
         if (count($this->filterList) > 0) {
             foreach ($this->filterList as $field => $filter) {
                 foreach ($filter as $value) {
-                    $params[] = "filter[]=" . urlencode("$field:\"$value\"");
+                    $params[] = urlencode("filter[]") . '=' .
+                        urlencode("$field:\"$value\"");
                 }
             }
         }
