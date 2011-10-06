@@ -56,7 +56,8 @@ class HoldLogic
     {
         global $configArray;
 
-        $this->hideHoldings = $configArray['Record']['hide_holdings'];
+        $this->hideHoldings = isset($configArray['Record']['hide_holdings'])
+            ? $configArray['Record']['hide_holdings'] : array();
 
         $this->catalog = ($catalog == true)
             ? $catalog : ConnectionManager::connectToCatalog();
