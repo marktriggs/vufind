@@ -190,7 +190,7 @@
       <img alt="{translate text='Cover Image'}" class="recordcover" src="{$coreThumbMedium|escape}"/>
     {if $coreThumbLarge}</a>{/if}
   {else}
-    <img src="{$path}/bookcover.php" class="recordcover" alt="{translate text='No Cover Image'}">
+    <img src="{$path}/bookcover.php" class="recordcover" alt="{translate text='No Cover Image'}"/>
   {/if}
   {* End Cover Image *}
 
