@@ -223,13 +223,24 @@ abstract class SearchObject_Base
 
         // Make sure the field exists
         if (isset($this->filterList[$field])) {
+            // Assume by default that we will not need to rebuild the array:
+            $rebuildArray = false;
+
             // Loop through all filters on the field
             for ($i = 0; $i < count($this->filterList[$field]); $i++) {
                 // Does it contain the value we don't want?
                 if ($this->filterList[$field][$i] == $value) {
                     // If so remove it.
                     unset($this->filterList[$field][$i]);
+
+                    // Flag that we now need to rebuild the array:
+                    $rebuildArray = true;
                 }
+            }
+
+            // If necessary, rebuild the array to remove gaps in the key sequence:
+            if ($rebuildArray) {
+                $this->filterList[$field] = array_values($this->filterList[$field]);
             }
         }
     }
