@@ -1,5 +1,11 @@
 {* Main Listing *}
 <div class="span-18{if $sidebarOnLeft} push-5 last{/if}">
+  {if $errorMsg || $infoMsg}
+    <div class="messages">
+      {if $errorMsg}<div class="error">{$errorMsg|translate}</div>{/if}
+      {if $infoMsg}<div class="info">{$infoMsg|translate}</div>{/if}
+    </div>
+  {/if}
   {if !$recordCount}
     <p>{translate text="course_reserves_empty_list"}</p>
   {else}

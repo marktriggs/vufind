@@ -48,6 +48,7 @@ class FavoriteHandler
     private $_listId;
     private $_allowEdit;
     private $_ids = array();
+    protected $infoMsg = false;
 
     /**
      * Constructor.
@@ -101,7 +102,9 @@ class FavoriteHandler
         if (array_key_exists('VuFind', $this->_ids)
             && count($this->_ids['VuFind']) > 0
         ) {
-            $searchObject->setQueryIDs($this->_ids['VuFind']);
+            if (!$searchObject->setQueryIDs($this->_ids['VuFind'])) {
+                $this->infoMsg = 'too_many_favorites';
+            }
             $result = $searchObject->processSearch();
             $resourceList = $searchObject->getResultListHTML(
                 $this->_user, $this->_listId, $this->_allowEdit
@@ -123,6 +126,17 @@ class FavoriteHandler
         );
         $pager = new VuFindPager($options);
         $interface->assign('pageLinks', $pager->getLinks());
+    }
+
+    /**
+     * Get info message, if any (boolean false if no message).
+     *
+     * @return string|bool
+     * @access public
+     */
+    public function getInfoMsg()
+    {
+        return $this->infoMsg;
     }
 }
 

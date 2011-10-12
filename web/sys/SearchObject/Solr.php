@@ -537,12 +537,28 @@ class SearchObject_Solr extends SearchObject_Base
      *
      * @param array $ids Record IDs to load
      *
-     * @return void
+     * @return bool      True if all IDs can be loaded, false if boolean clause
+     * limit is exceeded (in which case a partial list will still be loaded).
      * @access public
      */
     public function setQueryIDs($ids)
     {
+        // Assume we will succeed:
+        $retVal = true;
+
+        // Limit the ID list if it exceeds the clause limit, and adjust the return
+        // value to reflect the problem:
+        $limit = $this->indexEngine->getBooleanClauseLimit();
+        if (count($ids) > $limit) {
+            $ids = array_slice($ids, 0, $limit);
+            $retVal = false;
+        }
+
+        // Build the query:
         $this->query = 'id:(' . implode(' OR ', $ids) . ')';
+
+        // Report success or failure:
+        return $retVal;
     }
 
     /**

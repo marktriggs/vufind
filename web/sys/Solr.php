@@ -1688,6 +1688,21 @@ class Solr implements IndexEngine
     }
 
     /**
+     * Get the boolean clause limit.
+     *
+     * @return int
+     * @access public
+     */
+    public function getBooleanClauseLimit()
+    {
+        global $configArray;
+
+        // Use setting from config.ini if present, otherwise assume 1024:
+        return isset($configArray['Index']['maxBooleanClauses'])
+            ? $configArray['Index']['maxBooleanClauses'] : 1024;
+    }
+
+    /**
      * Extract terms from the Solr index.
      *
      * @param string $field           Field to extract terms from

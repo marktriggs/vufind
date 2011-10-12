@@ -6,6 +6,12 @@
   <div id="yui-main" class="content">
     <div class="yui-b first contentbox">
       <b class="btop"><b></b></b>
+      {if $errorMsg || $infoMsg}
+      <div class="messages">
+      {if $errorMsg}<div class="error">{$errorMsg|translate}</div>{/if}
+      {if $infoMsg}<div class="userMsg">{$infoMsg|translate}</div>{/if}
+      </div>
+      {/if}
       {if !$recordCount}
         <div class="page">{translate text="course_reserves_empty_list"}</div>
       {else}

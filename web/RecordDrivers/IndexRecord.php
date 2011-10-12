@@ -319,12 +319,18 @@ class IndexRecord implements RecordInterface
 
         // If we have query parts, we should try to find related records:
         if (!empty($parts)) {
+            // Limit the number of parts based on the boolean clause limit:
+            $index = $this->getIndexEngine();
+            $limit = $index->getBooleanClauseLimit();
+            if (count($parts) > $limit) {
+                $parts = array_slice($parts, 0, $limit);
+            }
+
             // Assemble the query parts and filter out current record:
             $query = '(' . implode(' OR ', $parts) . ') NOT id:' .
                 $this->getUniqueID();
 
             // Perform the search and return either results or an error:
-            $index = $this->getIndexEngine();
             $result = $index->search($query, null, null, 0, 5);
             if (PEAR::isError($result)) {
                 return $result;

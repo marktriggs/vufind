@@ -118,7 +118,9 @@ class Reserves extends Action
                         $bibIDs[] = $record['BIB_ID'];
                     }
                 }
-                $searchObject->setQueryIDs($bibIDs);
+                if (!$searchObject->setQueryIDs($bibIDs)) {
+                    $interface->assign('infoMsg', 'too_many_reserves');
+                }
 
                 // Build RSS Feed for Results (if requested)
                 if ($searchObject->getView() == 'rss') {
