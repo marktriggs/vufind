@@ -110,6 +110,10 @@ class FavoriteHandler
                 $this->_user, $this->_listId, $this->_allowEdit
             );
             $interface->assign('resourceList', $resourceList);
+        } else {
+            // If no records are displayed, $allowListEdit will be missing;
+            // make sure it gets assigned so the list can be edited:
+            $interface->assign('listEditAllowed', $this->_allowEdit);
         }
 
         // Set up paging of list contents:
