@@ -66,7 +66,7 @@
   {if $pageLinks.all}<div class="pagination">{$pageLinks.all}</div>{/if}
     <div class="searchtools">
       <strong>{translate text='Search Tools'}:</strong>
-      <a href="{$rssLink}" class="feed">{translate text='Get RSS Feed'}</a>
+      <a href="{$rssLink|escape}" class="feed">{translate text='Get RSS Feed'}</a>
       <a href="{$url}/Search/Email" class="mailSearch mail" title="{translate text='Email this Search'}">{translate text='Email this Search'}</a>
     </div>
   {/if}
