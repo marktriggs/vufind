@@ -1031,6 +1031,20 @@ table.datagrid tr.oddrow {
     padding:.5em .5em .5em 20px;
     margin-right:1em;
 }
+.checkRequest {
+    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/checkRequest.png);
+    background-repeat:no-repeat;
+    background-position: left;
+    padding:.5em .5em .5em 20px;
+    margin-right:1em;
+}
+.holdBlocked {
+    background-image:url(<?php echo $configArray['Site']['path'];?>/interface/themes/default/images/fugue/HoldBlocked.png);
+    background-repeat:no-repeat;
+    background-position: left;
+    padding:.5em .5em .5em 20px;
+    margin-right:1em;
+}
 
 /***** Image Alignment *****/
 
@@ -1523,4 +1537,8 @@ ul.suggestion li{
 .mapInfoResultThumbImg {
     height: 32px;
     width: 32px;
+}
+.ajax_hold_availability {
+    background: url(<?php echo $configArray['Site']['path'];?>/images/loading.gif) no-repeat left top;
+    padding:0 .5em .5em 20px;
 }

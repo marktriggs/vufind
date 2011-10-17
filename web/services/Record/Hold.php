@@ -44,7 +44,7 @@ class Hold extends Record
 {
     protected $gatheredDetails;
     protected $logonURL;
-    
+
     /**
      * Process incoming parameters and display the page.
      *
@@ -80,8 +80,19 @@ class Hold extends Record
 
             // User Must be logged In to Place Holds
             if (UserAccount::isLoggedIn()) {
-
                 if ($patron = UserAccount::catalogLogin()) {
+                    // Block invalid requests:
+                    if (!$this->catalog->checkRequestIsValid(
+                        $this->recordDriver->getUniqueID(),
+                        $this->gatheredDetails, $patron
+                    )) {
+                        header(
+                            'Location: ../../Record/' .
+                            urlencode($this->recordDriver->getUniqueID()) .
+                            "?errorMsg=hold_error_blocked#top"
+                        );
+                        return false;
+                    }
 
                     $interface->assign('formURL', $this->logonURL);
 

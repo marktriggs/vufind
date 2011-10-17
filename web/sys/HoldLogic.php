@@ -151,6 +151,10 @@ class HoldLogic
                                 : $this->_getHoldDetails(
                                     $copy, $checkHolds['HMACKeys']
                                 );
+                            // If we are unsure whether hold options are available,
+                            // set a flag so we can check later via AJAX:
+                            $copy['check'] = (strcmp($copy['addLink'], 'check') == 0)
+                                ? true : false;
                         }
                     }
                     $holdings[$copy['location']][] = $copy;
@@ -178,6 +182,9 @@ class HoldLogic
         $holdings = array();
         $any_available = false;
 
+        $holds_override = isset($configArray['Catalog']['allow_holds_override'])
+            ? $configArray['Catalog']['allow_holds_override'] : false;
+
         if (count($result)) {
             foreach ($result as $copy) {
                 $show = !in_array($copy['location'], $this->hideHoldings);
@@ -199,6 +206,10 @@ class HoldLogic
                     // Loop through each holding
                     foreach ($holdings as $location_key => $location) {
                         foreach ($location as $copy_key => $copy) {
+                            // Override the default hold behavior with a value from
+                            // the ILS driver if allowed and applicable:
+                            $type = ($holds_override && isset($copy['holdOverride']))
+                                ? $copy['holdOverride'] : $type;
 
                             switch($type) {
                             case "all":

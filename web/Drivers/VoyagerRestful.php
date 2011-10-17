@@ -75,6 +75,9 @@ class VoyagerRestful extends Voyager
             ? $this->config['pickUpLocations'] : false;
         $this->defaultPickUpLocation
             = $this->config['Holds']['defaultPickUpLocation'];
+        $this->holdCheckLimit
+            = isset($this->config['Holds']['holdCheckLimit']) 
+            ? $this->config['Holds']['holdCheckLimit'] : "15";
     }
 
     /**
@@ -193,6 +196,7 @@ class VoyagerRestful extends Voyager
     protected function processHoldingData($data, $patron = false)
     {
         $holding = parent::processHoldingData($data, $patron);
+        $mode = CatalogConnection::getHoldsMode();
 
         foreach ($holding as $i => $row) {
             $is_borrowable = $this->isBorrowable($row['_fullRow']['ITEM_TYPE_ID']);
@@ -208,11 +212,17 @@ class VoyagerRestful extends Voyager
 
             // Hold Type - If we have patron data, we can use it to dermine if a
             // hold link should be shown
-            if ($patron) {
-                $holdType = $this->determineHoldType(
-                    $row['id'], $row['item_id'], $patron['id']
-                );
-                $addLink = $holdType ? $holdType : false;
+            if ($patron && $mode == "driver") {
+                // This limit is set as the api is slow to return results
+                if ($i < $this->holdCheckLimit && $this->holdCheckLimit != "0") {
+                    $holdType = $this->determineHoldType(
+                        $row['id'], $row['item_id'], $patron['id']
+                    );
+                    $addLink = $holdType ? $holdType : false;
+                } else {
+                    $holdType = "auto";
+                    $addLink = "check";
+                }
             } else {
                 $holdType = "auto";
             }
@@ -225,6 +235,31 @@ class VoyagerRestful extends Voyager
             unset($holding[$i]['_fullRow']);
         }
         return $holding;
+    }
+
+    /**
+     * checkRequestIsValid
+     *
+     * This is responsible for determining if an item is requestable
+     *
+     * @param string $id     The Bib ID
+     * @param array  $data   An Array of item data
+     * @param patron $patron An array of patron data
+     *
+     * @return string True if request is valid, false if not
+     * @access protected
+     */
+    
+    public function checkRequestIsValid($id, $data, $patron)
+    {
+        $mode = CatalogConnection::getHoldsMode();
+        if ($data['holdtype'] == "auto" && $mode == "driver") {
+            $result = $this->determineHoldType($id, $data['item_id'], $patron['id']);
+            if (!$result || $result == 'block') {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -861,7 +896,7 @@ class VoyagerRestful extends Voyager
         $bibId = $holdDetails['id'];
 
         // Request was initiated before patron was logged in -
-        //Let's determine Hold Type now
+        // Let's determine Hold Type now
         if ($type == "auto") {
             $type = $this->determineHoldType($bibId, $itemId, $patron['id']);
             if (!$type || $type == "block") {

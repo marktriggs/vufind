@@ -138,6 +138,51 @@ class JSON extends Action
     }
 
     /**
+     * Check Request is Valid
+     *
+     * @return void
+     * @access public
+     */
+    public function checkRequestIsValid()
+    {
+        if (isset($_REQUEST['id']) && isset($_REQUEST['data'])) {
+            // check if user is logged in
+            $user = UserAccount::isLoggedIn();
+            if (!$user) {
+                return $this->output(
+                    array(
+                        'status' => false,
+                        'msg' => translate('You must be logged in first')
+                    ), JSON::STATUS_NEED_AUTH
+                );
+            }
+
+            $catalog = ConnectionManager::connectToCatalog();
+            if ($catalog && $catalog->status) {
+                if ($patron = UserAccount::catalogLogin()) {
+                    if (!PEAR::isError($patron)) {
+                        $results = $catalog->checkRequestIsValid(
+                            $_REQUEST['id'], $_REQUEST['data'], $patron
+                        );
+
+                        if (!PEAR::isError($results)) {
+                            $msg = $results
+                                ? translate('request_place_text')
+                                : translate('hold_error_blocked');
+                            return $this->output(
+                                array(
+                                    'status' => $results, 'msg' => $msg
+                               ), JSON::STATUS_OK
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        return $this->output(translate('An error has occurred'), JSON::STATUS_ERROR);
+    }
+
+    /**
      * Get Item Statuses
      *
      * This is responsible for printing the holdings information for a

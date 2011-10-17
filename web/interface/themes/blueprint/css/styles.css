@@ -89,7 +89,7 @@ div.dialogLoading {
     height:100%;
 }
 
-.ajax_availability {
+.ajax_availability, .ajax_hold_availability {
     background: url(../images/ajax_loading.gif) no-repeat left top;
     padding:0 .5em .5em 20px;
 }
@@ -753,6 +753,16 @@ dl.narrowList a {
     background-position: left;
     padding:.5em .5em .5em 20px;
     margin-right:1em;
+}
+.checkRequest {
+    background-image:url(../images/fugue/checkRequest.png);
+    background-repeat:no-repeat;
+    padding-left:18px;   
+}
+.holdBlocked {
+    background-image:url(../images/fugue/holdBlocked.png);
+    background-repeat:no-repeat;
+    padding-left:18px;   
 }
 
 /***** Pagination *****/

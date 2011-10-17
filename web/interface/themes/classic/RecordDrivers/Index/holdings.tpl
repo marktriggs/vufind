@@ -70,7 +70,7 @@
           <div>
            <span class="available">{translate text="Available"}</span>
           {if $row.link}
-            <a class="holdPlace" href="{$row.link|escape}"><span>{translate text="Place a Hold"}</span></a>
+            <a class="holdPlace{if $row.check} checkRequest{/if}" href="{$row.link|escape}"><span>{if !$row.check}{translate text="Place a Hold"}{else}{translate text="Check Hold"}{/if}</span></a>
           {/if}
           </div>
         {else}
@@ -85,7 +85,7 @@
             <span>{translate text="Requests"}: {$row.requests_placed|escape}</span>
           {/if}
           {if $row.link}
-            <a class="holdPlace" href="{$row.link|escape}"><span>{translate text="Recall This"}</span></a>
+            <a class="holdPlace{if $row.check} checkRequest{/if}" href="{$row.link|escape}"><span>{if !$row.check}{translate text="Recall This"}{else}{translate text="Check Recall"}{/if}</span></a>
           {/if}
           </div>
         {/if}
