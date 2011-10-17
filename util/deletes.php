@@ -58,7 +58,7 @@ require_once 'util.inc.php';        // set up util environment
 require_once 'sys/ConnectionManager.php';
 
 // Read Config file
-$configArray = parse_ini_file(dirname(__FILE__) . '/../web/conf/config.ini', true);
+$configArray = readConfig();
 
 // Setup Solr Connection
 $solr = ConnectionManager::connectToIndex($index);
