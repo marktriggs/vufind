@@ -71,20 +71,47 @@ class JSON_Vis extends JSON
 
         if (is_a($this->_searchObject, 'SearchObject_Solr')) {
             $this->_searchObject->init();
-            $fields = $this->_processDateFacets($this->_searchObject->getFilters());
-            $facets = $this->_searchObject->getFullFieldFacets(array_keys($fields));
+            $filters = $this->_searchObject->getFilters();
+            $fields = $this->_processDateFacets($filters);
+            $facets = $this->_processFacetValues($fields);
             foreach ($fields as $field => $val) {
                 $facets[$field]['min'] = $val[0] > 0 ? $val[0] : 0;
-                $facets[$field]['max'] = $val[1] > 0 ? $val[1] : 2100;
+                $facets[$field]['max'] = $val[1] > 0 ? $val[1] : 0;
                 $facets[$field]['removalURL']
                     = $this->_searchObject->renderLinkWithoutFilter(
-                        "$field:[" . $val[0] . " TO " . $val[1] ."]"
+                        isset($filters[$field][0])
+                            ? $field .':' . $filters[$field][0] : null
                     );
             }
             $this->output($facets, JSON::STATUS_OK);
         } else {
             $this->output("", JSON::STATUS_ERROR);
         }
+    }
+
+    /**
+     * Support method for getVisData() -- filter bad values from facet lists.
+     *
+     * @param array $fields Processed date information from _processDateFacets()
+     *
+     * @return array
+     * @access private
+     */
+    private function _processFacetValues($fields)
+    {
+        $facets = $this->_searchObject->getFullFieldFacets(array_keys($fields));
+        $retVal = array();
+        foreach ($facets as $field => $values) {
+            $newValues = array('data' => array());
+            foreach ($values['data'] as $current) {
+                // Only retain numeric values!
+                if (preg_match("/^[0-9]+$/", $current[0])) {
+                    $newValues['data'][] = $current;
+                }
+            }
+            $retVal[$field] = $newValues;
+        }
+        return $retVal;
     }
 
     /**

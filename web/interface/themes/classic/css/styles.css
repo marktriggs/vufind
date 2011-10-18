@@ -1478,6 +1478,16 @@ ul.suggestion li{
     background: url(<?php echo $configArray['Site']['path'];?>/images/loading.gif) no-repeat left top;
     padding:0 .5em .5em 20px;
 }
+/************pubdate_vis timeline**********/
+.dateVisClear {
+    background-color: #FFFFEE;
+    border: 2px solid #545454;
+    position: absolute;
+    left: 0px; top: 0px;
+    height: 20px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
 
 /* table for displaying full status in result list */
 table.summHoldings {

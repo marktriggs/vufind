@@ -43,6 +43,7 @@ class PubDateVisAjax implements RecommendationInterface
 {
     private $_searchObject;
     private $_baseSettings;
+    private $_zooming;
     private $_dateFacets = array();
 
     /**
@@ -59,7 +60,14 @@ class PubDateVisAjax implements RecommendationInterface
     {
         $this->_searchObject = $searchObject;
         $params = explode(':', $params);
-        $this->_dateFacets = $params;
+        if ($params[0] == "true" || $params[0] == "false") {
+            $this->_zooming = $params[0];
+            $this->_dateFacets = array_slice($params, 1);
+        } else {
+            $this->_zooming = "false";
+            $this->_dateFacets = $params;
+        }
+        
 
     }
 
@@ -101,6 +109,7 @@ class PubDateVisAjax implements RecommendationInterface
                 'visFacets',
                 $visFacets
             );
+            $interface->assign('zooming', $this->_zooming);
             $interface->assign('facetFields', implode(':', $this->_dateFacets));
             $interface->assign(
                 'searchParams', $this->_searchObject->renderSearchUrlParams()

@@ -1416,6 +1416,16 @@ ul.suggestion li{
     height: 32px;
     width: 32px;
 }
+/************pubdate_vis timeline**********/
+.dateVisClear {
+    background-color: #FFF;
+    border: 2px solid #545454;
+    position: absolute;
+    left: 6px; top: 6px;
+    height: 20px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
 
 /* table for displaying full status in result list */
 table.summHoldings {
