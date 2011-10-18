@@ -80,7 +80,7 @@ class JSON_Vis extends JSON
                 $facets[$field]['removalURL']
                     = $this->_searchObject->renderLinkWithoutFilter(
                         isset($filters[$field][0])
-                            ? $field .':' . $filters[$field][0] : null
+                        ? $field .':' . $filters[$field][0] : null
                     );
             }
             $this->output($facets, JSON::STATUS_OK);
