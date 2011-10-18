@@ -17,7 +17,16 @@ function checkItemStatuses() {
                     $.each(response.data, function(i, result) {
                         var safeId = jqEscape(result.id);
                         $('#status' + safeId).empty().append(result.availability_message);
-                        if (result.locationList) {
+                        if (typeof(result.full_status) != 'undefined'
+                            && result.full_status.length > 0
+                            && $('#callnumAndLocation' + safeId).length > 0
+                        ) {
+                            $('#callnumAndLocation' + safeId).empty().append(result.full_status);
+                            $('#callnumber' + safeId).hide();
+                            $('#location' + safeId).hide();
+                            $('.hideIfDetailed' + safeId).hide();
+                            $('#status' + safeId).hide();
+                        } else if (result.locationList) {
                             $('#callnumber' + safeId).hide();
                             $('.hideIfDetailed' + safeId).hide();
                             $('#location' + safeId).hide();
@@ -41,7 +50,11 @@ function checkItemStatuses() {
                             $('#locationDetails' + safeId).empty().append(locationListHTML);
                         } else {
                             $('#callnumber' + safeId).empty().append(result.callnumber);
-                            $('#location' + safeId).empty().append(result.reserve == 'true' ? result.reserve_message : result.location);
+                            $('#location' + safeId).empty().append(
+                                result.reserve == 'true' 
+                                ? result.reserve_message 
+                                : result.location
+                            );
                         }
                     });
                 } else {

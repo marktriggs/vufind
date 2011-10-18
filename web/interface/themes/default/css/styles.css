@@ -1542,3 +1542,30 @@ ul.suggestion li{
     background: url(<?php echo $configArray['Site']['path'];?>/images/loading.gif) no-repeat left top;
     padding:0 .5em .5em 20px;
 }
+
+/* table for displaying full status in result list */
+table.summHoldings {
+    font-size: smaller;
+    margin-bottom: .5em;
+}
+table.summHoldings th {
+    padding: 0;
+    color: #666666;
+    border-bottom: 1px solid #999999;
+}
+table.summHoldings td {
+    background: inherit !important;
+    padding: 0;
+}
+table.summHoldings .locationColumn {
+    width: 50%;
+}
+table.summHoldings .callnumColumn {
+    width: 30%;
+}
+table.summHoldings .statusColumn {
+    width: 20%;
+}
+a.summHoldings {
+    font-size: smaller;
+}

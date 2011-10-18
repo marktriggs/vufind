@@ -228,6 +228,8 @@ class JSON extends Action
             ? $configArray['Item_Status']['multiple_call_nos'] : 'msg';
         $locationSetting = isset($configArray['Item_Status']['multiple_locations'])
             ? $configArray['Item_Status']['multiple_locations'] : 'msg';
+        $showFullStatus = isset($configArray['Item_Status']['show_full_status'])
+            ? $configArray['Item_Status']['show_full_status'] : false;
 
         // Loop through all the status information that came back
         $statuses = array();
@@ -243,6 +245,12 @@ class JSON extends Action
                         $record, $messages, $locationSetting, $callnumberSetting
                     );
                 }
+
+                // If a full status display has been requested, append the HTML:
+                if ($showFullStatus) {
+                    $current['full_status'] = $this->_getItemStatusFull($record);
+                }
+
                 $statuses[] = $current;
 
                 // The current ID is not missing -- remove it from the missing list.
@@ -891,6 +899,32 @@ class JSON extends Action
         );
     }
 
+   /**
+    * Support method for getItemStatuses() -- process a single bibliographic record
+    * for "details" location setting.
+    *
+    * @param array  $record Information on items linked to a single bib record
+    *
+    * @return array         Detailed availability information
+    * @access private
+    */
+    private function _getItemStatusFull($record)
+    {
+        global $configArray;
+        global $interface;
+
+        $hideHoldings = isset($configArray['Record']['hide_holdings'])
+            ? $configArray['Record']['hide_holdings'] : array();
+        $items = array();
+        foreach ($record as $item) {
+            if (!in_array($item['location'], $hideHoldings)) {
+                $items[] = $item;
+            }
+        }
+        $interface->assign('statusItems', $items);
+        return empty($items) ? '': $interface->fetch('AJAX/status-full.tpl');
+    }
+    
     /**
      * Generate the "salt" used in the salt'ed login request.
      *
