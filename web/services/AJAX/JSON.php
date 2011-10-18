@@ -899,15 +899,15 @@ class JSON extends Action
         );
     }
 
-   /**
-    * Support method for getItemStatuses() -- process a single bibliographic record
-    * for "details" location setting.
-    *
-    * @param array  $record Information on items linked to a single bib record
-    *
-    * @return array         Detailed availability information
-    * @access private
-    */
+    /**
+     * Support method for getItemStatuses() -- process a single bibliographic record
+     * for "details" location setting.
+     *
+     * @param array $record Information on items linked to a single bib record
+     *
+     * @return array        Detailed availability information
+     * @access private
+     */
     private function _getItemStatusFull($record)
     {
         global $configArray;
