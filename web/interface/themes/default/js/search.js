@@ -50,7 +50,9 @@ function doGetStatuses(strings)
                     && items[i].full_status.length > 0
                     && fullStatusDiv) {
                     fullStatusDiv.innerHTML = items[i].full_status;
-                    statusDiv.style.display = 'none';
+                    if (statusDiv) {
+                        statusDiv.style.display = 'none';
+                    }
                 } else if (items[i].locationList && locationListDiv) {
                     // Hide Call Number and Location Holders
                     if (callnumberDiv) {
