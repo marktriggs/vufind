@@ -801,7 +801,7 @@ class Solr implements IndexEngine
         switch ($sortField) {
         case 'year':
         case 'publishDate':
-            $sortField = 'publishDate';
+            $sortField = 'publishDateSort';
             $defaultSortDirection = 'desc';
             break;
         case 'author':
@@ -1743,9 +1743,9 @@ class Solr implements IndexEngine
             // Tidy the data into a more usable format:
             $fixedArray = array();
             if (isset($data['terms'])) {
-                $data['terms'] = array(
-                    $data['terms'][0] => $this->_processTerms($data['terms'][1])
-                );
+                foreach ($data['terms'] as $field => $contents) {
+                    $data['terms'][$field] = $this->_processTerms($contents);
+                }
             }
             return $data;
         } else {

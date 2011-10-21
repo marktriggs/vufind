@@ -125,6 +125,9 @@
                     <field name="publishDate">
                         <xsl:value-of select="substring(//dc:date, 1, 4)"/>
                     </field>
+                    <field name="publishDateSort">
+                        <xsl:value-of select="substring(//dc:date, 1, 4)"/>
+                    </field>
                 </xsl:if>
 
                 <!-- FULL TEXT -->

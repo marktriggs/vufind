@@ -126,6 +126,9 @@
                     <field name="publishDate">
                         <xsl:value-of select="//nlm:pub-date/nlm:year"/>
                     </field>
+                    <field name="publishDateSort">
+                        <xsl:value-of select="//nlm:pub-date/nlm:year"/>
+                    </field>
                 </xsl:if>
 
                 <!-- URL -->
