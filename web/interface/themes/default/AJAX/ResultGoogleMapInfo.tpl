@@ -1,5 +1,5 @@
 <div class="mapInfoWrapper">
-  <h2>At this location:</h2>
+  <h2>{translate text='map_results_label'}</h2>
   <div class="mapInfoResults">
     {foreach from=$recordSet item=record name="recordLoop"}
       <div class="mapInfoResult {if ($smarty.foreach.recordLoop.iteration % 2) == 0}alt {/if}record{$smarty.foreach.recordLoop.iteration}">
