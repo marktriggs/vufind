@@ -700,7 +700,7 @@ class Unicorn implements DriverInterface
         foreach ($item_lines as $item) {
             list($catkey, $date_charged, $duedate, $date_renewed, $accrued_fine,
             $overdue, $number_of_renewals, $date_recalled,
-            $charge_key1, $charge_key2, $charge_key3, $charge_key4, $recall_period)
+            $charge_key1, $charge_key2, $charge_key3, $charge_key4, $recall_period, $callnum)
                 = explode('|', $item);
 
             $duedate = $original_duedate = $this->_parseDateTime($duedate);
@@ -728,7 +728,9 @@ class Unicorn implements DriverInterface
                 'original_duedate' => $this->_formatDateTime($original_duedate),
                 'renewable' => true,
                 'charge_key' => $charge_key,
-                'item_id' => $charge_key
+                'item_id' => $charge_key,
+                'callnum' => $callnum,
+                'dueStatus' => $overdue == 'Y' ? 'overdue' : ''
             );
         }
 
@@ -738,7 +740,9 @@ class Unicorn implements DriverInterface
             // function for php 5.2 compatibility
             $cmp = create_function(
                 '$a,$b',
-                'return $a["duedate_raw"] < $b["duedate_raw"] ? -1 : 1;'
+                'if ($a["duedate_raw"] == $b["duedate_raw"]) '
+                . 'return $a["id"] < $b["id"] ? -1 : 1;'
+                . 'return $a["duedate_raw"] < $b["duedate_raw"] ? -1 : 1;'
             );
             usort($items, $cmp);
         }
@@ -953,8 +957,8 @@ class Unicorn implements DriverInterface
         $number_of_charges, $item_type, $recirculate_flag,
         $holdcount, $library_code, $library,
         $location_code, $location, $currLocCode, $current_location,
-        $circulation_rule, $duedate, $date_recalled, $recall_period, $format)
-            = explode("|", $line);
+        $circulation_rule, $duedate, $date_recalled, $recall_period, 
+        $format, $title_holds) = explode("|", $line);
 
         // availability
         $availability = ($number_of_charges == 0) ? 1 : 0;
@@ -1006,7 +1010,7 @@ class Unicorn implements DriverInterface
             'barcode' => trim($barcode),
             'item_id' => trim($barcode),
             //'holdable' => $holdable,
-            'requests_placed' => $holdcount,
+            'requests_placed' => $holdcount + $title_holds,
             'current_location_code' => $currLocCode,
             'current_location' => $current_location,
             'item_type' => $item_type,
