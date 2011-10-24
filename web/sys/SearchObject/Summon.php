@@ -201,7 +201,9 @@ class SearchObject_Summon extends SearchObject_Base
 
         // Loop through the facets returned by Summon.
         $facetResult = array();
-        if (is_array($this->_indexResult['facetFields'])) {
+        if (isset($this->_indexResult['facetFields'])
+            && is_array($this->_indexResult['facetFields'])
+        ) {
             foreach ($this->_indexResult['facetFields'] as $current) {
                 // The "displayName" value is actually the name of the field on
                 // Summon's side -- we'll probably need to translate this to a
