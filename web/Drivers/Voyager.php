@@ -579,34 +579,37 @@ class Voyager implements DriverInterface
         $data = array();
 
         foreach ($sqlRows as $row) {
-            // Determine Copy Number
-            $number = ($row['ITEM_ENUM'])
-                ? $row['ITEM_ENUM'] : $row['ITEM_SEQUENCE_NUMBER'];
+            // Determine Copy Number (always use sequence number; append volume
+            // when available)
+            $number = $row['ITEM_SEQUENCE_NUMBER'];
+            if (isset($row['ITEM_ENUM'])) {
+                $number .= ' (' . $row['ITEM_ENUM'] . ')';
+            }
 
             // Concat wrapped rows (MARC data more than 300 bytes gets split
             // into multiple rows)
-            if (isset($data[$row['ITEM_ID']]["$number"])) {
+            if (isset($data[$row['ITEM_ID']][$number])) {
                 // We don't want to concatenate the same MARC information to
                 // itself over and over due to a record with multiple status
                 // codes -- we should only concat wrapped rows for the FIRST
                 // status code we encounter!
-                if ($data[$row['ITEM_ID']]["$number"]['STATUS_ARRAY'][0] == $row['STATUS']) {
-                    $data[$row['ITEM_ID']]["$number"]['RECORD_SEGMENT']
+                if ($data[$row['ITEM_ID']][$number]['STATUS_ARRAY'][0] == $row['STATUS']) {
+                    $data[$row['ITEM_ID']][$number]['RECORD_SEGMENT']
                         .= $row['RECORD_SEGMENT'];
                 }
 
                 // If we've encountered a new status code, we should track it:
                 if (!in_array(
-                    $row['STATUS'], $data[$row['ITEM_ID']]["$number"]['STATUS_ARRAY']
+                    $row['STATUS'], $data[$row['ITEM_ID']][$number]['STATUS_ARRAY']
                 )) {
-                    $data[$row['ITEM_ID']]["$number"]['STATUS_ARRAY'][]
+                    $data[$row['ITEM_ID']][$number]['STATUS_ARRAY'][]
                         = $row['STATUS'];
                 }
             } else {
                 // This is the first time we've encountered this row number --
                 // initialize the row and start an array of statuses.
-                $data[$row['ITEM_ID']]["$number"] = $row;
-                $data[$row['ITEM_ID']]["$number"]['STATUS_ARRAY']
+                $data[$row['ITEM_ID']][$number] = $row;
+                $data[$row['ITEM_ID']][$number]['STATUS_ARRAY']
                     = array($row['STATUS']);
             }
         }
