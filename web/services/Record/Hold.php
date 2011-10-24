@@ -191,6 +191,15 @@ class Hold extends Record
         if ($_REQUEST['hashKey'] != $hashKey) {
             return false;
         } else {
+            // Initialize gatheredDetails with any POST values we find; this will
+            // allow us to repopulate the hold form with user-entered values if there
+            // is an error.  However, it is important that we load the POST data
+            // FIRST and then override it with GET values in order to ensure that
+            // the user doesn't bypass the hashkey verification by manipulating POST
+            // values.
+            $this->gatheredDetails = isset($_POST['gatheredDetails'])
+                ? $_POST['gatheredDetails'] : array();
+
             // Get Values Passed from holdings.php
             $i=0;
             foreach ($linkData as $details) {
@@ -221,17 +230,12 @@ class Hold extends Record
     {
         global $interface;
 
-        // Collect all gathered Details and assign them to variable incase hold
-        // fails
-        $this->gatheredDetails = $_POST['gatheredDetails'];
-        $interface->assign('gatheredDetails', $this->gatheredDetails);
-
         // Add Patron Data to Submitted Data
-        $this->gatheredDetails['patron'] = $patron;
-        $this->holdDetails = $this->gatheredDetails;
+        $holdDetails = $this->gatheredDetails + array('patron' => $patron);
 
+        // Attempt to place the hold:
         $function = (string)$this->checkHolds['function'];
-        $results = $this->catalog->$function($this->holdDetails);
+        $results = $this->catalog->$function($holdDetails);
         if (PEAR::isError($results)) {
             PEAR::raiseError($results);
         }
