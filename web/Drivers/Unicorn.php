@@ -700,7 +700,8 @@ class Unicorn implements DriverInterface
         foreach ($item_lines as $item) {
             list($catkey, $date_charged, $duedate, $date_renewed, $accrued_fine,
             $overdue, $number_of_renewals, $date_recalled,
-            $charge_key1, $charge_key2, $charge_key3, $charge_key4, $recall_period, $callnum)
+            $charge_key1, $charge_key2, $charge_key3, $charge_key4, $recall_period,
+            $callnum)
                 = explode('|', $item);
 
             $duedate = $original_duedate = $this->_parseDateTime($duedate);
