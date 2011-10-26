@@ -9,7 +9,7 @@
   {assign var=columns value=0}
   {foreach from=$facetList item=details key=field}
     {assign var=list value=$details.sortedList}
-    {if $field == 'callnumber-first' || $field == 'dewey-hundreds'}{assign var=currentSize value=10}{else}{assign var=currentSize value=5}{/if}
+    {if $field == 'callnumber-first'}{assign var=currentSize value=10}{else}{assign var=currentSize value=5}{/if}
     {assign var=columns value=$columns+$currentSize}
     <h2 class="span-{$currentSize}">{translate text="home_browse"} {translate text=$details.label}</h2> 
   {/foreach}
