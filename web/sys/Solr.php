@@ -244,20 +244,18 @@ class Solr implements IndexEngine
      */
     private function _loadSearchSpecs()
     {
+        // Turn relative path into absolute path:
+        $fullPath = dirname(__FILE__) . '/../' . $this->searchSpecsFile;
+
         // Generate cache key:
-        $key = md5(
-            basename($this->searchSpecsFile) . '-' .
-            filemtime($this->searchSpecsFile)
-        );
+        $key = md5(basename($this->searchSpecsFile) . '-' . filemtime($fullPath));
 
         // Load cache manager:
         $cache = new VuFindCache($this->_specCache, 'searchspecs');
 
         // Generate data if not found in cache:
         if (!($results = $cache->load($key))) {
-            $results = Horde_Yaml::load(
-                file_get_contents($this->searchSpecsFile)
-            );
+            $results = Horde_Yaml::load(file_get_contents($fullPath));
             $cache->save($results, $key);
         }
         $this->_searchSpecs = $results;
