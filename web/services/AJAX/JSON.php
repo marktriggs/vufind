@@ -70,7 +70,7 @@ class JSON extends Action
         ) {
             $this->$_GET['method']();
         } else {
-            $this->output(translate('Invalid Method'), JSON::STATUS_ERROR);
+            return $this->output(translate('Invalid Method'), JSON::STATUS_ERROR);
         }
     }
 
@@ -86,9 +86,9 @@ class JSON extends Action
 
         $user = UserAccount::isLoggedIn();
         if ($user) {
-            $this->output(true, JSON::STATUS_OK);
+            return $this->output(true, JSON::STATUS_OK);
         } else {
-            $this->output(false, JSON::STATUS_OK);
+            return $this->output(false, JSON::STATUS_OK);
         }
     }
 
@@ -120,10 +120,10 @@ class JSON extends Action
         // Authenticate the user:
         $user = UserAccount::login();
         if (PEAR::isError($user)) {
-            $this->output(translate($user->getMessage()), JSON::STATUS_ERROR);
+            return $this->output(translate($user->getMessage()), JSON::STATUS_ERROR);
         }
 
-        $this->output(true, JSON::STATUS_OK);
+        return $this->output(true, JSON::STATUS_OK);
     }
 
     /**
@@ -134,7 +134,7 @@ class JSON extends Action
      */
     public function getSalt()
     {
-        $this->output($this->_generateSalt(), JSON::STATUS_OK);
+        return $this->output($this->_generateSalt(), JSON::STATUS_OK);
     }
 
     /**
@@ -200,11 +200,13 @@ class JSON extends Action
 
         $catalog = ConnectionManager::connectToCatalog();
         if (!$catalog || !$catalog->status) {
-            $this->output(translate('An error has occurred'), JSON::STATUS_ERROR);
+            return $this->output(
+                translate('An error has occurred'), JSON::STATUS_ERROR
+            );
         }
         $results = $catalog->getStatuses($_GET['id']);
         if (PEAR::isError($results)) {
-            $this->output($results->getMessage(), JSON::STATUS_ERROR);
+            return $this->output($results->getMessage(), JSON::STATUS_ERROR);
         } else if (!is_array($results)) {
             // If getStatuses returned garbage, let's turn it into an empty array
             // to avoid triggering a notice in the foreach loop below.
@@ -273,7 +275,7 @@ class JSON extends Action
         }
 
         // Done
-        $this->output($statuses, JSON::STATUS_OK);
+        return $this->output($statuses, JSON::STATUS_OK);
     }
 
     /**
@@ -290,7 +292,7 @@ class JSON extends Action
         // check if user is logged in
         $user = UserAccount::isLoggedIn();
         if (!$user) {
-            $this->output(
+            return $this->output(
                 translate('You must be logged in first'), JSON::STATUS_NEED_AUTH
             );
         }
@@ -317,7 +319,7 @@ class JSON extends Action
                 }
             }
         }
-        $this->output($result, JSON::STATUS_OK);
+        return $this->output($result, JSON::STATUS_OK);
     }
 
     /**
@@ -333,16 +335,18 @@ class JSON extends Action
         // check if user is logged in
         $user = UserAccount::isLoggedIn();
         if (!$user) {
-            $this->output(
+            return $this->output(
                 translate('You must be logged in first'), JSON::STATUS_NEED_AUTH
             );
         }
 
         if (!Save::saveRecord($user)) {
-            $this->output(translate($result->getMessage()), JSON::STATUS_ERROR);
+            return $this->output(
+                translate($result->getMessage()), JSON::STATUS_ERROR
+            );
         }
 
-        $this->output(translate('Done'), JSON::STATUS_OK);
+        return $this->output(translate('Done'), JSON::STATUS_OK);
     }
 
     /**
@@ -363,10 +367,12 @@ class JSON extends Action
         );
 
         if (PEAR::isError($result)) {
-            $this->output(translate($result->getMessage()), JSON::STATUS_ERROR);
+            return $this->output(
+                translate($result->getMessage()), JSON::STATUS_ERROR
+            );
         }
 
-        $this->output(translate('email_success'), JSON::STATUS_OK);
+        return $this->output(translate('email_success'), JSON::STATUS_OK);
     }
 
     /**
@@ -385,10 +391,12 @@ class JSON extends Action
         $result = $sms->sendSMS();
 
         if (PEAR::isError($result)) {
-            $this->output(translate($result->getMessage()), JSON::STATUS_ERROR);
+            return $this->output(
+                translate($result->getMessage()), JSON::STATUS_ERROR
+            );
         }
 
-        $this->output(translate('sms_success'), JSON::STATUS_OK);
+        return $this->output(translate('sms_success'), JSON::STATUS_OK);
     }
 
     /**
@@ -401,17 +409,17 @@ class JSON extends Action
     {
         $user = UserAccount::isLoggedIn();
         if ($user === false) {
-            $this->output(
+            return $this->output(
                 translate('You must be logged in first'), JSON::STATUS_NEED_AUTH
             );
         }
 
         include_once 'services/Record/AddTag.php';
         if (!AddTag::save($user)) {
-            $this->output(translate('Failed'), JSON::STATUS_ERROR);
+            return $this->output(translate('Failed'), JSON::STATUS_ERROR);
         }
 
-        $this->output(translate('Done'), JSON::STATUS_OK);
+        return $this->output(translate('Done'), JSON::STATUS_OK);
     }
 
     /**
@@ -438,9 +446,9 @@ class JSON extends Action
         if (empty($tagList)) {
             $msg = translate('No Tags') . ', ' .
                 translate('Be the first to tag this record') . '!';
-            $this->output($msg, JSON::STATUS_ERROR);
+            return $this->output($msg, JSON::STATUS_ERROR);
         } else {
-            $this->output($tagList, JSON::STATUS_OK);
+            return $this->output($tagList, JSON::STATUS_OK);
         }
     }
 
@@ -456,16 +464,18 @@ class JSON extends Action
 
         $user = UserAccount::isLoggedIn();
         if ($user === false) {
-            $this->output(
+            return $this->output(
                 translate('You must be logged in first'), JSON::STATUS_NEED_AUTH
             );
         }
 
         if (!UserComments::saveComment($user)) {
-            $this->output(translate('comment_error_save'), JSON::STATUS_ERROR);
+            return $this->output(
+                translate('comment_error_save'), JSON::STATUS_ERROR
+            );
         }
 
-        $this->output(translate('Done'), JSON::STATUS_OK);
+        return $this->output(translate('Done'), JSON::STATUS_OK);
     }
 
     /**
@@ -483,7 +493,7 @@ class JSON extends Action
         $interface->assign('id', $_GET['id']);
         UserComments::assignComments();
         $html = $interface->fetch('Record/view-comments-list.tpl');
-        $this->output($html, JSON::STATUS_OK);
+        return $this->output($html, JSON::STATUS_OK);
     }
 
     /**
@@ -498,15 +508,17 @@ class JSON extends Action
 
         $user = UserAccount::isLoggedIn();
         if ($user === false) {
-            $this->output(
+            return $this->output(
                 translate('You must be logged in first'), JSON::STATUS_NEED_AUTH
             );
         }
 
         if (!UserComments::deleteComment($_GET['id'], $user)) {
-            $this->output(translate('An error has occurred'), JSON::STATUS_ERROR);
+            return $this->output(
+                translate('An error has occurred'), JSON::STATUS_ERROR
+            );
         }
-        $this->output(translate('Done'), JSON::STATUS_OK);
+        return $this->output(translate('Done'), JSON::STATUS_OK);
     }
 
     /**
@@ -526,10 +538,12 @@ class JSON extends Action
         );
 
         if (PEAR::isError($result)) {
-            $this->output(translate($result->getMessage()), JSON::STATUS_ERROR);
+            return $this->output(
+                translate($result->getMessage()), JSON::STATUS_ERROR
+            );
         }
 
-        $this->output(translate('email_success'), JSON::STATUS_OK);
+        return $this->output(translate('email_success'), JSON::STATUS_OK);
     }
 
     /**
@@ -544,7 +558,7 @@ class JSON extends Action
 
         $user = UserAccount::isLoggedIn();
         if ($user === false) {
-            $this->output(
+            return $this->output(
                 translate('You must be logged in first'), JSON::STATUS_NEED_AUTH
             );
         }
@@ -552,10 +566,12 @@ class JSON extends Action
         $listService = new ListEdit();
         $result = $listService->addList();
         if (PEAR::isError($result)) {
-            $this->output(translate($result->getMessage()), JSON::STATUS_ERROR);
+            return $this->output(
+                translate($result->getMessage()), JSON::STATUS_ERROR
+            );
         }
 
-        $this->output(array('newId'=>$result), JSON::STATUS_OK);
+        return $this->output(array('newId'=>$result), JSON::STATUS_OK);
     }
 
     /**
@@ -582,7 +598,7 @@ class JSON extends Action
         } else {
             $html .= $url . '">' . translate('export_download') . '</a></p>';
         }
-        $this->output(
+        return $this->output(
             array('result'=>translate('Done'), 'result_additional'=>$html),
             JSON::STATUS_OK
         );
@@ -603,13 +619,13 @@ class JSON extends Action
             $deleteFavorites = new Delete();
             $result = $deleteFavorites->deleteFavorites($ids, $listID);
             if (!PEAR::isError($result) && !empty($result['deleteDetails'])) {
-                $this->output(
+                return $this->output(
                     array('result' => translate($result['deleteDetails'])),
                     JSON::STATUS_OK
                 );
             }
         } else {
-             $this->output(array('result'=>translate('delete_missing')));
+             return $this->output(array('result'=>translate('delete_missing')));
         }
     }
 
@@ -688,7 +704,7 @@ class JSON extends Action
             ? $configArray['OpenURL']['resolver'] : 'other';
         $resolver = new ResolverConnection($resolverType);
         if (!$resolver->driverLoaded()) {
-            $this->output(
+            return $this->output(
                 translate("Could not load driver for $resolverType"),
                 JSON::STATUS_ERROR
             );
@@ -725,7 +741,7 @@ class JSON extends Action
         $html = $interface->fetch('AJAX/resolverLinks.tpl');
 
         // output HTML encoded in JSON object
-        $this->output($html, JSON::STATUS_OK);
+        return $this->output($html, JSON::STATUS_OK);
     }
 
     /**
