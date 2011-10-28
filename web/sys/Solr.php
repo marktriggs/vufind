@@ -215,9 +215,8 @@ class Solr implements IndexEngine
             if (count($shards) === 1) {
                 $shardsKeys = array_keys($shards);
                 $this->host = 'http://'.$shards[$shardsKeys[0]];
-            }
-            // else (if more than one shard is used), set shards to query
-            else {
+            } else {
+                // else (if more than one shard is used), set shards to query
                 $this->setShards($shards);
             }
         }
