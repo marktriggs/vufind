@@ -146,7 +146,7 @@ class Record_Functions extends SeleniumTestCase
 
         $this->assertNotVisible("id=popupbox"); // Assert that lightbox is invisible
 
-        /* Test the Text This functionlaity */
+        /* Test the Text This functionality */
         $this->debugPrint("\nTesting Text This Functionality");
 
         $this->click("link=Text this");
@@ -169,7 +169,7 @@ class Record_Functions extends SeleniumTestCase
         $this->debugPrint("\nAsserting if Lightbox was closed\n");
         $this->assertNotVisible("id=popupbox"); // Assert that lightbox is invisible
 
-        /* Test the Email This functionlaity  */
+        /* Test the Email This functionality  */
         $this->debugPrint("\n\nTesting Email This Functionality");
 
         $this->click("link=Email this");
@@ -215,7 +215,7 @@ class Record_Functions extends SeleniumTestCase
 
         $this->assertNotVisible("id=popupbox"); // Assert that lightbox is invisible
 
-        /* Test the Add Fav functionlaity  */
+        /* Test the Add Fav functionality  */
         $this->debugPrint("\n\nTesting Add Fav Functionality");
 
 

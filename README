@@ -26,7 +26,7 @@ III. Bundled Components
     Apache Solr (solr/jetty/webapps/solr.war)
         http://lucene.apache.org/solr/
     NLA Browse Handler (import/browse-indexing.jar; solr/lib/browse-handler.jar)
-        https://code.nla.gov.au/redmine/projects/show/nlabrowse
+        https://github.com/marktriggs/nla-browse-handler
     Jetty (solr/jetty/*)
         http://jetty.codehaus.org/jetty/
     SolrMarc (import/SolrMarc.jar; import/VuFindIndexer.jar)
