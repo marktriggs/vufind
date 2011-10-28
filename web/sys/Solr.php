@@ -210,7 +210,16 @@ class Solr implements IndexEngine
                     $shards[$current] = $configArray['IndexShards'][$current];
                 }
             }
-            $this->setShards($shards);
+            // only set shards if it is necessary
+            // if only one shard is used, take its URL as SOLR-Host-URL
+            if (count($shards) === 1) {
+                $shardsKeys = array_keys($shards);
+                $this->host = 'http://'.$shards[$shardsKeys[0]];
+            }
+            // else (if more than one shard is used), set shards to query
+            else {
+                $this->setShards($shards);
+            }
         }
     }
 
