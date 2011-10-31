@@ -200,6 +200,10 @@ class Hold extends Record
             $this->gatheredDetails = isset($_POST['gatheredDetails'])
                 ? $_POST['gatheredDetails'] : array();
 
+            // Make sure the bib ID is included, even if it's not loaded as part of
+            // the validation loop below.
+            $this->gatheredDetails['id'] = $_GET['id'];
+
             // Get Values Passed from holdings.php
             $i=0;
             foreach ($linkData as $details) {
