@@ -116,9 +116,18 @@ class Hold extends Record
                         'defaultPickUpLocation', $defaultPickUpLocation
                     );
 
-                    // Form Has Been Sucessfully Submitted
                     if (isset($_POST['placeHold'])) {
-                        $this->_placeHold($patron);
+                        // If the form contained a pickup location, make sure that
+                        // the value has not been tampered with:
+                        if (!$this->validatePickUp($extraHoldFields, $libs)) {
+                            $this->assignError(
+                                array('status' => 'error_inconsistent_parameters')
+                            );
+                        } else if ($this->_placeHold($patron)) {
+                            // If we made it this far, we're ready to place the hold;
+                            // if successful, we will redirect and can stop here.
+                            return;
+                        }
                     }
                 }
                 $interface->setPageTitle(
@@ -151,6 +160,33 @@ class Hold extends Record
     }
 
     /**
+     * Check if the user-provided pickup location is valid.
+     *
+     * @param array $extraHoldFields Hold form fields enabled by configuration/driver
+     * @param array $pickUpLibs      Pickup library list from driver
+     *
+     * @return bool
+     * @access protected
+     */
+    protected function validatePickUp($extraHoldFields, $pickUpLibs)
+    {
+        // Not having to care for pickUpLocation is equivalent to having a valid one.
+        if (!in_array('pickUpLocation', $extraHoldFields)) {
+            return true;
+        }
+
+        // Check the valid pickup locations for a match against user input:
+        foreach ($pickUpLibs as $lib) {
+            if ($this->gatheredDetails['pickUpLocation'] == $lib['locationID']) {
+                return true;
+            }
+        }
+
+        // If we got this far, something is wrong!
+        return false;
+    }
+
+    /**
      * Protected method for getting a default due date
      *
      * @return string A formatted default due date
@@ -171,6 +207,25 @@ class Hold extends Record
         );
 
         return $formatDate->convertToDisplayDate("U", $nextMonth);
+    }
+
+    /**
+     * Send an error response to the view.
+     *
+     * @param array $results Place hold response containing an error.
+     *
+     * @return void
+     * @access protected
+     */
+    protected function assignError($results)
+    {
+        global $interface;
+
+        $interface->assign('results', $results);
+
+        // Fail: Display Form for Try Again
+        // Get as much data back as possible
+        $interface->assign('subTemplate', 'hold-submit.tpl');
     }
 
     /**
@@ -232,8 +287,6 @@ class Hold extends Record
      */
     private function _placeHold($patron)
     {
-        global $interface;
-
         // Add Patron Data to Submitted Data
         $holdDetails = $this->gatheredDetails + array('patron' => $patron);
 
@@ -248,10 +301,7 @@ class Hold extends Record
             header('Location: ../../MyResearch/Holds?success=true');
             return true;
         } else {
-            // Fail: Display Form for Try Again
-            // Get as much data back as possible
-            $interface->assign('results', $results);
-            $interface->assign('subTemplate', 'hold-submit.tpl');
+            $this->assignError($results);
         }
         return false;
     }
