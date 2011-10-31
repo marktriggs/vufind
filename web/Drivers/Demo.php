@@ -464,7 +464,7 @@ class Demo implements DriverInterface
      * locationDisplay keys
      * @access public
      */
-    public function getPickUpLocations($patron)
+    public function getPickUpLocations($patron = false)
     {
         return array(
             array(
