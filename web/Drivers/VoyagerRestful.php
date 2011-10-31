@@ -50,6 +50,7 @@ class VoyagerRestful extends Voyager
     protected $ws_patronHomeUbId;
     protected $ws_pickUpLocations;
     protected $defaultPickUpLocation;
+    protected $holdCheckLimit;
 
     /**
      * Constructor
@@ -247,9 +248,8 @@ class VoyagerRestful extends Voyager
      * @param patron $patron An array of patron data
      *
      * @return string True if request is valid, false if not
-     * @access protected
+     * @access public
      */
-    
     public function checkRequestIsValid($id, $data, $patron)
     {
         $mode = CatalogConnection::getHoldsMode();
