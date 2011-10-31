@@ -185,7 +185,8 @@ class HorizonXMLAPI extends Horizon
      *
      * @param array $patron The Patron's ID
      *
-     * @return array        An keyed array where libray id => Library Display Name
+     * @return array        An array of associative arrays with locationID and
+     * locationDisplay keys
      * @access public
      */
     public function getPickUpLocations($patron)

@@ -108,7 +108,8 @@ class Unicorn implements DriverInterface
      *
      * @param array $patron Patron information returned by the patronLogin method.
      *
-     * @return array        An keyed array where libray id => Library Display Name
+     * @return array        An array of associative arrays with locationID and
+     * locationDisplay keys
      * @access public
      */
     public function getPickUpLocations($patron = false)

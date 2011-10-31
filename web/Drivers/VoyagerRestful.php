@@ -344,7 +344,8 @@ class VoyagerRestful extends Voyager
      *
      * @param array $patron Patron information returned by the patronLogin method.
      *
-     * @return array        An keyed array where libray id => Library Display Name
+     * @return array        An array of associative arrays with locationID and
+     * locationDisplay keys
      * @access public
      */
     public function getPickUpLocations($patron = false)
@@ -388,8 +389,7 @@ class VoyagerRestful extends Voyager
      *
      * @param array $patron Patron information returned by the patronLogin method.
      *
-     * @return array        An keyed array where libray id => Library Display Name
-     * @access public
+     * @return string       The default pickup location for the patron.
      */
     public function getDefaultPickUpLocation($patron = false)
     {
