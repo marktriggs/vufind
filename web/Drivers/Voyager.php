@@ -1153,7 +1153,7 @@ class Voyager implements DriverInterface
         $sqlBind = array(':id' => $patron['id']);
 
         $sqlArray = array(
-            'modifier' => $sqlSelectModifer,
+            'modifier' => $sqlSelectModifier,
             'expressions' => $sqlExpressions,
             'from' => $sqlFrom,
             'where' => $sqlWhere,
