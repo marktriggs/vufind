@@ -60,7 +60,7 @@
   {foreach from=$holding item=row}
     {if $row.barcode != ""}
   <tr>
-    <th>{translate text="Copy"} {$row.number}</th>
+    <th>{translate text="Copy"} {$row.number|escape}</th>
     <td>
       {if $row.reserve == "Y"}
       {translate text="On Reserve - Ask at Circulation Desk"}
