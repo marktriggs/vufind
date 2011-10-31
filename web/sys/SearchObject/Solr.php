@@ -866,24 +866,19 @@ class SearchObject_Solr extends SearchObject_Base
         // Find our tag in the database
         $tag = new Tags();
         $tag->tag = $lookfor;
-        $newSearch = array();
+        $tagList = array();
         if ($tag->find(true)) {
             // Grab the list of records tagged with this tag
             $resourceList = array();
             $resourceList = $tag->getResources();
             if (count($resourceList)) {
-                $newSearch[0] = array('join' => 'OR', 'group' => array());
                 foreach ($resourceList as $resource) {
-                    $newSearch[0]['group'][] = array(
-                        'field' => 'id',
-                        'lookfor' => $resource->record_id,
-                        'bool' => 'OR'
-                    );
+                    $tagList[] = $resource->record_id;
                 }
             }
         }
 
-        return $newSearch;
+        return $tagList;
     }
 
     /**
@@ -967,14 +962,14 @@ class SearchObject_Solr extends SearchObject_Base
             // If we managed to find some tag matches, let's override the search
             // array.  If we didn't find any tag matches, we should return an
             // empty record set.
-            $newSearch = $this->_processTagSearch($search[0]['lookfor']);
+            $tagList = $this->_processTagSearch($search[0]['lookfor']);
             // Save search so it displays correctly on the "no hits" page:
-            if (empty($newSearch)) {
+            if (empty($tagList)) {
                 return array(
                     'response' => array('numFound' => 0, 'docs' => array())
                 );
             } else {
-                $search = $newSearch;
+                $this->setQueryIDs($tagList);
             }
         }
 
