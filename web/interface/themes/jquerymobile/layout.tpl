@@ -14,7 +14,7 @@
     </script>
 
     {css filename="jquery.mobile-1.0rc2.min.css"}
-    {js filename="jquery-1.5.1.min.js"}
+    {js filename="jquery-1.6.4.min.js"}
     {js filename="common.js"}
     {js filename="jquery.mobile-1.0rc2.min.js"}
     {js filename="jquery.cookie.js"}
