@@ -230,7 +230,6 @@ function processIds(form, field, mode, module, action, id, lookfor, message, fol
         }
         else {
             postParams = "";
-            message = 'no_items_selected';
         }
 
         // If an array of extra parameters was sent in, add it to the POST string:
