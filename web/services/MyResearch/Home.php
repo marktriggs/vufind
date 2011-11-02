@@ -64,6 +64,16 @@ class Home extends MyResearch
             if (isset($_REQUEST['comment'])) {
                 $followupUrl .= "?comment=" . urlencode($_REQUEST['comment']);
             }
+            if (isset($_REQUEST['extraParams'])
+                && is_array($_REQUEST['extraParams'])
+            ) {
+                $parts = array();
+                foreach ($_REQUEST['extraParams'] as $param) {
+                    $pair = explode("|", $param, 2);
+                    $parts[] = urlencode($pair[0]) . "=". urlencode($pair[1]);
+                }
+                $followupUrl .= "?" . implode('&', $parts);
+            }
             header("Location: " . $followupUrl);
         } else {
             // No follow-up URL; choose the default:

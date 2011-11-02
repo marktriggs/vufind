@@ -63,7 +63,14 @@ class UserComments extends Record
         if (isset($_REQUEST['comment'])) {
             if (!$user) {
                 $interface->assign('recordId', $_GET['id']);
-                $interface->assign('comment', $_REQUEST['comment']);
+                // Use "extraParams" mechanism to make sure that user comment gets
+                // passed safely through login process:
+                $interface->assign(
+                    'extraParams',
+                    array(
+                        array('name' => 'comment', 'value' => $_REQUEST['comment'])
+                    )
+                );
                 $interface->assign('followup', true);
                 $interface->assign('followupModule', 'Record');
                 $interface->assign('followupAction', 'UserComments');
