@@ -120,7 +120,7 @@ class Hold extends Record
                     if (isset($_POST['placeHold'])) {
                         // If the form contained a pickup location, make sure that
                         // the value has not been tampered with:
-                        if (!$this->validatePickUp($extraHoldFields, $libs)) {
+                        if (!$this->validatePickUpInput($extraHoldFields, $libs)) {
                             $this->assignError(
                                 array('status' => 'error_inconsistent_parameters')
                             );
@@ -169,7 +169,7 @@ class Hold extends Record
      * @return bool
      * @access protected
      */
-    protected function validatePickUp($extraHoldFields, $pickUpLibs)
+    protected function validatePickUpInput($extraHoldFields, $pickUpLibs)
     {
         // Not having to care for pickUpLocation is equivalent to having a valid one.
         if (!in_array('pickUpLocation', $extraHoldFields)) {
@@ -177,14 +177,30 @@ class Hold extends Record
         }
 
         // Check the valid pickup locations for a match against user input:
-        foreach ($pickUpLibs as $lib) {
-            if ($this->gatheredDetails['pickUpLocation'] == $lib['locationID']) {
-                return true;
-            }
-        }
+        return $this->validatePickUpLocation(
+            $this->gatheredDetails['pickUpLocation'], $pickUpLibs
+        );
+    }
+
+    /**
+     * Check if the provided pickup location is valid.
+     *
+     * @param string $location   Location to check
+     * @param array  $pickUpLocs Pickup locations list from driver
+     *
+     * @return bool
+     * @access protected
+     */
+    protected function validatePickUpLocation($location, $pickUpLibs)
+    {
+         foreach ($pickUpLibs as $lib) {
+             if ($location == $lib['locationID']) {
+                 return true;
+             }
+         }
 
         // If we got this far, something is wrong!
-        return false;
+         return false;
     }
 
     /**
