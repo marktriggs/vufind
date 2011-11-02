@@ -133,22 +133,22 @@ function readConfig($basePath = 'conf')
  */
 function determineSiteUrl($configArray)
 {
-    if (! empty($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+    if (!empty($_SERVER['HTTP_X_FORWARDED_HOST'])) {
         // This should work with Apache/Nginx reverse proxying, but not
         // with WSGI proxies like Deliverance and Diazo.
         // TODO: Survey why, and how can we get this working
         $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
         $path = $_SERVER['HTTP_X_FORWARDED_PATH'];
-    } else if (! empty($_SERVER['HTTP_X_FORWARDED_SERVER'])) {
+    } else if (!empty($_SERVER['HTTP_X_FORWARDED_SERVER'])) {
         $host = $_SERVER['HTTP_X_FORWARDED_SERVER'];
         $path = $_SERVER['HTTP_X_FORWARDED_PATH'];
     } else {
-        $host
-            = $_SERVER['HTTP_HOST'] . (
-                in_array($_SERVER['SERVER_PORT'], array(80, 443))
-                ? ''
-                : ':'. $_SERVER['SERVER_PORT']
-            );
+        $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
+        if (isset($_SERVER['SERVER_PORT'])
+            && !in_array($_SERVER['SERVER_PORT'], array(80, 443))
+        ) {
+            $host .= ':'. $_SERVER['SERVER_PORT'];
+        }
         $path = $configArray['Site']['path'];
     }
     $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')
