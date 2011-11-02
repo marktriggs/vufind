@@ -342,13 +342,19 @@ class VoyagerRestful extends Voyager
      * This is responsible for gettting a list of valid library locations for
      * holds / recall retrieval
      *
-     * @param array $patron Patron information returned by the patronLogin method.
+     * @param array $patron      Patron information returned by the patronLogin
+     * method.
+     * @param array $holdDetails Optional array, only passed in when getting a list
+     * in the context of placing a hold; contains most of the same values passed to
+     * placeHold, minus the patron data.  May be used to limit the pickup options
+     * or may be ignored.  The driver must not add new options to the return array
+     * based on this data or other areas of VuFind may behave incorrectly.
      *
      * @return array        An array of associative arrays with locationID and
      * locationDisplay keys
      * @access public
      */
-    public function getPickUpLocations($patron = false)
+    public function getPickUpLocations($patron = false, $holdDetails = null)
     {
         if ($this->ws_pickUpLocations) {
             foreach ($this->ws_pickUpLocations as $code => $library) {
@@ -387,11 +393,16 @@ class VoyagerRestful extends Voyager
      *
      * Returns the default pick up location set in VoyagerRestful.ini
      *
-     * @param array $patron Patron information returned by the patronLogin method.
+     * @param array $patron      Patron information returned by the patronLogin
+     * method.
+     * @param array $holdDetails Optional array, only passed in when getting a list
+     * in the context of placing a hold; contains most of the same values passed to
+     * placeHold, minus the patron data.  May be used to limit the pickup options
+     * or may be ignored.
      *
      * @return string       The default pickup location for the patron.
      */
-    public function getDefaultPickUpLocation($patron = false)
+    public function getDefaultPickUpLocation($patron = false, $holdDetails = null)
     {
         return $this->defaultPickUpLocation;
     }
@@ -927,7 +938,7 @@ class VoyagerRestful extends Voyager
 
         // Make Sure Pick Up Library is Valid
         $pickUpValid = false;
-        $pickUpLibs = $this->getPickUpLocations();
+        $pickUpLibs = $this->getPickUpLocations($patron, $holdDetails);
         foreach ($pickUpLibs as $location) {
             if ($location['locationID'] == $pickUpLocation) {
                 $pickUpValid = true;

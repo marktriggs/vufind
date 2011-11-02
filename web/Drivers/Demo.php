@@ -458,13 +458,19 @@ class Demo implements DriverInterface
      * This is responsible get a list of valid library locations for holds / recall
      * retrieval
      *
-     * @param array $patron The Patron's ID
+     * @param array $patron      Patron information returned by the patronLogin
+     * method.
+     * @param array $holdDetails Optional array, only passed in when getting a list
+     * in the context of placing a hold; contains most of the same values passed to
+     * placeHold, minus the patron data.  May be used to limit the pickup options
+     * or may be ignored.  The driver must not add new options to the return array
+     * based on this data or other areas of VuFind may behave incorrectly.
      *
      * @return array        An array of associative arrays with locationID and
      * locationDisplay keys
      * @access public
      */
-    public function getPickUpLocations($patron = false)
+    public function getPickUpLocations($patron = false, $holdDetails = null)
     {
         return array(
             array(
@@ -487,12 +493,17 @@ class Demo implements DriverInterface
      *
      * Returns the default pick up location set in HorizonXMLAPI.ini
      *
-     * @param array $patron Patron information returned by the patronLogin method.
+     * @param array $patron      Patron information returned by the patronLogin
+     * method.
+     * @param array $holdDetails Optional array, only passed in when getting a list
+     * in the context of placing a hold; contains most of the same values passed to
+     * placeHold, minus the patron data.  May be used to limit the pickup options
+     * or may be ignored.
      *
      * @return string A location ID
      * @access public
      */
-    public function getDefaultPickUpLocation($patron = false)
+    public function getDefaultPickUpLocation($patron = false, $holdDetails = null)
     {
         $locations = $this->getPickUpLocations($patron);
         return $locations[0]['locationID'];

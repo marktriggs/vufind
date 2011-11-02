@@ -99,7 +99,9 @@ class Hold extends Record
                     $interface->assign('gatheredDetails', $this->gatheredDetails);
 
                     // Get List of PickUp Libraries
-                    $libs = $this->catalog->getPickUpLocations($patron);
+                    $libs = $this->catalog->getPickUpLocations(
+                        $patron, $this->gatheredDetails
+                    );
                     $interface->assign('pickup', $libs);
                     $interface->assign('home_library', $user->home_library);
 
@@ -110,11 +112,10 @@ class Hold extends Record
                             : array();
                     $interface->assign('extraHoldFields', $extraHoldFields);
 
-                    $defaultPickUpLocation
-                        = $this->catalog->getDefaultPickUpLocation($patron);
-                    $interface->assign(
-                        'defaultPickUpLocation', $defaultPickUpLocation
+                    $defaultPickUpLoc = $this->catalog->getDefaultPickUpLocation(
+                        $patron, $this->gatheredDetails
                     );
+                    $interface->assign('defaultPickUpLocation', $defaultPickUpLoc);
 
                     if (isset($_POST['placeHold'])) {
                         // If the form contained a pickup location, make sure that
