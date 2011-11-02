@@ -186,18 +186,18 @@ class Hold extends Record
      * Check if the provided pickup location is valid.
      *
      * @param string $location   Location to check
-     * @param array  $pickUpLocs Pickup locations list from driver
+     * @param array  $pickUpLibs Pickup locations list from driver
      *
      * @return bool
      * @access protected
      */
     protected function validatePickUpLocation($location, $pickUpLibs)
     {
-         foreach ($pickUpLibs as $lib) {
-             if ($location == $lib['locationID']) {
-                 return true;
-             }
-         }
+        foreach ($pickUpLibs as $lib) {
+            if ($location == $lib['locationID']) {
+                return true;
+            }
+        }
 
         // If we got this far, something is wrong!
          return false;
