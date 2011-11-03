@@ -25,7 +25,7 @@
 {/if}
 {if $showPreviews}
 {if $showGBSPreviews} 
-<script src="http://books.google.com/books?jscmd=viewapi&amp;bibkeys={if $isbn}ISBN{$isbn}{/if}{if $holdingLCCN}{if $isbn},{/if}LCCN{$holdingLCCN}{/if}{if $holdingArrOCLC}{if $isbn|$holdingLCCN},{/if}{foreach from=$holdingArrOCLC item=holdingOCLC name=oclcLoop}OCLC{$holdingOCLC}{if !$smarty.foreach.oclcLoop.last},{/if}{/foreach}{/if}&amp;callback=ProcessGBSBookInfo" type="text/javascript"></script>
+<script src="https://encrypted.google.com/books?jscmd=viewapi&amp;bibkeys={if $isbn}ISBN{$isbn}{/if}{if $holdingLCCN}{if $isbn},{/if}LCCN{$holdingLCCN}{/if}{if $holdingArrOCLC}{if $isbn|$holdingLCCN},{/if}{foreach from=$holdingArrOCLC item=holdingOCLC name=oclcLoop}OCLC{$holdingOCLC}{if !$smarty.foreach.oclcLoop.last},{/if}{/foreach}{/if}&amp;callback=ProcessGBSBookInfo" type="text/javascript"></script>
 {/if}
 {if $showOLPreviews}
 <script src="http://openlibrary.org/api/books?bibkeys={if $isbn}ISBN{$isbn}{/if}{if $holdingLCCN}{if $isbn},{/if}LCCN{$holdingLCCN}{/if}{if $holdingArrOCLC}{if $isbn|$holdingLCCN},{/if}{foreach from=$holdingArrOCLC item=holdingOCLC name=oclcLoop}OCLC{$holdingOCLC}{if !$smarty.foreach.oclcLoop.last},{/if}{/foreach}{/if}&amp;callback=ProcessOLBookInfo" type="text/javascript"></script>

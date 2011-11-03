@@ -108,7 +108,7 @@
 {if $showPreviews}
 <script type="text/javascript">
 {if $showGBSPreviews}
-document.write(unescape("%3Cscript src=http://books.google.com/books?jscmd=viewapi&bibkeys=" + doGetExtIds() + "&callback=ProcessGBSBookInfo" + " type='text/javascript'%3E%3C/script%3E"));
+document.write(unescape("%3Cscript src=https://encrypted.google.com/books?jscmd=viewapi&bibkeys=" + doGetExtIds() + "&callback=ProcessGBSBookInfo" + " type='text/javascript'%3E%3C/script%3E"));
 {/if}
 {if $showOLPreviews}
 document.write(unescape("%3Cscript src=http://openlibrary.org/api/books?bibkeys=" + doGetExtIds() + "&callback=ProcessOLBookInfo" + " type='text/javascript'%3E%3C/script%3E"));
