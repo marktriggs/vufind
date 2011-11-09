@@ -19,7 +19,8 @@
     {js filename="jquery.mobile-1.0rc2.min.js"}
     {js filename="jquery.cookie.js"}
     {js filename="cart_cookie.js"}
-    {js filename="cart.js"}    
+    {js filename="cart.js"}
+    {js filename="scripts.js"}    
     {css filename="styles.css"}
     {css filename="formats.css"}
   </head> 
