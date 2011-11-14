@@ -171,7 +171,7 @@ function exportIDS(ids, format, strings)
             var value = eval('(' + transaction.responseText + ')');
             if (value && value.status == 'OK') {
                 document.getElementById('popupMessages').innerHTML = userParagraph + strings.success + endParagraph;
-                document.getElementById('popupDetails').innerHTML = '<p><a class="save" onClick="hideLightbox();" href="'+path+'/MyResearch/Bulk?exportInit">'+strings.download+'</a></p>';
+                document.getElementById('popupDetails').innerHTML = value.data.result_additional;
                 document.getElementById('popupDetails').style.display = 'block';
             } else if (value && value.result && value.result.length > 0) {
                 var errorDetails = value.result;
