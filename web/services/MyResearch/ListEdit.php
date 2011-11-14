@@ -73,6 +73,9 @@ class ListEdit extends Action
             $_GET['id'] = $_REQUEST['recordId'];
         }
         $interface->assign('recordId', isset($_GET['id']) ? $_GET['id'] : false);
+        $interface->assign(
+            'bulkIDs', isset($_REQUEST['ids']) ? $_REQUEST['ids'] : false
+        );
 
         // Check if user is logged in
         if (!$this->_user) {
@@ -100,6 +103,12 @@ class ListEdit extends Action
                     if (!empty($_REQUEST['recordId'])) {
                         $url = '../Record/' . urlencode($_REQUEST['recordId']) .
                             '/Save';
+                    } if (isset($_REQUEST['ids']) && !empty($_REQUEST['ids'])) {
+                        $parts = array();
+                        foreach ($_REQUEST['ids'] as $id) {
+                            $parts[] = urlencode('ids[]') . '=' . urlencode($id);
+                        }
+                        $url = '../Cart/Home?saveCart=&' . implode('&', $parts);
                     } else {
                         $url = 'Home';
                     }

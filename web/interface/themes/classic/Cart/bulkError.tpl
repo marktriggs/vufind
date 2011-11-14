@@ -1,9 +1,11 @@
 <div class="alignleft">
   {if $errorMsg}<div class="error">{$errorMsg|translate}</div>{/if}
-  {if $infoMsg}<div class="info">{$infoMsg|translate}</div>{/if}
+  {if $infoMsg}<div class="userMsg">{$infoMsg|translate}</div>{/if}
 
   <div id="popupMessages"></div>
   <div id="popupDetails">
-    <div class="info">{translate text="bulk_noitems_advice"}</div>
+    {if $detailedMsg}
+      <div class="userMsg">{translate text=$detailedMsg}</div>
+    {/if}
   </div>
 </div>

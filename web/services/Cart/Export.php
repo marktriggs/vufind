@@ -1,6 +1,6 @@
 <?php
 /**
- * Export action for MyResearch module.
+ * Bulk Exporter
  *
  * PHP version 5
  *
@@ -20,38 +20,25 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * @category VuFind
- * @package  Controller_MyResearch
- * @author   Luke O'Sullivan <vufind-tech@lists.sourceforge.net>
+ * @package  Controller_Cart
+ * @author   Luke O'Sullivan <l.osullivan@swansea.ac.uk>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
 
-require_once 'Action.php';
-require_once 'sys/Language.php';
-require_once 'services/MyResearch/MyResearch.php';
-require_once 'RecordDrivers/Factory.php';
+require_once 'Bulk.php';
 
 /**
- * Export action for MyResearch module.
+ * Bulk Exporter
  *
  * @category VuFind
- * @package  Controller_MyResearch
- * @author   Luke O'Sullivan <vufind-tech@lists.sourceforge.net>
+ * @package  Bulk_Emailer
+ * @author   Luke O'Sullivan <l.osullivan@swansea.ac.uk>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-class Export extends MyResearch
+class Export extends Bulk
 {
-    /**
-     * Constructor
-     *
-     * @access public
-     */
-    public function __construct()
-    {
-        // Do not require login for export:
-        parent::__construct(true);
-    }
 
     /**
      * Process parameters and display the page.
@@ -65,18 +52,6 @@ class Export extends MyResearch
         global $interface;
 
         $doExport = false;
-
-        if (isset($_REQUEST['followup'])) {
-            $this->followupUrl =  $configArray['Site']['url'] . "/". 
-                $_REQUEST['followupModule'];
-            $this->followupUrl .= "/" . $_REQUEST['followupAction'];
-        } else if (isset($_REQUEST['listID']) && !empty($_REQUEST['listID'])) {
-            $this->followupUrl = $configArray['Site']['url'] . 
-                "/MyResearch/MyList/" . urlencode($_REQUEST['listID']);
-        } else {
-            $this->followupUrl = $configArray['Site']['url'] . 
-                "/MyResearch/Favorites";
-        }
 
         // Check for Session Info
         if (isset($_REQUEST['exportInit'])) {
@@ -107,14 +82,15 @@ class Export extends MyResearch
     {
         global $configArray;
 
-        if (strtolower($_POST['format']) == 'refworks') {
+        if (strtolower($_REQUEST['format']) == 'refworks') {
             // can't pass the ids through the session, so need to stringify
-            $id_str = '';
-            foreach ($_POST['ids'] as $id) {
-                $id_str .= '&ids[]='.urlencode($id);
+            $parts = array();
+            foreach ($ids as $id) {
+                $parts[] = urlencode('ids[]') . '=' . urlencode($id);
             }
+            $id_str = implode('&', $parts);
             // Build the URL to pass data to RefWorks:
-            $exportUrl = $configArray['Site']['url'] . '/MyResearch/Bulk' .
+            $exportUrl = $configArray['Site']['url'] . '/Cart/Home' .
                 '?export=true&exportInit=true&exportToRefworks=true' . $id_str;
             // Build up the RefWorks URL:
             return $configArray['RefWorks']['url'] . '/express/expressimport.asp' .
@@ -123,11 +99,12 @@ class Export extends MyResearch
         }
 
         // Default case:
-        return $configArray['Site']['url'] . '/MyResearch/Export?exportInit';
+        return $configArray['Site']['url'] . '/Cart/Home?exportInit';
     }
 
     /**
-     * Support method - process incoming parameters.
+     * Process submitted details
+     * Display error page on terminal error, success page on successs
      *
      * @return void
      * @access private
@@ -135,9 +112,9 @@ class Export extends MyResearch
     private function _processSubmit()
     {
         // Check for essentials
-        if (isset($_POST['format']) && isset($_POST['ids'])) {
-            $_SESSION['exportIDS'] =  $_POST['ids'];
-            $_SESSION['exportFormat'] = $_POST['format'];
+        if (isset($_REQUEST['format']) && isset($_REQUEST['ids'])) {
+            $_SESSION['exportIDS'] =  $_REQUEST['ids'];
+            $_SESSION['exportFormat'] = $_REQUEST['format'];
 
             if ($_SESSION['exportIDS'] && $_SESSION['exportFormat']) {
                 // Special case -- for RefWorks, go directly there;
@@ -186,10 +163,11 @@ class Export extends MyResearch
     }
 
     /**
-     * Support method - export records based on settings saved in the session
-     * (generally by a prior AJAX call).
+     * Begin Export
+     * Set headers for download and "display" file for export on success or error
+     * message on failure
      *
-     * @return void
+     * @return boolean false On unrecoverable error
      * @access private
      */
     private function _exportInit()
@@ -230,7 +208,7 @@ class Export extends MyResearch
 
             if ($export) {
                 $interface->assign('bulk', $result['exportDetails']);
-                $interface->display('MyResearch/export/bulk.tpl');
+                $interface->display('Cart/export/bulk.tpl');
                 return true;
             } else {
                 $this->errorMsg = 'bulk_fail';
@@ -256,10 +234,10 @@ class Export extends MyResearch
 
         $exportList = array();
 
-        // Extract the current set of export options from the interface (they were
-        // assigned by the parent class based on config settings).  We'll filter
-        // them down based on what the selected records actually support.
-        $formats = $interface->get_template_vars('exportOptions');
+        // Get the export options determined by the parent class based on config
+        // settings.  We'll filter them down based on what the selected records
+        // actually support.
+        $formats = $this->exportOptions;
 
         foreach ($ids as $id) {
             $record = $this->db->getRecord($id);
@@ -287,7 +265,8 @@ class Export extends MyResearch
     }
 
     /**
-     * Support method - display content inside a lightbox.
+     * Process Light Box Request
+     * Display error message on terminal error or export details page on success
      *
      * @return void
      * @access private
@@ -297,21 +276,22 @@ class Export extends MyResearch
         global $configArray;
         global $interface;
 
-        if (!empty($_POST['ids'])) {
+        if (!empty($_REQUEST['ids'])) {
             // Assign Item Info
             $interface->assign('exportIDS', $_POST['ids']);
-            $this->_assignExportList($_POST['ids']);
+            $this->_assignExportList($_REQUEST['ids']);
             $interface->assign('title', $_GET['message']);
-            return $interface->fetch('MyResearch/export.tpl');
+            return $interface->fetch('Cart/export.tpl');
         } else {
-            $interface->assign('title', translate('bulk_fail'));
-            $interface->assign('errorMsg', $_GET['message']);
-            return $interface->fetch('MyResearch/bulkError.tpl');
+            $interface->assign('title', $_GET['message']);
+            $interface->assign('errorMsg', 'bulk_noitems_advice');
+            return $interface->fetch('Cart/bulkError.tpl');
         }
     }
 
     /**
-     * Support method - display content outside of a lightbox.
+     * Process Non-LightBox Request
+     * Display error message on terminal error or email details page on success
      *
      * @return void
      * @access private
@@ -322,10 +302,10 @@ class Export extends MyResearch
         global $interface;
 
         // Assign IDs
-        if (isset($_POST['selectAll']) && is_array($_POST['idsAll'])) {
-            $ids = $_POST['idsAll'];
-        } else if (isset($_POST['ids'])) {
-            $ids = $_POST['ids'];
+        if (isset($_REQUEST['selectAll']) && is_array($_REQUEST['idsAll'])) {
+            $ids = $_REQUEST['idsAll'];
+        } else if (isset($_REQUEST['ids'])) {
+            $ids = $_REQUEST['ids'];
         }
         $_POST['ids'] = "";
         // Check we have an array of IDS
@@ -337,12 +317,17 @@ class Export extends MyResearch
             $interface->assign('subTemplate', 'export.tpl');
             $interface->assign('exportIDS', $ids);
             $this->_assignExportList($ids);
-            // If we're on a particular list, save the ID so we can redirect to
-            // the appropriate page after exporting.
-            if (isset($_REQUEST['listID']) && !empty($_REQUEST['listID'])) {
-                $interface->assign('listID', $_REQUEST['listID']);
+
+            if ($this->origin == "Favorites") {
+                $interface->assign('followupModule', "MyResearch");
+                $interface->assign('followupAction', "Favorites");
+                // If we're on a particular list, save the ID so we can redirect to
+                // the appropriate page after exporting.
+                if (isset($_REQUEST['listID']) && !empty($_REQUEST['listID'])) {
+                    $interface->assign('listID', $_REQUEST['listID']);
+                }
             }
-            $interface->setTemplate('view-alt.tpl');
+            $interface->setTemplate('view.tpl');
             $interface->display('layout.tpl');
         } else {
             // Without an array of IDS, we can't perform any operations
@@ -354,13 +339,13 @@ class Export extends MyResearch
     }
 
     /**
-     * Perform a bulk export operation.
+     * Get record and export data
+     * Display error message on terminal error or email details page on success
      *
-     * @param string $format Format to export (should be a valid value for the
-     * getExport method of the record driver)
-     * @param array  $ids    IDs to export
+     * @param string $format The desired export format
+     * @param array  $ids    A list of bib IDs
      *
-     * @return array         Exported documents
+     * @return array Record data for each ID, plus an list of IDs without results
      * @access public
      */
     public function exportAll($format, $ids)

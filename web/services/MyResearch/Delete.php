@@ -163,9 +163,9 @@ class Delete extends MyResearch
             $interface->assign('title', $_GET['message']);
             return $interface->fetch('MyResearch/delete.tpl');
         } else {
-            $interface->assign('title', translate('bulk_fail'));
-            $interface->assign('errorMsg', $_GET['message']);
-            return $interface->fetch('MyResearch/bulkError.tpl');
+            $interface->assign('title', $_GET['message']);
+            $interface->assign('errorMsg', 'bulk_noitems_advice');
+            return $interface->fetch('Cart/bulkError.tpl');
         }
     }
 
@@ -203,7 +203,7 @@ class Delete extends MyResearch
             $interface->assign('subTemplate', 'delete.tpl');
             $interface->assign('deleteIDS', $ids);
             $interface->assign('deleteList', $this->_getDeleteList($ids));
-            $interface->setTemplate('view-alt.tpl');
+            $interface->setTemplate('../MyResearch/view-alt.tpl');
             $interface->display('layout.tpl');
         } else {
             // Without an array of IDS, we can't perform any operations

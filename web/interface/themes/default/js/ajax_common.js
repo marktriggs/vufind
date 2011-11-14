@@ -135,7 +135,7 @@ function SendIDEmail(to, from, ids, message, strings)
                  "from=" + encodeURIComponent(from) + "&" +
                  "to=" + encodeURIComponent(to) + "&" +
                  "message=" + encodeURIComponent(message);
-    sendAJAXEmail(params, strings, 'emailSearch');
+    sendAJAXEmail(params, strings, 'emailBulk');
 }
 
 /* Given a string of ids and a set of parameters, use AJAX to export favorites; this assumes

@@ -522,6 +522,31 @@ class JSON extends Action
     }
 
     /**
+     * Email Bulk Results
+     *
+     * @return void
+     * @access public
+     */
+    public function emailBulk()
+    {
+        include_once 'services/Cart/Email.php';
+
+        $emailService = new Email();
+        $result = $emailService->sendEmail(
+            $_REQUEST['url'], $_REQUEST['to'], $_REQUEST['from'],
+            $_REQUEST['message']
+        );
+
+        if (PEAR::isError($result)) {
+            return $this->output(
+                translate($result->getMessage()), JSON::STATUS_ERROR
+            );
+        }
+
+        return $this->output(translate('email_success'), JSON::STATUS_OK);
+    }
+
+    /**
      * Email Search Results
      *
      * @return void
@@ -584,7 +609,7 @@ class JSON extends Action
      */
     public function exportFavorites()
     {
-        include_once 'services/MyResearch/Export.php';
+        include_once 'services/Cart/Export.php';
 
         global $configArray;
         $_SESSION['exportIDS'] =  $_POST['ids'];
@@ -602,6 +627,47 @@ class JSON extends Action
             array('result'=>translate('Done'), 'result_additional'=>$html),
             JSON::STATUS_OK
         );
+    }
+
+    /**
+     * Saves records to a User's favorites
+     *
+     * @return void
+     * @access public
+     */
+    public function bulkSave()
+    {
+        // Without IDs, we can't continue
+        if (empty($_REQUEST['ids'])) {
+            return $this->output(
+                array('result'=>translate('bulk_error_missing')),
+                JSON::STATUS_ERROR
+            );
+        }
+
+        include_once 'services/Cart/Save.php';
+
+        $user = UserAccount::isLoggedIn();
+        if ($user === false) {
+            return $this->output(
+                translate('You must be logged in first'), JSON::STATUS_NEED_AUTH
+            );
+        }
+
+        $saveService = new Save();
+        $result = $saveService->saveRecord();
+        if ($result) {
+            return $this->output(
+                array('result' => $result, 'info' => translate("bulk_save_success")),
+                JSON::STATUS_OK
+            );
+        } else {
+            return $this->output(
+                array('info' => translate('bulk_save_error')),
+                JSON::STATUS_ERROR
+            );
+        }
+
     }
 
     /**
@@ -625,8 +691,31 @@ class JSON extends Action
                 );
             }
         } else {
-             return $this->output(array('result'=>translate('delete_missing')));
+             return $this->output(
+                 array('result'=>translate('delete_missing')), JSON::STATUS_ERROR
+             );
         }
+    }
+
+    /**
+     * Delete records from a User's cart
+     *
+     * @return void
+     * @access public
+     */
+    public function removeItemsCart()
+    {
+        include_once 'services/Cart/Cart.php';
+        $cart = new Cart();
+        // Without IDs, we can't continue
+        if (empty($_POST['ids'])) {
+            $this->output(
+                array('result'=>translate('bulk_error_missing')),
+                JSON::STATUS_ERROR
+            );
+        }
+        $cart->cart->removeItems($_REQUEST['ids']);
+        return $this->output(array('delete' => true), JSON::STATUS_OK);
     }
 
     /**
@@ -679,7 +768,7 @@ class JSON extends Action
         } else {
             echo translate('Cannot Load Action');
         }
-        $interface->display('AJAX/lightbox.tpl');
+        return $interface->display('AJAX/lightbox.tpl');
     }
 
     /**
@@ -940,7 +1029,7 @@ class JSON extends Action
         $interface->assign('statusItems', $items);
         return empty($items) ? '': $interface->fetch('AJAX/status-full.tpl');
     }
-    
+
     /**
      * Generate the "salt" used in the salt'ed login request.
      *

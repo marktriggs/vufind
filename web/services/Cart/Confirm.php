@@ -1,6 +1,6 @@
 <?php
 /**
- * Confirm action for MyResearch Module
+ * Confirm action for Bulk Module
  *
  * PHP version 5
  *
@@ -20,16 +20,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * @category VuFind
- * @package  Controller_MyResearch
+ * @package  Controller_Cart
  * @author   Luke O'Sullivan <vufind-tech@lists.sourceforge.net>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
 
-require_once 'MyResearch.php';
+require_once 'Bulk.php';
 
 /**
- * Confirm action for MyResearch Module
+ * Confirm action for Bulk Module
  *
  * @category VuFind
  * @package  Controller_MyResearch
@@ -37,7 +37,7 @@ require_once 'MyResearch.php';
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_a_module Wiki
  */
-class Confirm extends MyResearch
+class Confirm extends Bulk
 {
     /**
      * Process parameters and display the page.
@@ -52,11 +52,11 @@ class Confirm extends MyResearch
 
         // Delete List Confirmation
         if (isset($_POST['deleteList']) && isset($_POST['listID'])) {
-            if ($_POST['confirm']) {
+            if ($_POST['confirmAction']) {
                 include_once 'services/MyResearch/MyList.php';
                 $myList = new MyList();
                 $myList->launch();
-            } else if ($_POST['cancel']) {
+            } else if ($_POST['cancelAction']) {
                 $followupUrl =  $configArray['Site']['url'] .
                     "/MyResearch/MyList/" . urlencode($_POST['listID']);
                 header(
@@ -69,7 +69,18 @@ class Confirm extends MyResearch
                 $interface->assign('listName', $_POST['listName']);
                 $interface->setpageTitle('delete_list');
                 $this->infoMsg = 'confirm_delete_list_text';
-                return $this->_display();
+
+                // Set Messages
+                $interface->assign('infoMsg', $this->infoMsg);
+                $interface->assign('errorMsg', $this->errorMsg);
+                $interface->assign('origin', $this->origin);
+
+                // Display Page
+                if (isset($_GET['lightbox'])) {
+                    return $this->_displayLightBox();
+                } else {
+                    $this->_displayNonLightBox();
+                }
             }
         }
         // If we get this far, we're missing some vital information
@@ -78,26 +89,28 @@ class Confirm extends MyResearch
     /**
      * Private support method -- display the confirmation dialog.
      *
+     * @return Template
+     * @access private
+     */
+    private function _displayLightBox()
+    {
+        global $interface;
+        $interface->assign('title', $_GET['message']);
+        return $interface->fetch('Cart/confirm.tpl');
+    }
+
+    /**
+     * Private support method -- display the confirmation dialog.
+     *
      * @return void
      * @access private
      */
-    private function _display()
+    private function _displayNonLightBox()
     {
         global $interface;
-
-        // Set Messages
-        $interface->assign('infoMsg', $this->infoMsg);
-        $interface->assign('errorMsg', $this->errorMsg);
-
-        // Display Page
-        if (isset($_GET['lightbox'])) {
-            $interface->assign('title', $_GET['message']);
-            return $interface->fetch('MyResearch/confirm.tpl');
-        } else {
-            $interface->assign('subTemplate', 'confirm.tpl');
-            $interface->setTemplate('view-alt.tpl');
-            $interface->display('layout.tpl');
-        }
+        $interface->assign('subTemplate', 'confirm.tpl');
+        $interface->setTemplate('view.tpl');
+        $interface->display('layout.tpl');
     }
 }
 

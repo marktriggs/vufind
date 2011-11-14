@@ -84,6 +84,10 @@ label.invalid {
     display:inline;
 }
 
+div#modalDialog {
+    text-align: left;
+}
+
 div.dialogLoading {
     background: url(../images/dialog_loading.gif) no-repeat center center;
     height:100%;
@@ -116,21 +120,43 @@ p.listDescription {
 
 div.bulkActionButtons {
     border-bottom: 1px solid #eee;
+    padding: 1em 0;
 }
-div.bulkActionButtons input {
-     margin-right: 5px;
+div.bulkActionButtons input, div.bulkActionButtons label, div.bulkActionButtons span {
+     margin-right: 10px;
 }
-input.smallButton {
+
+div.bulkActionButtons a {
+    padding-bottom: 0.2em;
+}
+
+div.bulkActionButtons input.button {
+    background-color:transparent;
     background-position: 2px center;
-    padding: 2px 2px 2px 25px;
+    text-decoration: underline;
+    border:0 none;
+    cursor:pointer;
+    padding:0 0 0 23px;
+    vertical-align: top;
+    color: #06C;
+}
+
+div.bulkActionButtons input.button {
+    width: 0;  /* IE table-cell margin fix */
+    overflow: visible;
+}
+
+div.bulkActionButtons input.button[class] {  /* IE < 7 ignores [class] */
+    width: auto;  /* cancel margin fix for other browsers */
+}
+
+div.bulkActionButtons input.checkbox {
+    vertical-align: top;
 }
 
 /** Cart **/
-#cartSummary {
+.cartSummary {
     float:right;
-    width: 90px;
-    padding: 2px;
-    text-align: right;
 }
 ul.cartContent {
     list-style-type:none;
@@ -306,7 +332,7 @@ ul.recordSet li {
 ul.recordSet li.alt {
     background-color: #eee;
 }
-ul.recordSet input.checkbox {
+ul.recordSet input.checkbox_ui {
     float: left;
     margin-top: 3em;
     margin-left: -1em;
@@ -407,32 +433,40 @@ dl.narrowList a {
 
 /* Icon Classes */
 
-.cart {
-    background-image:url(../images/silk/cart.png);
+.bookbag {
+    background-image:url(../images/fugue/bookbag.png);
     background-repeat:no-repeat;
     background-position: left top;
     padding:0 .5em .5em 20px;
     margin-right:1em;
 }
 
-.cartView {
-    background-image:url(../images/silk/cart_go.png);
+.bookbagView {
+    background-image:url(../images/fugue/bookbag.png);
     background-repeat:no-repeat;
     background-position: left top;
     padding:0 .5em .5em 20px;
     margin-right:1em;
 }
 
-.cartAdd {
-    background-image:url(../images/silk/cart_put.png);
+.bookbagAdd {
+    background-image:url(../images/fugue/bookbagAdd.png);
     background-repeat:no-repeat;
     background-position: left top;
     padding:0 .5em .5em 20px;
     margin-right:1em;
 }
 
-.cartEmpty {
-    background-image:url(../images/silk/cart_delete.png);
+.bookbagDelete {
+    background-image:url(../images/fugue/bookbagDelete.png);
+    background-repeat:no-repeat;
+    background-position: left top;
+    padding:0 .5em .5em 20px;
+    margin-right:1em;
+}
+
+.bookbagEmpty {
+    background-image:url(../images/fugue/bookbagEmpty.png);
     background-repeat:no-repeat;
     background-position: left top;
     padding:0 .5em .5em 20px;
@@ -757,12 +791,12 @@ dl.narrowList a {
 .checkRequest {
     background-image:url(../images/fugue/checkRequest.png);
     background-repeat:no-repeat;
-    padding-left:18px;   
+    padding-left:18px;
 }
 .holdBlocked {
     background-image:url(../images/fugue/holdBlocked.png);
     background-repeat:no-repeat;
-    padding-left:18px;   
+    padding-left:18px;
 }
 
 /***** Pagination *****/
@@ -806,10 +840,10 @@ div.recordsubcontent {
 }
 
 /* hack to hide redundant titles introduced by syndetics plus */
-#syn_nyreview .syn_title, 
-#syn_chreview .syn_title, 
-#syn_dbchapter .syn_title, 
-#syn_anotes .syn_title, 
+#syn_nyreview .syn_title,
+#syn_chreview .syn_title,
+#syn_dbchapter .syn_title,
+#syn_anotes .syn_title,
 #syn_video_clip .syn_title {
     display:none;
 }
@@ -1362,12 +1396,12 @@ ul.suggestion li{
 
 /* Europeana recommendation images */
 .europeanaImage {
-    width:65px; 
+    width:65px;
     border: 1px solid white;
 }
 
 .europeanaImg {
-    float:left; 
+    float:left;
     margin-right: 10px;
 }
 
@@ -1452,4 +1486,108 @@ table.summHoldings .statusColumn {
 }
 a.summHoldings {
     font-size: smaller;
+}
+/*****************contextHelp*******************/
+
+table#contextHelp td, table#contextHelp tr {
+    padding: 0;
+}
+
+table#contextHelp {
+    z-index: 1;
+    display: none;
+    position: absolute;
+    border-spacing: 0;
+    border-collapse: collapse;
+    max-width: 400px;
+    top: 0;
+}
+table#contextHelp tr.top td, table#contextHelp tr.bottom td {
+    background-image: url(../images/contextHelp.png);
+    background-repeat: repeat-x;
+    height: 9px;
+}
+table#contextHelp tr.top td.left {
+    background-position: 0 0;
+    width: 4px;
+}
+table#contextHelp tr.top td.center {
+    background-position: 0 100%;
+}
+table#contextHelp tr.top td.right {
+    background-position: -4px 0;
+    width: 4px;
+}
+table#contextHelp tr.bottom td.left {
+    background-position: -12px 0;
+    width: 4px;
+}
+table#contextHelp tr.bottom td.center {
+    background-position: 0 -9px;
+}
+table#contextHelp tr.bottom td.right {
+    background-position: -8px 0;
+    width: 4px;
+}
+table#contextHelp tr.middle td{
+    background: #ededed;
+}
+table#contextHelp td.body {
+    padding: 12px 10px;
+    background: #ededed;
+}
+table#contextHelp td.body h2 {
+    font-size: 1.4em;
+    margin-bottom: 5px;
+    color: #2D4687;
+    font-weight: bold;
+}
+table#contextHelp a {
+    color: #04778E;
+    /*border-bottom: solid 1px #ACD4DB;*/
+    text-decoration: underline;
+    font-weight: bold;
+}
+table#contextHelp a:hover {
+    color: #024A59;
+    /*border-color: #82A1A5;*/
+}
+table#contextHelp div.arrow {
+    height: 6px;
+    background-image: url(../images/contextHelp-arrow.png);
+    background-repeat: no-repeat;
+    margin: 0 15px;
+}
+table#contextHelp div.arrow.down {
+    background-position: 0 -6px;
+    margin-top: 3px;
+}
+table#contextHelp div.arrow.up {
+    background-position: 0 0;
+    margin-bottom: 3px;
+}
+table#contextHelp p {
+    font-size: 0.9em;
+    text-align: left;
+    font-weight: bold;
+}
+table#contextHelp p.separator {
+    background: url(../images/dashed-line-grey.gif) 0 top repeat-x scroll;
+    margin-top:15px;
+    padding-top:15px;
+}
+div#closeContextHelp {
+    float: right;
+    width: 16px;
+    height: 16px;
+    margin-top: -6px;
+    margin-right:-4px;
+    background: url(../images/cross-stack.png) 0 0;
+    cursor: pointer;
+}
+div#closeContextHelp:hover {
+    background-position: 0 -16px;
+}
+div#closeContextHelp:active {
+    background-position: 0 -32px;
 }

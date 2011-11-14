@@ -27,6 +27,7 @@
  */
 require_once 'Smarty/Smarty.class.php';
 require_once 'sys/mobile_device_detect.php';
+require_once 'sys/Cart_Model.php';
 
 /**
  * Smarty Extension class
@@ -128,6 +129,13 @@ class UInterface extends Smarty
         $this->assign(
             'retainFiltersByDefault', $searchObject->getRetainFilterSetting()
         );
+        
+        if (isset($configArray['Site']['showBookBag'])) {
+            $this->assign(
+                'bookBag', ($configArray['Site']['showBookBag']) 
+                ? Cart_Model::getInstance() : false
+            );
+        }
 
         if (isset($configArray['OpenURL'])
             && isset($configArray['OpenURL']['url'])
