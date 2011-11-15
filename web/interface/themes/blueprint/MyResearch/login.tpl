@@ -1,7 +1,7 @@
 <h2>{translate text='Login'}</h2>
 {if $message}<div class="error">{$message|translate}</div>{/if}
 {if $authMethod != 'Shibboleth'}
-  <form method="post" action="{$url}/MyResearch/Home" name="loginForm">
+  <form method="post" action="{$url}/MyResearch/Home" name="loginForm" id="loginForm">
     <label class="span-2" for="login_username">{translate text='Username'}:</label>
     <input id="login_username" type="text" name="username" value="{$username|escape}" size="15" class="mainFocus {jquery_validation required='This field is required'}"/>
     <br class="clear"/>
@@ -20,5 +20,12 @@
     {/if}
     <div class="clear"></div>
   </form>
+  <script>
+    {literal}
+    $(document).ready(function() {
+      $('#loginForm').validate();
+    });
+    {/literal}
+  </script>
   {if $authMethod == 'DB'}<a class="new_account" href="{$url}/MyResearch/Account">{translate text='Create New Account'}</a>{/if}
 {/if}
