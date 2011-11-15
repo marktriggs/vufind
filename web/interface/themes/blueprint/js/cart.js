@@ -2,11 +2,11 @@ var _CART_COOKIE = 'vufind_cart';
 var _CART_COOKIE_DELIM = "\t";
 
 $(document).ready(function() {
-    
+
     var cartRecordId = $('#cartId').val();
     $('#cartItems').hide();
     $('#viewCart, #updateCart, #updateCartBottom').removeClass('offscreen');
-    
+
     // Record
     $('#recordCart').removeClass('offscreen').click(function() {
         if(cartRecordId != undefined) {
@@ -21,22 +21,22 @@ $(document).ready(function() {
         return false;
     });
     redrawCartStatus()
-    var $form = $('form[name="bulkActionForm"]');    
+    var $form = $('form[name="bulkActionForm"]');
     registerUpdateCart($form);
-    
+
 });
 
 function registerUpdateCart($form) {
-    if($form) {    
+    if($form) {
         $("#updateCart, #updateCartBottom").unbind('click').click(function(){
-        	var elId = this.id;
+            var elId = this.id;
             var selected = $("input[name='ids[]']:checked", $form);
             var cleanSelected = [];
             $(selected).each(function(i) {
                 var item = this.value.replace('[^a-z0-9]','');
                 cleanSelected[i] = item;
             });
-            
+
             if (cleanSelected.length > 0) {
                 var inCart = 0;
                 var msg = "";
@@ -88,7 +88,7 @@ function getItemsFromCartCookie() {
     if (cookie) {
         var cart = cookie.split(_CART_COOKIE_DELIM);
         return cart ? cart : Array();
-    } 
+    }
     return Array();
 }
 

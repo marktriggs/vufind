@@ -47,18 +47,18 @@ class PrintCart extends Bulk
      * @return void
      * @access public
      */
-    function launch()
+    public function launch()
     {
         global $interface;
         global $configArray;
-        
+
         // Assign IDs
         if (isset($_REQUEST['selectAll']) && is_array($_REQUEST['idsAll'])) {
             $ids = $_REQUEST['idsAll'];
         } else if (isset($_REQUEST['ids'])) {
             $ids = $_REQUEST['ids'];
         }
-        
+
         // Without IDs, we can't continue
         if (empty($ids)) {
             header(
@@ -67,8 +67,8 @@ class PrintCart extends Bulk
             exit();
         }
 
-        $this->followupUrl = $configArray['Site']['url'] . 
-            "/Search/Results?lookfor=" . urlencode(implode(" ", $ids)) . 
+        $this->followupUrl = $configArray['Site']['url'] .
+            "/Search/Results?lookfor=" . urlencode(implode(" ", $ids)) .
             "&type=ids&print=true";
         header("Location: " . $this->followupUrl);
         exit();

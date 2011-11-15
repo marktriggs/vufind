@@ -89,17 +89,19 @@ class Cart extends Bulk
     /**
      * Add Items to Cart
      *
+     * @param array $ids IDs to add
+     *
      * @return void
-     * @access protected
+     * @access private
      */
     private function _addItems($ids)
     {
         if (!empty($ids)) {
             $addItems = $this->cart->addItems($ids);
-            if(!$addItems['success']) {
-                $this->infoMsg = translate(bookbag_full_msg) . ". " .
+            if (!$addItems['success']) {
+                $this->infoMsg = translate('bookbag_full_msg') . ". " .
                 $addItems['notAdded'] . " " .
-                translate(items_already_in_bookbag) . ".";
+                translate('items_already_in_bookbag') . ".";
             }
         } else {
             $this->errorMsg = "bulk_noitems_advice";
@@ -109,8 +111,10 @@ class Cart extends Bulk
     /**
      * Delete Items from Cart
      *
+     * @param array $ids IDs to delete.
+     *
      * @return void
-     * @access protected
+     * @access private
      */
     private function _deleteItems($ids)
     {
