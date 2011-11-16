@@ -64,6 +64,35 @@ class InnovativeTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test the ID formatter based on different configurations:
+     *
+     * @return void
+     * @access public
+     */
+    public function testPrepID()
+    {
+        // Test that RecordID:use_full_id setting defaults to true:
+        $iii = new InnovativeTestHarness(
+            '../../tests/web/conf/InnovativeNoIdSetting.ini'
+        );
+        $this->assertEquals($iii->testPrepID('.b1000167x'), '1000167');
+
+        // Test for correct value when RecordID:use_full_id is true and full ID
+        // is passed in:
+        $iii = new InnovativeTestHarness(
+            '../../tests/web/conf/InnovativeFullId.ini'
+        );
+        $this->assertEquals($iii->testPrepID('.b1000167x'), '1000167');
+
+        // Test for correct value when RecordID:use_full_id is false and stripped ID
+        // is passed in:
+        $iii = new InnovativeTestHarness(
+            '../../tests/web/conf/InnovativeNonFullId.ini'
+        );
+        $this->assertEquals($iii->testPrepID('b1000167'), '1000167');
+    }
+
+    /**
      * Standard teardown method.
      *
      * @return void
@@ -71,6 +100,31 @@ class InnovativeTest extends PHPUnit_Framework_TestCase
      */
     public function tearDown()
     {
+    }
+}
+
+/**
+ * Innovative ILS Driver Test Harness
+ *
+ * @category VuFind
+ * @package  Tests
+ * @author   Demian Katz <demian.katz@villanova.edu>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/unit_tests Wiki
+ */
+class InnovativeTestHarness extends Innovative
+{
+    /**
+     * Expose protected method as public for the purposes of testing.
+     *
+     * @param string $id ID to format
+     *
+     * @return string
+     * @access public
+     */
+    public function testPrepID($id)
+    {
+        return parent::prepID($id);
     }
 }
 ?>

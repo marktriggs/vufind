@@ -47,14 +47,43 @@ class Innovative implements DriverInterface
     /**
      * Constructor
      *
+     * @param string $configFile The location of an alternative config file
+     *
      * @access public
      */
-    public function __construct()
+    public function __construct($configFile = false)
     {
         // Load Configuration for this Module
+        $filename = $configFile === false ? 'Innovative.ini' : $configFile;
         $this->config = parse_ini_file(
-            dirname(__FILE__) . '/../conf/Innovative.ini', true
+            dirname(__FILE__) . '/../conf/' . $filename, true
         );
+    }
+
+    /**
+     * prepID
+     *
+     * This function returns the correct record id format as defined
+     * in the Innovative.ini file.
+     *
+     * @param string $id ID to format
+     *
+     * @return string
+     * @access protected
+     */
+    protected function prepID($id)
+    {
+        // Get the ID format from config (default to use_full_id if unset):
+        if (!isset($this->config['RecordID']['use_full_id'])
+            || $this->config['RecordID']['use_full_id']
+        ) {
+            // Strip ID leading period and trailing check digit.
+            $id_ = substr(str_replace('.b', '', $id), 0, -1);
+        } else {
+            // Return digits only.
+            $id_ = substr($id, 1);
+        };
+        return $id_;
     }
 
     /**
@@ -73,7 +102,7 @@ class Innovative implements DriverInterface
     public function getStatus($id)
     {
         // Strip ID
-        $id_ = substr(str_replace('.b', '', $id), 0, -1);
+        $id_ = $this->prepID($id);
 
         // Load Record Page
         if (substr($this->config['Catalog']['url'], -1) == '/') {
@@ -265,7 +294,7 @@ class Innovative implements DriverInterface
     public function getHoldLink($id)
     {
         // Strip ID
-        $id_ = substr(str_replace('.b', '', $id), 0, -1);
+        $id_ = $this->prepID($id);
 
         //Build request link
         $link = $this->config['Catalog']['url'] . '/search?/.b' . $id_ . '/.b' .
