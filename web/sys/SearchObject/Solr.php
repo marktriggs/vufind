@@ -135,6 +135,11 @@ class SearchObject_Solr extends SearchObject_Base
                 $this->addHiddenFilter($field.':'.'"'.$subfields.'"');
             }
         }
+        if (isset($searchSettings['RawHiddenFilters'])) {
+            foreach ($searchSettings['RawHiddenFilters'] as $rawFilter) {
+                $this->addHiddenFilter($rawFilter);
+            }
+        }
         if (isset($searchSettings['Basic_Searches'])) {
             $this->basicTypes = $searchSettings['Basic_Searches'];
         }
