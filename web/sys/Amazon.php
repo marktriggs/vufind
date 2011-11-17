@@ -67,6 +67,8 @@ class AWS_Request
         $params['AWSAccessKeyId'] = $accessKeyId;
         $params['Service'] = $service;
         $params['Operation'] = $operation;
+        $params['AssociateTag'] = isset($configArray['Content']['amazonassociate'])
+            ? $configArray['Content']['amazonassociate'] : null;
 
         // Add a timestamp:
         $params['Timestamp'] = gmdate('Y-m-d\TH:i:s\Z');
