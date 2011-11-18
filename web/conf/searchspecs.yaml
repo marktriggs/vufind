@@ -414,12 +414,16 @@ CallNumber:
       - [callnumber_fuzzy, ~]
 
 publisher:
+  DismaxFields:
+    - publisher^100
   QueryFields:
     - publisher:
       - [and, 100]
       - [or, ~]
 
 year:
+  DismaxFields:
+    - publishDate^100
   QueryFields:
     - publishDate:
       - [and, 100]
@@ -431,6 +435,8 @@ language:
       - [and, ~]
 
 toc:
+  DismaxFields:
+    - contents^100
   QueryFields:
     - contents:
       - [and, 100]
