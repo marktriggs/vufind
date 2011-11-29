@@ -208,10 +208,10 @@ class HoldLogic
                         foreach ($location as $copy_key => $copy) {
                             // Override the default hold behavior with a value from
                             // the ILS driver if allowed and applicable:
-                            $type = ($holds_override && isset($copy['holdOverride']))
+                            $switchType = ($holds_override && isset($copy['holdOverride']))
                                 ? $copy['holdOverride'] : $type;
 
-                            switch($type) {
+                            switch($switchType) {
                             case "all":
                                 $addlink = true; // always provide link
                                 break;
