@@ -272,8 +272,16 @@ abstract class SearchObject_Base
     public function getFilterList($excludeCheckboxFilters = false)
     {
         // Get a list of checkbox filters to skip if necessary:
-        $skipList = $excludeCheckboxFilters ?
-            array_keys($this->checkboxFacets) : array();
+        $skipList = array();
+        if ($excludeCheckboxFilters) {
+            foreach ($this->checkboxFacets as $current) {
+                list($field, $value) = $this->parseFilter($current['filter']);
+                if (!isset($skipList[$field])) {
+                    $skipList[$field] = array();
+                }
+                $skipList[$field][] = $value;
+            }
+        }
 
         $list = array();
         // Loop through all the current filter fields
@@ -282,7 +290,7 @@ abstract class SearchObject_Base
             $translate = in_array($field, $this->translatedFacets);
             foreach ($values as $value) {
                 // Add to the list unless it's in the list of fields to skip:
-                if (!in_array($field, $skipList)) {
+                if (!isset($skipList[$field]) || !in_array($value, $skipList[$field])) {
                     $facetLabel = $this->getFacetLabel($field);
                     $display = $translate ? translate($value) : $value;
                     $list[$facetLabel][] = array(
@@ -1322,29 +1330,15 @@ abstract class SearchObject_Base
      */
     public function getCheckboxFacets()
     {
-        // Create a lookup array of filter removal URLs -- this will tell us
-        // if any of the boxes are checked, and help us uncheck them if they are.
-        //
-        // Note that this assumes that each boolean filter's field name will only
-        // show up once anywhere in the filter list -- this is why you can't use
-        // the same field both in the checkbox facet list and the regular facet
-        // list.
-        $filters = $this->getFilterList();
-        $deselect = array();
-        foreach ($filters as $currentSet) {
-            foreach ($currentSet as $current) {
-                $deselect[$current['field']] = $current['removalUrl'];
-            }
-        }
-
-        // Now build up an array of checkbox facets with status booleans and
+        // Build up an array of checkbox facets with status booleans and
         // toggle URLs.
         $facets = array();
         foreach ($this->checkboxFacets as $field => $details) {
             $facets[$field] = $details;
-            if (isset($deselect[$field])) {
+            if ($this->hasFilter($details['filter'])) {
                 $facets[$field]['selected'] = true;
-                $facets[$field]['toggleUrl'] = $deselect[$field];
+                $facets[$field]['toggleUrl']
+                    = $this->renderLinkWithoutFilter($details['filter']);
             } else {
                 $facets[$field]['selected'] = false;
                 $facets[$field]['toggleUrl']
