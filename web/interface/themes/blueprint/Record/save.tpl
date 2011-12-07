@@ -27,7 +27,7 @@
       {/foreach}
     </select>
   {/if}
-  <a href="{$url}/MyResearch/ListEdit?id={$id|escape:"url"}" class="listEdit" id="listEdit{$id|escape}" title="{translate text='Create new list'}">{translate text="or create a new list"}</a>
+  <a href="{$url}/MyResearch/ListEdit?id={$id|escape:"url"}" class="listEdit" id="listEdit{$id|escape}" title="{translate text='Create a List'}">{translate text="or create a new list"}</a>
   
   {if $showLists}
     <label class="displayBlock" for="add_mytags">{translate text='Add Tags'}</label>
