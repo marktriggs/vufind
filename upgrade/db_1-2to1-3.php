@@ -114,6 +114,9 @@ addNewTables();
 // adjust existing tables:
 updateExistingTables();
 
+// fix name of vufind.ini file:
+fixIniFile($mysql_db);
+
 // clean up anonymous tags (this should not be necessary after release 1.1, but
 // it doesn't hurt to retain the check just in case the data gets corrupted or
 // this cleanup step was skipped during a previous upgrade process):
@@ -136,6 +139,24 @@ function executeSQL($sqlStatement, $bindParams = array())
         die("Problem executing: {$sqlStatement}");
     }
     return $sql;
+}
+
+/**
+ * Rename the vufind.ini file to match the correct database name (if necessary).
+ *
+ * @param string $dbName   Name of database
+ *
+ * @return void
+ */
+function fixIniFile($dbName)
+{
+    if ($dbName != 'vufind') {
+        echo "Copying vufind.ini to reflect custom database name ($dbName)...\n\n";
+        $basePath = realpath(dirname(__FILE__) . '/../web/conf');
+        $src = $basePath . '/vufind.ini';
+        $dest = $basePath . '/' . $dbName . '.ini';
+        copy($src, $dest);
+    }
 }
 
 /**
