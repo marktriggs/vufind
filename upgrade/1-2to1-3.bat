@@ -8,16 +8,20 @@ echo Unable to enable Windows command extensions.
 goto end
 :extensionsokay
 
+rem Set up versions for convenience:
+set OLD=1.2
+set NEW=1.3
+
 rem Make sure the user is really ready to run this process
-echo VuFind 1.1 to 1.2 Upgrade Script
+echo VuFind %OLD% to %NEW% Upgrade Script
 echo.
 echo Before you run this script, make sure you have done these things:
 echo.
 echo 1) Take VuFind offline to prevent new data being created during
 echo    the upgrade process.
-echo 2) Move your 1.1 directory to a new location, and unpack 1.2 into
-echo    the old 1.1 location.  DO NOT UNPACK 1.2 ON TOP OF 1.1.  It is
-echo    very important that you maintain separate directories.  Your 1.1
+echo 2) Move your %OLD% directory to a new location, and unpack %NEW% into
+echo    the old %OLD% location.  DO NOT UNPACK %NEW% ON TOP OF %OLD%.  It is
+echo    very important that you maintain separate directories.  Your %OLD%
 echo    directory will not be modified by this process, so you can revert
 echo    fairly easily if you need to by simply moving directories around.
 echo 3) Back up your MySQL database.  This script makes only minor, harmless
@@ -41,7 +45,7 @@ cd /d %0\..\..
 set VUFIND_PATH=%CD%
 
 rem first adjust some paths
-set /p YN=VuFind 1.2 is installed in %VUFIND_PATH%, correct? [Y/n] 
+set /p YN=VuFind %NEW% is installed in %VUFIND_PATH%, correct? [Y/n] 
 if "%YN%"=="Y" goto havenewpath
 if "%YN%"=="y" goto havenewpath
 if "%YN%"=="" goto havenewpath
@@ -50,7 +54,7 @@ set /p VUFIND_PATH=Please enter the correct path:
 :havenewpath
 
 rem check if there is a vufind.sh in VUFIND_PATH, if not ask for direction
-if exist %VUFIND_PATH%\vufind.sh goto newpathchecked
+if exist "%VUFIND_PATH%\vufind.sh" goto newpathchecked
 echo There is no VuFind installation in %VUFIND_PATH%
 goto getnewpath
 :newpathchecked
@@ -59,10 +63,10 @@ cd /d %VUFIND_PATH%
 
 echo Using %VUFIND_PATH% as installation path
 echo.
-echo Where is your old VuFind 1.1 installed?
+echo Where is your old VuFind %OLD% installed?
 :getoldpath
 set /p OLD_VUFIND_PATH=Please enter the path to the installation directory: 
-if exist %OLD_VUFIND_PATH%\vufind.sh goto oldpathchecked
+if exist "%OLD_VUFIND_PATH%\vufind.sh" goto oldpathchecked
 echo There is no VuFind installation in %OLD_VUFIND_PATH%
 goto getoldpath
 :oldpathchecked
@@ -85,7 +89,7 @@ if not "%MYSQLADMUSER%"=="" goto admuserset
 set MYSQLADMUSER=root
 :admuserset
 
-php upgrade\db_1-1to1-2.php %MYSQLADMUSER% %MYSQLADMPASS% %OLD_VUFIND_PATH%
+php upgrade\db_1-2to1-3.php %MYSQLADMUSER% %MYSQLADMPASS% %OLD_VUFIND_PATH%
 
 set /p JUNK=Hit ENTER to proceed
 
@@ -97,7 +101,7 @@ echo @set VUFIND_HOME=%VUFIND_PATH%>%VUFIND_PATH%\vufind.bat
 echo @call run_vufind.bat %%1 %%2 %%3 %%4 %%5 %%6 %%7 %%8 %%9>>%VUFIND_PATH%\vufind.bat
 
 rem update config.ini with settings from the old version:
-php upgrade\config_1-1to1-2.php %OLD_VUFIND_PATH%
+php upgrade\config_1-2to1-3.php %OLD_VUFIND_PATH%
 
 set /p JUNK=Hit ENTER to proceed
 
