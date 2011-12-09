@@ -665,6 +665,40 @@ class Solr implements IndexEngine
      */
     private function _buildAdvancedQuery($handler, $query)
     {
+        $query = $this->_buildAdvancedInnerQuery($handler, $query);
+
+        // Apply boost query/boost function, if any:
+        $ss = $this->_getSearchSpecs($handler);
+        $bq = array();
+        if (isset($ss['DismaxParams']) && is_array($ss['DismaxParams'])) {
+            foreach ($ss['DismaxParams'] as $current) {
+                if ($current[0] == 'bq') {
+                    $bq[] = $current[1];
+                } else if ($current[0] == 'bf') {
+                    $bq[] = '_val_:' . $current[1];
+                }
+            }
+        }
+
+        if (!empty($bq)) {
+            $query = '(' . $query . ') AND (*:* OR ' . implode(' OR ', $bq) . ')';
+        }
+
+        return $query;
+    }
+
+    /**
+     * Support method for _buildAdvancedQuery -- build the inner portion of the
+     * query; the calling method may then wrap this with additional settings.
+     *
+     * @param string $handler The YAML search spec field name to search
+     * @param string $query   The string to search for in the field
+     *
+     * @return  string        The query
+     * @access  private
+     */
+    private function _buildAdvancedInnerQuery($handler, $query)
+    {
         // Special case -- if the user wants all records but the current handler
         // has a filter query, apply the filter query:
         if (trim($query) == '*:*') {
@@ -933,6 +967,13 @@ class Solr implements IndexEngine
             // if we can adapt the search to work with the appropriate fields.
             if (!empty($handler)) {
                 $options['q'] = $this->_buildAdvancedQuery($handler, $query);
+                // If highlighting is enabled, we only want to use the inner query
+                // for highlighting; anything added outside of this is a boost and
+                // should be ignored for highlighting purposes!
+                if ($this->_highlight) {
+                    $options['hl.q']
+                        = $this->_buildAdvancedInnerQuery($handler, $query);
+                }
             }
         }
 
