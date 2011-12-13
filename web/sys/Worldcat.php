@@ -50,7 +50,9 @@ class Worldcat extends SRU
     {
         global $configArray;
 
-        parent::__construct('http://www.worldcat.org/webservices/catalog/search/sru');
+        parent::__construct(
+            'http://www.worldcat.org/webservices/catalog/search/sru'
+        );
         $this->_wskey = isset($configArray['WorldCat']['apiKey']) ?
             $configArray['WorldCat']['apiKey'] : null;
     }
@@ -66,7 +68,9 @@ class Worldcat extends SRU
     public function getHoldings($id)
     {
         $this->client->setMethod(HTTP_REQUEST_METHOD_POST);
-        $this->client->setURL('http://www.worldcat.org/webservices/catalog/content/libraries/' . $id);
+        $this->client->setURL(
+            'http://www.worldcat.org/webservices/catalog/content/libraries/' . $id
+        );
         $this->client->addRawQueryString("wskey={$this->_wskey}&servicelevel=full");
 
         if ($this->debug) {
@@ -101,7 +105,9 @@ class Worldcat extends SRU
     public function getRecord($id)
     {
         $this->client->setMethod(HTTP_REQUEST_METHOD_POST);
-        $this->client->setURL('http://www.worldcat.org/webservices/catalog/content/' . $id);
+        $this->client->setURL(
+            'http://www.worldcat.org/webservices/catalog/content/' . $id
+        );
         $this->client->addRawQueryString("wskey={$this->_wskey}&servicelevel=full");
         $result = $this->client->sendRequest();
 
@@ -158,7 +164,8 @@ class Worldcat extends SRU
             if ($subjFieldList = $record->getFields($currentTag)) {
                 foreach ($subjFieldList as $subjField) {
                     if ($subjField = $subjField->getSubfield('a')) {
-                        $parts[] = 'srw.su all "' . trim($subjField->getData()) . '"';
+                        $parts[]
+                            = 'srw.su all "' . trim($subjField->getData()) . '"';
                     }
                 }
             }
@@ -275,14 +282,16 @@ class Worldcat extends SRU
                     if ($params['group'][0]['bool'] == 'NOT') {
                         $excludes[] = join(" OR ", $thisGroup);
                     } else {
-                        $groups[] = join(" ".$params['group'][0]['bool']." ", $thisGroup);
+                        $groups[]
+                            = join(" ".$params['group'][0]['bool']." ", $thisGroup);
                     }
                 }
 
                 // Basic Search
                 if (isset($params['lookfor']) && $params['lookfor'] != '') {
-                    // Clean and validate input -- note that index may be in a different
-                    // field depending on whether this is a basic or advanced search.
+                    // Clean and validate input -- note that index may be in a
+                    // different field depending on whether this is a basic or
+                    // advanced search.
                     $lookfor = str_replace('"', '', $params['lookfor']);
                     if (isset($params['field'])) {
                         $index = $params['field'];

@@ -171,7 +171,8 @@ class SearchObject_Solr extends SearchObject_Base
 
         // Load limit preferences (or defaults if none in .ini file):
         if (isset($searchSettings['General']['limit_options'])) {
-            $this->limitOptions = explode(",", $searchSettings['General']['limit_options']);
+            $this->limitOptions
+                = explode(",", $searchSettings['General']['limit_options']);
         } elseif (isset($searchSettings['General']['default_limit'])) {
             $this->limitOptions = array($this->defaultLimit);
         } else {

@@ -290,7 +290,9 @@ abstract class SearchObject_Base
             $translate = in_array($field, $this->translatedFacets);
             foreach ($values as $value) {
                 // Add to the list unless it's in the list of fields to skip:
-                if (!isset($skipList[$field]) || !in_array($value, $skipList[$field])) {
+                if (!isset($skipList[$field])
+                    || !in_array($value, $skipList[$field])
+                ) {
                     $facetLabel = $this->getFacetLabel($field);
                     $display = $translate ? translate($value) : $value;
                     $list[$facetLabel][] = array(

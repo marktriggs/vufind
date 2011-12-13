@@ -144,7 +144,7 @@ function executeSQL($sqlStatement, $bindParams = array())
 /**
  * Rename the vufind.ini file to match the correct database name (if necessary).
  *
- * @param string $dbName   Name of database
+ * @param string $dbName Name of database
  *
  * @return void
  */
