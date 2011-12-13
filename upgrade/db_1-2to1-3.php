@@ -265,6 +265,8 @@ function addNewTables()
  */
 function updateExistingTables()
 {
+    /* No table changes in this release, but retaining code from previous
+       upgrade script for future reference...
     // Get list of fields in user table:
     $check = executeSQL("DESCRIBE user");
     $tmp = $check->fetchAll();
@@ -284,6 +286,7 @@ function updateExistingTables()
     } else {
         echo "No table updates necessary.\n\n";
     }
+     */
 }
 
 /**
