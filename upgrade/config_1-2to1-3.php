@@ -85,16 +85,19 @@ This is an automated process, so the results may require some manual cleanup.
 <?php
 
 // Update configuration files:
-fixConfigIni($old_inputs['config'], $new_inputs['config']);
-fixFacetsIni($old_inputs['facets'], $new_inputs['facets']);
-fixSearchIni($old_inputs['searches'], $new_inputs['searches']);
-fixSummonIni($old_inputs['Summon'], $new_inputs['Summon']);
-fixWorldCatIni($old_inputs['WorldCat'], $new_inputs['WorldCat']);
-fixSMSIni($old_inputs['sms'], $new_inputs['sms']);
+$notifications = array();
+foreach ($files as $current) {
+    $function = 'fix' . strtoupper(substr($current, 0, 1)) . substr($current, 1)
+        . 'Ini';
+    $warnings = $function($old_inputs[$current], $new_inputs[$current]);
+    if (!empty($warnings)) {
+        $notifications = array_merge($notifications, $warnings);
+    }
+}
 
 // Check to see if any recommended dependencies are missing:
 echo "\n**** CHECKING DEPENDENCIES... ****\n\n";
-checkDependencies();
+checkDependencies($notifications);
 
 // Display parting notes now that we are done:
 ?>
@@ -121,11 +124,20 @@ over the equivalent *.ini files (i.e. replace config.ini with config.ini.new).
 /**
  * Display warning messages about missing recommended dependencies.
  *
+ * @param array $notifications Notification strings generated during config
+ * processing
+ *
  * @return void
  */
-function checkDependencies()
+function checkDependencies($notifications)
 {
     $problems = 0;
+
+    // Display passed-in warnings first:
+    foreach ($notifications as $current) {
+        echo $current . "\n\n";
+        $problems++;
+    }
 
     // Is the mbstring library missing?
     if (!function_exists('mb_substr')) {
@@ -179,7 +191,7 @@ function checkDependencies()
  * @param string $old_config_input The old input file
  * @param string $new_config_input The new input file
  *
- * @return void
+ * @return array                   Dependency problems detected during processing
  */
 function fixConfigIni($old_config_input, $new_config_input)
 {
@@ -195,9 +207,31 @@ function fixConfigIni($old_config_input, $new_config_input)
         }
     }
 
-    // Brazilian Portuguese language file is now disabled by default (since
-    // it is very incomplete, and regular Portuguese file is now available):
-    unset($new_config['Languages']['pt-br']);
+    // If the [BulkExport] options setting is the old default, update it to
+    // reflect the fact that we now support RefWorks.
+    if ($new_config['BulkExport']['options'] == 'MARC:EndNote:BibTeX') {
+        $new_config['BulkExport']['options'] = 'MARC:EndNote:RefWorks:BibTeX';
+    }
+
+    // Warn the user if they have Amazon enabled but do not have the appropriate
+    // credentials set up.
+    $warnings = array();
+    $hasAmazonReview = isset($new_config['Content']['reviews'])
+        && stristr($new_config['Content']['reviews'], 'amazon');
+    $hasAmazonCover = isset($new_config['Content']['coverimages'])
+        && stristr($new_config['Content']['coverimages'], 'amazon');
+    if ($hasAmazonReview || $hasAmazonCover) {
+        if (!isset($new_config['Content']['amazonsecret'])) {
+            $warnings[] = 'WARNING: You have Amazon content enabled but are missing '
+                . 'the required amazonsecret setting in the [Content] section of '
+                . 'config.ini';
+        }
+        if (!isset($new_config['Content']['amazonassociate'])) {
+            $warnings[] = 'WARNING: You have Amazon content enabled but are missing '
+                . 'the required amazonassociate setting in the [Content] section of '
+                . 'config.ini';
+        }
+    }
 
     // save the file
     if (!writeIniFile($new_config, $new_comments, $new_config_file)) {
@@ -207,6 +241,7 @@ function fixConfigIni($old_config_input, $new_config_input)
     // report success
     echo "\nInput:  {$old_config_input}\n";
     echo "Output: {$new_config_file}\n";
+    return $warnings;
 }
 
 /**
@@ -215,18 +250,14 @@ function fixConfigIni($old_config_input, $new_config_input)
  * @param string $old_facets_input The old input file
  * @param string $new_facets_input The new input file
  *
- * @return void
+ * @return array                   Dependency problems detected during processing
  */
 function fixFacetsIni($old_facets_input, $new_facets_input)
 {
-    // No changes this release -- just copy the old file into place!
-    $new_config_file = 'web/conf/facets.ini.new';
-    copyUnchangedConfig($old_facets_input, $new_config_file);
-
-    /* retained more complex logic (not needed in this release) for future reference:
     $old_config = parse_ini_file($old_facets_input, true);
     $new_config = parse_ini_file($new_facets_input, true);
     $new_comments = readIniComments($new_facets_input);
+    $new_config_file = 'web/conf/facets.ini.new';
 
     // override new version's defaults with matching settings from old version:
     foreach ($old_config as $section => $subsection) {
@@ -237,7 +268,9 @@ function fixFacetsIni($old_facets_input, $new_facets_input)
 
     // we want to retain the old installation's various facet groups
     // exactly as-is
-    $facetGroups = array('Results', 'ResultsTop', 'Advanced', 'Author');
+    $facetGroups = array(
+        'Results', 'ResultsTop', 'Advanced', 'Author', 'CheckboxFacets'
+    );
     foreach ($facetGroups as $group) {
         $new_config[$group] = $old_config[$group];
     }
@@ -250,7 +283,7 @@ function fixFacetsIni($old_facets_input, $new_facets_input)
     // report success
     echo "\nInput:  {$old_facets_input}\n";
     echo "Output: {$new_config_file}\n";
-     */
+    return array();
 }
 
 /**
@@ -259,9 +292,9 @@ function fixFacetsIni($old_facets_input, $new_facets_input)
  * @param string $old_search_input The old input file
  * @param string $new_search_input The new input file
  *
- * @return void
+ * @return array                   Dependency problems detected during processing
  */
-function fixSearchIni($old_search_input, $new_search_input)
+function fixSearchesIni($old_search_input, $new_search_input)
 {
     $old_config = parse_ini_file($old_search_input, true);
     $new_config = parse_ini_file($new_search_input, true);
@@ -276,9 +309,13 @@ function fixSearchIni($old_search_input, $new_search_input)
     }
 
     // we want to retain the old installation's Basic/Advanced search settings
-    // exactly as-is
-    $new_config['Basic_Searches'] = $old_config['Basic_Searches'];
-    $new_config['Advanced_Searches'] = $old_config['Advanced_Searches'];
+    // and sort settings exactly as-is
+    $groups = array(
+        'Basic_Searches', 'Advanced_Searches', 'Sorting', 'DefaultSortingByType'
+    );
+    foreach ($groups as $group) {
+        $new_config[$group] = $old_config[$group];
+    }
 
     // save the file
     if (!writeIniFile($new_config, $new_comments, $new_config_file)) {
@@ -288,6 +325,7 @@ function fixSearchIni($old_search_input, $new_search_input)
     // report success
     echo "\nInput:  {$old_search_input}\n";
     echo "Output: {$new_config_file}\n";
+    return array();
 }
 
 /**
@@ -296,18 +334,14 @@ function fixSearchIni($old_search_input, $new_search_input)
  * @param string $old_input The old input file
  * @param string $new_input The new input file
  *
- * @return void
+ * @return array            Dependency problems detected during processing
  */
 function fixSummonIni($old_input, $new_input)
 {
-    // No changes this release -- just copy the old file into place!
-    $new_config_file = 'web/conf/Summon.ini.new';
-    copyUnchangedConfig($old_input, $new_config_file);
-
-    /* retained more complex logic (not needed in this release) for future reference:
     $old_config = parse_ini_file($old_input, true);
     $new_config = parse_ini_file($new_input, true);
     $new_comments = readIniComments($new_input);
+    $new_config_file = 'web/conf/Summon.ini.new';
 
     // override new version's defaults with matching settings from old version:
     foreach ($old_config as $section => $subsection) {
@@ -318,10 +352,12 @@ function fixSummonIni($old_input, $new_input)
 
     // we want to retain the old installation's search and facet settings
     // exactly as-is
-    $new_config['Facets'] = $old_config['Facets'];
-    $new_config['FacetsTop'] = $old_config['FacetsTop'];
-    $new_config['Basic_Searches'] = $old_config['Basic_Searches'];
-    $new_config['Advanced_Searches'] = $old_config['Advanced_Searches'];
+    $groups = array(
+        'Facets', 'FacetsTop', 'Basic_Searches', 'Advanced_Searches', 'Sorting'
+    );
+    foreach ($groups as $group) {
+        $new_config[$group] = $old_config[$group];
+    }
 
     // save the file
     if (!writeIniFile($new_config, $new_comments, $new_config_file)) {
@@ -331,7 +367,7 @@ function fixSummonIni($old_input, $new_input)
     // report success
     echo "\nInput:  {$old_input}\n";
     echo "Output: {$new_config_file}\n";
-     */
+    return array();
 }
 
 /**
@@ -340,13 +376,14 @@ function fixSummonIni($old_input, $new_input)
  * @param string $old_input The old input file
  * @param string $new_input The new input file
  *
- * @return void
+ * @return array            Dependency problems detected during processing
  */
-function fixSMSIni($old_input, $new_input)
+function fixSmsIni($old_input, $new_input)
 {
     // No changes this release -- just copy the old file into place!
     $new_config_file = 'web/conf/sms.ini.new';
     copyUnchangedConfig($old_input, $new_config_file);
+    return array();
 }
 
 /**
@@ -355,13 +392,14 @@ function fixSMSIni($old_input, $new_input)
  * @param string $old_input The old input file
  * @param string $new_input The new input file
  *
- * @return void
+ * @return array            Dependency problems detected during processing
  */
 function fixWorldCatIni($old_input, $new_input)
 {
     // No changes this release -- just copy the old file into place!
     $new_config_file = 'web/conf/WorldCat.ini.new';
     copyUnchangedConfig($old_input, $new_config_file);
+    return array();
 }
 
 /**
