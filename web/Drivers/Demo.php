@@ -243,7 +243,7 @@ class Demo implements DriverInterface
                 $status[$i]['notes'][] = "Item $itemNum note $j";
             }
             $summCount = rand(1, 3);
-            $status['summary'] = array();
+            $status[$i]['summary'] = array();
             for ($j = 1; $j <= $summCount; $j++) {
                 $status[$i]['summary'][] = "Item $itemNum summary $j";
             }
