@@ -231,7 +231,26 @@ class Demo implements DriverInterface
      */
     public function getHolding($id, $patron = false)
     {
-        return $this->getStatus($id);
+        // Get basic status info:
+        $status = $this->getStatus($id);
+
+        // Add notes and summary:
+        foreach ($status as $i => $current) {
+            $itemNum = $i + 1;
+            $noteCount = rand(1, 3);
+            $status[$i]['notes'] = array();
+            for ($j = 1; $j <= $noteCount; $j++) {
+                $status[$i]['notes'][] = "Item $itemNum note $j";
+            }
+            $summCount = rand(1, 3);
+            $status['summary'] = array();
+            for ($j = 1; $j <= $summCount; $j++) {
+                $status[$i]['summary'][] = "Item $itemNum summary $j";
+            }
+        }
+
+        // Send back final value:
+        return $status;
     }
 
     /**
