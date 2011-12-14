@@ -46,10 +46,10 @@ require_once 'sys/VuFindDate.php';
  **/
 class Unicorn implements DriverInterface
 {
-    private $_host;
-    private $_port;
-    private $_search_prog;
-    private $_url;
+    protected $host;
+    protected $port;
+    protected $search_prog;
+    protected $url;
 
     protected $db;
     protected $ilsConfigArray;
@@ -57,23 +57,23 @@ class Unicorn implements DriverInterface
     /**
      * Constructor.
      */
-    function __construct()
+    public function __construct()
     {
         // Load Configuration for this Module
         $this->ilsConfigArray = parse_ini_file('conf/Unicorn.ini', true);
         global $configArray;
 
         // allow user to specify the full url to the Sirsi side perl script
-        $this->_url = $this->ilsConfigArray['Catalog']['url'];
+        $this->url = $this->ilsConfigArray['Catalog']['url'];
 
         // host/port/search_prog kept for backward compatibility
         if (isset($this->ilsConfigArray['Catalog']['host'])
             && isset($this->ilsConfigArray['Catalog']['port'])
             && isset($this->ilsConfigArray['Catalog']['search_prog'])
         ) {
-            $this->_host = $this->ilsConfigArray['Catalog']['host'];
-            $this->_port = $this->ilsConfigArray['Catalog']['port'];
-            $this->_search_prog = $this->ilsConfigArray['Catalog']['search_prog'];
+            $this->host = $this->ilsConfigArray['Catalog']['host'];
+            $this->port = $this->ilsConfigArray['Catalog']['port'];
+            $this->search_prog = $this->ilsConfigArray['Catalog']['search_prog'];
         }
 
         $this->db = ConnectionManager::connectToIndex();
@@ -1083,14 +1083,14 @@ class Unicorn implements DriverInterface
      */
     protected function querySirsi($params)
     {
-        $url = $this->_url;
+        $url = $this->url;
         if (empty($url)) {
-            $url = $this->_host;
-            if ($this->_port) {
-                $url =  "http://" . $url . ":" . $this->_port . "/" .
-                    $this->_search_prog;
+            $url = $this->host;
+            if ($this->port) {
+                $url =  "http://" . $url . ":" . $this->port . "/" .
+                    $this->search_prog;
             } else {
-                $url =  "http://" . $url . "/" . $this->_search_prog;
+                $url =  "http://" . $url . "/" . $this->search_prog;
             }
         }
 
