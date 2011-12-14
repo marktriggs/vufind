@@ -64,6 +64,59 @@ class HoldLogic
     }
 
     /**
+     * Support method to rearrange the holdings array for displaying convenience.
+     * VuFind is currently set up to display only the notes and summaries found
+     * in the first item for a location; this method gathers notes and summaries
+     * from other items and pushes them into the first for convenience.
+     *
+     * Note: This is not very elegant -- it would make more sense to have separate
+     * elements in the return array for holding collected notes and summaries rather
+     * than stuffing them into an arbitrary item; this will be addressed in VuFind
+     * 2.0.
+     *
+     * @param array $holdings An associative array of location => item array
+     *
+     * @return array          An associative array keyed by location with each
+     * entry being a list of items where the first holds the summary
+     * and notes for all.
+     * @access protected
+     */
+    protected function formatHoldings($holdings)
+    {
+        foreach ($holdings as $location => $items) {
+            $notes = array();
+            $summaries = array();
+            foreach ($items as $item) {
+                if (isset($item['notes'])) {
+                    if (!is_array($item['notes'])) {
+                        $item['notes'] = empty($item['notes'])
+                            ? array() : array($item['notes']);
+                    }
+                    foreach ($item['notes'] as $note) {
+                        if (!in_array($note, $notes)) {
+                            $notes[] = $note;
+                        }
+                    }
+                }
+                if (isset($item['summary'])) {
+                    if (!is_array($item['summary'])) {
+                        $item['summary'] = empty($item['summary'])
+                            ? array() : array($item['summary']);
+                    }
+                    foreach ($item['summary'] as $summary) {
+                        if (!in_array($summary, $summaries)) {
+                            $summaries[] = $summary;
+                        }
+                    }
+                }
+            }
+            $holdings[$location][0]['notes'] = $notes;
+            $holdings[$location][0]['summary'] = $summaries;
+        }
+        return $holdings;
+    }
+
+    /**
      * Public method for getting item holdings from the catalog and selecting which
      * holding method to call
      *
@@ -95,7 +148,7 @@ class HoldLogic
                 $holdings = $this->generateHoldings($result, $mode);
             }
         }
-        return $holdings;
+        return $this->formatHoldings($holdings);
     }
 
     /**
