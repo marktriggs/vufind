@@ -583,7 +583,7 @@ class Voyager implements DriverInterface
             // when available)
             $number = $row['ITEM_SEQUENCE_NUMBER'];
             if (isset($row['ITEM_ENUM'])) {
-                $number .= ' (' . $row['ITEM_ENUM'] . ')';
+                $number .= ' (' . utf8_encode($row['ITEM_ENUM']) . ')';
             }
 
             // Concat wrapped rows (MARC data more than 300 bytes gets split
@@ -1067,7 +1067,7 @@ class Voyager implements DriverInterface
             'duedate' => $dueDate,
             'dueTime' => $dueTime,
             'dueStatus' => $dueStatus,
-            'volume' => str_replace("v.", "", $sqlRow['ITEM_ENUM']),
+            'volume' => str_replace("v.", "", utf8_encode($sqlRow['ITEM_ENUM'])),
             'publication_year' => $sqlRow['YEAR'],
             'title' => empty($sqlRow['TITLE_BRIEF'])
                 ? $sqlRow['TITLE'] : $sqlRow['TITLE_BRIEF']
@@ -1354,7 +1354,7 @@ class Voyager implements DriverInterface
             'available' => $available,
             'reqnum' => $sqlRow['HOLD_RECALL_ID'],
             'item_id' => $sqlRow['ITEM_ID'],
-            'volume' => str_replace("v.", "", $sqlRow['ITEM_ENUM']),
+            'volume' => str_replace("v.", "", utf8_encode($sqlRow['ITEM_ENUM'])),
             'publication_year' => $sqlRow['YEAR'],
             'title' => empty($sqlRow['TITLE_BRIEF'])
                 ? $sqlRow['TITLE'] : $sqlRow['TITLE_BRIEF']
