@@ -1430,9 +1430,14 @@ class SearchObject_Solr extends SearchObject_Base
         //   inside the marc data, so lets get rid of the 'fullrecord'
         //   nodes. Not sure what we'll do if these are needed for some
         //   reason
+        // The marc_error nodes can also cause problems, so let's get rid
+        //   of them at the same time.
         for ($i = 0; $i < count($result['response']['docs']); $i++) {
             if (isset($result['response']['docs'][$i]['fullrecord'])) {
                 unset($result['response']['docs'][$i]['fullrecord']);
+            }
+            if (isset($result['response']['docs'][$i]['marc_error'])) {
+                unset($result['response']['docs'][$i]['marc_error']);
             }
         }
 
