@@ -25,6 +25,8 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/unit_tests Wiki
  */
+error_reporting(E_ALL ^ E_DEPRECATED);
+
 require_once 'PHPUnit/Framework/TestSuite.php';
 require_once 'Selenium/AllTests.php';
 require_once 'web/AllTests.php';
@@ -48,18 +50,6 @@ class AllTests extends PHPUnit_Framework_TestSuite
      */
     protected function setUp()
     {
-        // Update the code coverage blacklist -- we don't want to analyze all the
-        // test code or any external PEAR libraries that we include:
-        PHP_CodeCoverage_Filter::getInstance()->addDirectoryToBlacklist(
-            '/usr/share/php'
-        );
-        PHP_CodeCoverage_Filter::getInstance()->addDirectoryToBlacklist(
-            '/usr/local/lib'
-        );
-        PHP_CodeCoverage_Filter::getInstance()->addDirectoryToBlacklist(
-            dirname(__FILE__)
-        );
-
         // Clear out Smarty files to ensure testing begins with a clean slate:
         $this->_smartyCleanup();
     }
