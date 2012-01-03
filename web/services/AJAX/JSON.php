@@ -1050,19 +1050,9 @@ class JSON extends Action
      */
     private function _getItemStatusFull($record)
     {
-        global $configArray;
         global $interface;
-
-        $hideHoldings = isset($configArray['Record']['hide_holdings'])
-            ? $configArray['Record']['hide_holdings'] : array();
-        $items = array();
-        foreach ($record as $item) {
-            if (!in_array($item['location'], $hideHoldings)) {
-                $items[] = $item;
-            }
-        }
-        $interface->assign('statusItems', $items);
-        return empty($items) ? '': $interface->fetch('AJAX/status-full.tpl');
+        $interface->assign('statusItems', $record);
+        return $interface->fetch('AJAX/status-full.tpl');
     }
 
     /**
