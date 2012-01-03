@@ -183,6 +183,33 @@ class JSON extends Action
     }
 
     /**
+     * Support method for getItemStatuses() -- filter suppressed locations from the
+     * array of item information for a particular bib record.
+     *
+     * @param array $record Information on items linked to a single bib record
+     *
+     * @return array        Filtered version of $record
+     * @access private
+     */
+    private function _filterSuppressedLocations($record)
+    {
+        global $configArray;
+        static $hideHoldings = false;
+        if ($hideHoldings === false) {
+            $hideHoldings = isset($configArray['Record']['hide_holdings'])
+                ? $configArray['Record']['hide_holdings'] : array();
+        }
+
+        $filtered = array();
+        foreach ($record as $current) {
+            if (!in_array($current['location'], $hideHoldings)) {
+                $filtered[] = $current;
+            }
+        }
+        return $filtered;
+    }
+
+    /**
      * Get Item Statuses
      *
      * This is responsible for printing the holdings information for a
@@ -238,6 +265,12 @@ class JSON extends Action
         foreach ($results as $record) {
             // Skip errors and empty records:
             if (!PEAR::isError($record) && count($record)) {
+                // Filter out suppressed locations, and skip record if none remain:
+                $record = $this->_filterSuppressedLocations($record);
+                if (empty($record)) {
+                    continue;
+                }
+
                 if ($locationSetting == "group") {
                     $current = $this->_getItemStatusGroup(
                         $record, $messages, $callnumberSetting
@@ -260,7 +293,8 @@ class JSON extends Action
             }
         }
 
-        // If any IDs were missing, send back appropriate dummy data
+        // If any IDs were missing, send back appropriate dummy data, including a
+        // "missing data" flag which can be used to completely suppress status info:
         foreach ($missingIds as $missingId => $junk) {
             $statuses[] = array(
                 'id'                   => $missingId,
@@ -270,7 +304,8 @@ class JSON extends Action
                 'locationList'         => false,
                 'reserve'              => 'false',
                 'reserve_message'      => translate('Not On Reserve'),
-                'callnumber'           => ''
+                'callnumber'           => '',
+                'missing_data'         => true
             );
         }
 

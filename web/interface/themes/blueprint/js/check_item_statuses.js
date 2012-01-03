@@ -21,12 +21,19 @@ function checkItemStatuses() {
                             && result.full_status.length > 0
                             && $('#callnumAndLocation' + safeId).length > 0
                         ) {
+                            // Full status mode is on -- display the HTML and hide extraneous junk:
                             $('#callnumAndLocation' + safeId).empty().append(result.full_status);
                             $('#callnumber' + safeId).hide();
                             $('#location' + safeId).hide();
                             $('.hideIfDetailed' + safeId).hide();
                             $('#status' + safeId).hide();
+                        } else if (typeof(result.missing_data) != 'undefined'
+                            && result.missing_data
+                        ) {
+                            // No data is available -- hide the entire status area:
+                            $('#callnumAndLocation' + safeId).hide();
                         } else if (result.locationList) {
+                            // We have multiple locations -- build appropriate HTML and hide unwanted labels:
                             $('#callnumber' + safeId).hide();
                             $('.hideIfDetailed' + safeId).hide();
                             $('#location' + safeId).hide();
@@ -49,6 +56,7 @@ function checkItemStatuses() {
                             $('#locationDetails' + safeId).show();
                             $('#locationDetails' + safeId).empty().append(locationListHTML);
                         } else {
+                            // Default case -- load call number and location into appropriate containers:
                             $('#callnumber' + safeId).empty().append(result.callnumber);
                             $('#location' + safeId).empty().append(
                                 result.reserve == 'true' 

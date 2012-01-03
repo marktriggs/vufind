@@ -48,13 +48,23 @@ function doGetStatuses(strings)
                 var fullStatusDiv = getElem('callnumAndLocation' + items[i].id);
                 if (typeof(items[i].full_status) != 'undefined'
                     && items[i].full_status.length > 0
-                    && fullStatusDiv) {
+                    && fullStatusDiv
+                ) {
+                    // Full status mode is on -- display the HTML and hide extraneous junk:
                     fullStatusDiv.innerHTML = items[i].full_status;
                     if (statusDiv) {
                         statusDiv.style.display = 'none';
                     }
+                } else if (typeof(items[i].missing_data) != 'undefined'
+                    && items[i].missing_data
+                ) {
+                    // No data is available -- hide the entire status area:
+                    fullStatusDiv.style.display = 'none';
+                    if (statusDiv) {
+                        statusDiv.style.display = 'none';
+                    }
                 } else if (items[i].locationList && locationListDiv) {
-                    // Hide Call Number and Location Holders
+                    // We have multiple locations -- build appropriate HTML and hide unwanted labels:
                     if (callnumberDiv) {
                         callnumberDiv.parentNode.style.display = "none";
                     }
@@ -77,6 +87,7 @@ function doGetStatuses(strings)
                     locationListDiv.innerHTML = locationListHTML;
                     locationListDiv.style.display = "block";
                 } else {
+                    // Default case -- load call number and location into appropriate containers:
                     if (locationDiv) {
                         locationDiv.innerHTML = (items[i].reserves == 'true')
                             ? items[i].reserve_message : items[i].location;
