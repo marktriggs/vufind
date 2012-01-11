@@ -255,8 +255,16 @@ class Solr implements IndexEngine
         // Turn relative path into absolute path:
         $fullPath = dirname(__FILE__) . '/../' . $this->searchSpecsFile;
 
+        // Check for a local override file:
+        $local = str_replace('.yaml', '_local.yaml', $fullPath);
+        $local = file_exists($local) ? $local : false;
+
         // Generate cache key:
-        $key = md5(basename($this->searchSpecsFile) . '-' . filemtime($fullPath));
+        $key = basename($fullPath) . '-' . filemtime($fullPath);
+        if ($local) {
+            $key .= '-' . basename($local) . '-' . filemtime($local);
+        }
+        $key = md5($key);
 
         // Load cache manager:
         $cache = new VuFindCache($this->_specCache, 'searchspecs');
@@ -264,6 +272,12 @@ class Solr implements IndexEngine
         // Generate data if not found in cache:
         if (!($results = $cache->load($key))) {
             $results = Horde_Yaml::load(file_get_contents($fullPath));
+            if ($local) {
+                $localResults = Horde_Yaml::load(file_get_contents($local));
+                foreach ($localResults as $key => $value) {
+                    $results[$key] = $value;
+                }
+            }
             $cache->save($results, $key);
         }
         $this->_searchSpecs = $results;
