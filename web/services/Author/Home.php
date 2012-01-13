@@ -488,6 +488,10 @@ class Home extends Action
         $pattern[] = '/({{)pron-en\|([^}]*)(}})/Us';
         $replacement[] = translate("pronounced") . " /$2/";
 
+        // Fix dashes
+        $pattern[] = '/{{ndash}}/';
+        $replacement[] = ' - ';
+
         // Removes citations
         $pattern[] = '/({{)[^}]*(}})/Us';
         $replacement[] = "";
