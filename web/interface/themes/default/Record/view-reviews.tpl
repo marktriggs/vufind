@@ -7,7 +7,7 @@
     </p>
     {/if}
     {if $review.Source}
-    <b>Review by {$review.Source}</b>
+    <b>{translate text="Review by"} {$review.Source}</b>
     {/if}
     <p class="summary">{$review.Content}
       {if !$review.Content && $review.ReviewURL}<a target="new" href="{$review.ReviewURL}">{translate text="Read the full review online..."}</a>{/if}
