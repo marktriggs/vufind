@@ -1019,7 +1019,7 @@ class VoyagerRestful extends Voyager
                 
                 $response[$itemId] = array(
                     'success' => ($reply == "ok") ? true : false,
-                    'status' => ($result[$itemId]['success'])
+                    'status' => ($reply == "ok")
                         ? "hold_cancel_success" : "hold_cancel_fail",
                     'sysMessage' => ($reply == "ok") ? false : $reply,
                 );
