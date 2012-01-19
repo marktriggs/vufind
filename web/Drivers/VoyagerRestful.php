@@ -933,7 +933,7 @@ class VoyagerRestful extends Voyager
 
         if (time() > $checkTime) {
             // Hold Date is in the past
-            return $this->holdError("hold_date_passed");
+            return $this->holdError("hold_date_past");
         }
 
         // Make Sure Pick Up Library is Valid
