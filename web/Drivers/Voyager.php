@@ -1449,27 +1449,45 @@ class Voyager implements DriverInterface
                "FROM $this->dbName.PATRON, $this->dbName.PATRON_ADDRESS, ".
                "$this->dbName.PATRON_PHONE, $this->dbName.PATRON_BARCODE, " .
                "$this->dbName.PATRON_GROUP " .
-               "WHERE PATRON.PATRON_ID = PATRON_ADDRESS.PATRON_ID " .
-               "AND PATRON_ADDRESS.ADDRESS_ID = PATRON_PHONE.ADDRESS_ID " .
-               "AND PATRON.PATRON_ID = PATRON_BARCODE.PATRON_ID " .
-               "AND PATRON_BARCODE.PATRON_GROUP_ID = PATRON_GROUP.PATRON_GROUP_ID " .
+               "WHERE PATRON.PATRON_ID = PATRON_ADDRESS.PATRON_ID (+) " .
+               "AND PATRON_ADDRESS.ADDRESS_ID = PATRON_PHONE.ADDRESS_ID (+) " .
+               "AND PATRON.PATRON_ID = PATRON_BARCODE.PATRON_ID (+) " .
+               "AND PATRON_BARCODE.PATRON_GROUP_ID = " .
+               "PATRON_GROUP.PATRON_GROUP_ID (+) " .
                "AND PATRON.PATRON_ID = :id";
         try {
             $sqlStmt = $this->db->prepare($sql);
             $sqlStmt->execute(array(':id' => $patron['id']));
-            $row = $sqlStmt->fetch(PDO::FETCH_ASSOC);
-            if ($row) {
-                $patron = array('firstname' => $row['FIRST_NAME'],
-                                'lastname' => $row['LAST_NAME'],
-                                'address1' => $row['ADDRESS_LINE1'],
-                                'address2' => $row['ADDRESS_LINE2'],
-                                'zip' => $row['ZIP_POSTAL'],
-                                'phone' => $row['PHONE_NUMBER'],
-                                'group' => $row['PATRON_GROUP_NAME']);
-                return $patron;
-            } else {
-                return null;
+            $patron = array();
+            while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
+                if (!empty($row['FIRST_NAME'])) {
+                    $patron['firstname'] = $row['FIRST_NAME'];
+                }
+                if (!empty($row['LAST_NAME'])) {
+                    $patron['lastname'] = $row['LAST_NAME'];
+                }
+                if (!empty($row['PHONE_NUMBER'])) {
+                    $patron['phone'] = $row['PHONE_NUMBER'];
+                }
+                if (!empty($row['PATRON_GROUP_NAME'])) {
+                    $patron['group'] = $row['PATRON_GROUP_NAME'];
+                }
+                $validator = new Zend_Validate_EmailAddress();
+                if ($validator->isValid($row['ADDRESS_LINE1'])) {
+                    $patron['email'] = $row['ADDRESS_LINE1'];
+                } else if (!isset($patron['address1'])) {
+                    if (!empty($row['ADDRESS_LINE1'])) {
+                        $patron['address1'] = $row['ADDRESS_LINE1'];
+                    }
+                    if (!empty($row['ADDRESS_LINE2'])) {
+                        $patron['address2'] = $row['ADDRESS_LINE2'];
+                    }
+                    if (!empty($row['ZIP_POSTAL'])) {
+                        $patron['zip'] = $row['ZIP_POSTAL'];
+                    }
+                }
             }
+            return (empty($patron) ? null : $patron);
         } catch (PDOException $e) {
             return new PEAR_Error($e->getMessage());
         }
