@@ -925,22 +925,28 @@ class Voyager implements DriverInterface
      * This is responsible for authenticating a patron against the catalog.
      *
      * @param string $barcode The patron barcode
-     * @param string $lname   The patron's last name
+     * @param string $login   The patron's last name or PIN (depending on config)
      *
      * @return mixed          Associative array of patron info on successful login,
      * null on unsuccessful login, PEAR_Error on error.
      * @access public
      */
-    public function patronLogin($barcode, $lname)
+    public function patronLogin($barcode, $login)
     {
-        $sql = "SELECT PATRON.PATRON_ID, PATRON.FIRST_NAME " .
+        // Load the field used for verifying the login from the config file, and
+        // make sure there's nothing crazy in there:
+        $login_field = isset($this->config['Catalog']['login_field'])
+            ? $this->config['Catalog']['login_field'] : 'LAST_NAME';
+        $login_field = preg_replace('/[^\w]/', '', $login_field);
+
+        $sql = "SELECT PATRON.PATRON_ID, PATRON.FIRST_NAME, PATRON.LAST_NAME " .
                "FROM $this->dbName.PATRON, $this->dbName.PATRON_BARCODE " .
                "WHERE PATRON.PATRON_ID = PATRON_BARCODE.PATRON_ID AND " .
-               "lower(PATRON.LAST_NAME) = :lname AND " .
+               "lower(PATRON.{$login_field}) = :login AND " .
                "lower(PATRON_BARCODE.PATRON_BARCODE) = :barcode";
         try {
             $sqlStmt = $this->db->prepare($sql);
-            $sqlStmt->bindParam(':lname', strtolower($lname), PDO::PARAM_STR);
+            $sqlStmt->bindParam(':login', strtolower($login), PDO::PARAM_STR);
             $sqlStmt->bindParam(':barcode', strtolower($barcode), PDO::PARAM_STR);
             $sqlStmt->execute();
             $row = $sqlStmt->fetch(PDO::FETCH_ASSOC);
@@ -948,9 +954,9 @@ class Voyager implements DriverInterface
                 return array(
                     'id' => $row['PATRON_ID'],
                     'firstname' => $row['FIRST_NAME'],
-                    'lastname' => $lname,
+                    'lastname' => $row['LAST_NAME'],
                     'cat_username' => $barcode,
-                    'cat_password' => $lname,
+                    'cat_password' => $login,
                     // There's supposed to be a getPatronEmailAddress stored
                     // procedure in Oracle, but I couldn't get it to work here;
                     // might be worth investigating further if needed later.
