@@ -365,7 +365,8 @@ class VoyagerRestful extends Voyager
             }
         } else {
             $sql = "SELECT CIRC_POLICY_LOCS.LOCATION_ID as location_id, " .
-                "LOCATION.LOCATION_DISPLAY_NAME as location_name from " .
+                "NVL(LOCATION.LOCATION_DISPLAY_NAME, LOCATION.LOCATION_NAME) " .
+                "as location_name from " .
                 $this->dbName . ".CIRC_POLICY_LOCS, $this->dbName.LOCATION " .
                 "where CIRC_POLICY_LOCS.PICKUP_LOCATION = 'Y' ".
                 "and CIRC_POLICY_LOCS.LOCATION_ID = LOCATION.LOCATION_ID";
@@ -381,7 +382,7 @@ class VoyagerRestful extends Voyager
             while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
                 $pickResponse[] = array(
                     "locationID" => $row['LOCATION_ID'],
-                    "locationDisplay" => $row['LOCATION_NAME']
+                    "locationDisplay" => utf8_encode($row['LOCATION_NAME'])
                 );
             }
         }
