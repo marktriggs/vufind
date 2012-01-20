@@ -1478,8 +1478,8 @@ class Voyager implements DriverInterface
                 if (!empty($row['PATRON_GROUP_NAME'])) {
                     $patron['group'] = $row['PATRON_GROUP_NAME'];
                 }
-                $validator = new Zend_Validate_EmailAddress();
-                if ($validator->isValid($row['ADDRESS_LINE1'])) {
+                include_once 'Mail/RFC822.php';
+                if (Mail_RFC822::isValidInetAddress($row['ADDRESS_LINE1'])) {
                     $patron['email'] = $row['ADDRESS_LINE1'];
                 } else if (!isset($patron['address1'])) {
                     if (!empty($row['ADDRESS_LINE1'])) {
