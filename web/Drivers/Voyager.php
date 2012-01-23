@@ -322,11 +322,9 @@ class Voyager implements DriverInterface
                     'id' => $row['BIB_ID'],
                     'status' => $row['STATUS'],
                     'status_array' => array($row['STATUS']),
-                    'location' => htmlentities(
-                        $row['TEMP_LOCATION'] > 0
+                    'location' => $row['TEMP_LOCATION'] > 0
                         ? $this->getLocationName($row['TEMP_LOCATION'])
-                        : $row['LOCATION']
-                    ),
+                        : $row['LOCATION'],
                     'reserve' => $row['ON_RESERVE'],
                     'callnumber' => $row['CALLNUMBER']
                 );
@@ -729,11 +727,9 @@ class Voyager implements DriverInterface
         return array(
             'id' => $sqlRow['BIB_ID'],
             'status' => $sqlRow['STATUS'],
-            'location' => htmlentities(
-                $sqlRow['TEMP_LOCATION'] > 0
+            'location' => $sqlRow['TEMP_LOCATION'] > 0
                 ? $this->getLocationName($sqlRow['TEMP_LOCATION'])
-                : $sqlRow['LOCATION']
-            ),
+                : $sqlRow['LOCATION'],
             'reserve' => $sqlRow['ON_RESERVE'],
             'callnumber' => $sqlRow['CALLNUMBER'],
             'barcode' => $sqlRow['ITEM_BARCODE']

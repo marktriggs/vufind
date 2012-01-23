@@ -1,5 +1,5 @@
 {foreach from=$holdings item=holding key=location}
-<h4>{translate text=$location}</h4>
+<h4>{$location|translate|escape}</h4>
 <table class="holdings" summary="{translate text='Holdings details from'} {translate text=$location}">
   {if $holding.0.callnumber}
   <tr>

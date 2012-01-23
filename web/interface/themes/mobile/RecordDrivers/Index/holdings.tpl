@@ -18,7 +18,7 @@
   </span>
 {/if}
 {foreach from=$holdings item=holding key=location}
-<h3>{translate text=$location}</h3>
+<h3>{$location|translate|escape}</h3>
 <table cellpadding="2" cellspacing="0" border="0" class="citation" summary="{translate text='Holdings details from'} {translate text=$location}">
   {if $holding.0.callnumber}
   <tr>

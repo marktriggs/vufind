@@ -327,7 +327,7 @@ class Amicus implements DriverInterface
                         'callnumber' => $textoSign
                         );
                     } else {
-                        $multiple=htmlentities($row['LOCATION']);
+                        $multiple=$row['LOCATION'];
                         if ($multiple=='Deposito2') {
                             $multiple="Depósito2";
                         }
@@ -340,7 +340,7 @@ class Amicus implements DriverInterface
                             'status_array' => array($prestados),
                             'location' => $multiple,
                             'reserve' => $reservados,
-                            'callnumber' => htmlentities($row['CALLNUMBER'])
+                            'callnumber' => $row['CALLNUMBER']
                         );
                     }
                 } else {
@@ -357,9 +357,9 @@ class Amicus implements DriverInterface
                         'id' => $id,
                         'status' => '0',
                         'status_array' => array($prestados),
-                        'location' => htmlentities(translate("No copies")),
+                        'location' => translate("No copies"),
                         'reserve' => $reservados,
-                        'callnumber' => htmlentities(translate("No copies"))
+                        'callnumber' => translate("No copies")
                     );
                 break;
             }
@@ -462,7 +462,7 @@ class Amicus implements DriverInterface
                 // This is the first time we've encountered this row number --
                 // initialize the row and start an array of statuses.
                 if (!isset($data[$row['LOCATION']])) {
-                    $multiple=htmlentities($row['LOCATION']);
+                    $multiple=$row['LOCATION'];
                     if ($multiple=='Deposito2') {
                         $multiple=utf8_decode("Depósito2");
                     }
@@ -506,14 +506,14 @@ class Amicus implements DriverInterface
                 if (!isset($holding[$item['LOCATION']])) {
                     $holding[$item['LOCATION']] = array(
                         'id' => $item['LOCATION'],
-                        'location' => htmlentities($item['LOCATION']),
+                        'location' => $item['LOCATION'],
                         'copias' => array(
                             array(
-                                'SIGNATURA' => htmlentities($row2['SIGNATURA']),
-                                'BRCDE_NBR' => htmlentities($row2['BRCDE_NBR']),
+                                'SIGNATURA' => $row2['SIGNATURA'],
+                                'BRCDE_NBR' => $row2['BRCDE_NBR'],
                                 'CPY_ID_NBR' => $row2['CPY_ID_NBR'],
-                                'STATUS' => htmlentities($row2['STATUS']),
-                                'FECHA' => htmlentities($row2['FECHA'])
+                                'STATUS' => $row2['STATUS'],
+                                'FECHA' => $row2['FECHA']
                             )
                         )
                     );

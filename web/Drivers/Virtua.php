@@ -281,7 +281,7 @@ class Virtua implements DriverInterface
                 'id'           => $id,
                 'availability' => $available,
                 'status'       => $row['STATUS'],
-                'location'     => htmlentities($row['LOCATION']),
+                'location'     => $row['LOCATION'],
                 'reserve'      => $row['RESERVE'],
                 'campus'       => $campus,
                 'callnumber'   => $row['BIB_CALL_NUM']
@@ -432,7 +432,7 @@ class Virtua implements DriverInterface
                 "availability"  => $available,
                 "status"        => $row['STATUS'],
                 "status_code"   => $row['STATUS_CODE'],
-                "location"      => htmlentities($row['LOCATION']),
+                "location"      => $row['LOCATION'],
                 "location_code" => $row['LOCATION_ID'],
                 "reserve"       => $row['ITEM_REQ'] + $row['BIB_REQ'],
                 "callnumber"    => $call_num,

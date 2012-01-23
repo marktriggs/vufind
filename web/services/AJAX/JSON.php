@@ -968,13 +968,13 @@ class JSON extends Action
             'availability' => ($available ? 'true' : 'false'),
             'availability_message' =>
                 $messages[$available ? 'available' : 'unavailable'],
-            'location' => $location,
+            'location' => htmlentities($location),
             'locationList' => false,
             'reserve' =>
                 ($record[0]['reserve'] == 'Y' ? 'true' : 'false'),
             'reserve_message' => $record[0]['reserve'] == 'Y'
                 ? translate('on_reserve') : translate('Not On Reserve'),
-            'callnumber' => $callNumber
+            'callnumber' => htmlentities($callNumber)
         );
     }
 
@@ -1017,8 +1017,8 @@ class JSON extends Action
             $locationInfo = array(
                 'availability' =>
                     isset($details['available']) ? $details['available'] : false,
-                'location' => $location,
-                'callnumbers' => $locationCallnumbers
+                'location' => htmlentities($location),
+                'callnumbers' => htmlentities($locationCallnumbers)
             );
             $locationList[] = $locationInfo;
         }
