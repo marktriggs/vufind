@@ -220,7 +220,8 @@ class Voyager implements DriverInterface
         $sqlExpressions = array(
             "BIB_ITEM.BIB_ID", "ITEM.ITEM_ID",
             "ITEM.ON_RESERVE", "ITEM_STATUS_DESC as status",
-            "LOCATION.LOCATION_DISPLAY_NAME as location",
+            "NVL(LOCATION.LOCATION_DISPLAY_NAME, " .
+                "LOCATION.LOCATION_NAME) as location",
             "MFHD_MASTER.DISPLAY_CALL_NO as callnumber",
             "ITEM.TEMP_LOCATION"
         );
@@ -274,7 +275,8 @@ class Voyager implements DriverInterface
         $sqlExpressions = array("BIB_MFHD.BIB_ID",
                                 "1 as ITEM_ID", "'N' as ON_RESERVE",
                                 "'No information available' as status",
-                                "LOCATION.LOCATION_DISPLAY_NAME as location",
+                                "NVL(LOCATION.LOCATION_DISPLAY_NAME, " .
+                                    "LOCATION.LOCATION_NAME) as location",
                                 "MFHD_MASTER.DISPLAY_CALL_NO as callnumber",
                                 "0 AS TEMP_LOCATION"
                                );
@@ -324,7 +326,7 @@ class Voyager implements DriverInterface
                     'status_array' => array($row['STATUS']),
                     'location' => $row['TEMP_LOCATION'] > 0
                         ? $this->getLocationName($row['TEMP_LOCATION'])
-                        : $row['LOCATION'],
+                        : utf8_encode($row['LOCATION']),
                     'reserve' => $row['ON_RESERVE'],
                     'callnumber' => $row['CALLNUMBER']
                 );
@@ -461,7 +463,8 @@ class Voyager implements DriverInterface
             "ITEM.RECALLS_PLACED", "ITEM.HOLDS_PLACED",
             "ITEM_STATUS_TYPE.ITEM_STATUS_DESC as status",
             "MFHD_DATA.RECORD_SEGMENT", "MFHD_ITEM.ITEM_ENUM",
-            "LOCATION.LOCATION_DISPLAY_NAME as location",
+            "NVL(LOCATION.LOCATION_DISPLAY_NAME, " .
+                "LOCATION.LOCATION_NAME) as location",
             "ITEM.TEMP_LOCATION",
             "MFHD_MASTER.DISPLAY_CALL_NO as callnumber",
             "to_char(CIRC_TRANSACTIONS.CURRENT_DUE_DATE, 'MM-DD-YY') as duedate",
@@ -530,7 +533,8 @@ class Voyager implements DriverInterface
                                 "MFHD_DATA.RECORD_SEGMENT", "null as ITEM_ENUM",
                                 "'N' as ON_RESERVE", "1 as ITEM_SEQUENCE_NUMBER",
                                 "'No information available' as status",
-                                "LOCATION.LOCATION_DISPLAY_NAME as location",
+                                "NVL(LOCATION.LOCATION_DISPLAY_NAME, " .
+                                    "LOCATION.LOCATION_NAME) as location",
                                 "MFHD_MASTER.DISPLAY_CALL_NO as callnumber",
                                 "null as duedate"
                                );
@@ -702,13 +706,13 @@ class Voyager implements DriverInterface
 
         // Fill cache if empty:
         if (!isset($cache[$id])) {
-            $sql = "SELECT LOCATION_NAME FROM {$this->dbName}.LOCATION " .
-                "WHERE LOCATION_ID=:id";
+            $sql = "SELECT NVL(LOCATION_DISPLAY_NAME, LOCATION_NAME) as location " .
+                "FROM {$this->dbName}.LOCATION WHERE LOCATION_ID=:id";
             $bind = array('id' => $id);
             $sqlStmt = $this->db->prepare($sql);
             $sqlStmt->execute($bind);
             $sqlRow = $sqlStmt->fetch(PDO::FETCH_ASSOC);
-            $cache[$id] = $sqlRow['LOCATION_NAME'];
+            $cache[$id] = utf8_encode($sqlRow['LOCATION']);
         }
 
         return $cache[$id];
@@ -729,7 +733,7 @@ class Voyager implements DriverInterface
             'status' => $sqlRow['STATUS'],
             'location' => $sqlRow['TEMP_LOCATION'] > 0
                 ? $this->getLocationName($sqlRow['TEMP_LOCATION'])
-                : $sqlRow['LOCATION'],
+                : utf8_encode($sqlRow['LOCATION']),
             'reserve' => $sqlRow['ON_RESERVE'],
             'callnumber' => $sqlRow['CALLNUMBER'],
             'barcode' => $sqlRow['ITEM_BARCODE']
