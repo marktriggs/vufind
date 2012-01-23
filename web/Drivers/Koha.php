@@ -174,12 +174,13 @@ class Koha implements DriverInterface
      * the ILS OPAC. This is used for ILSs that do not support an API or method
      * to place Holds.
      *
-     * @param string $id The id of the bib record
+     * @param string $id       The id of the bib record
+     * @param array  $details  Item details from getHoldings return array
      *
      * @return string          URL to ILS's OPAC's place hold screen.
      * @access public
      */
-    public function getHoldLink($id)
+    public function getHoldLink($id, $details)
     {
         // Web link of the ILS for placing hold on the item
         return $this->_ilsBaseUrl . "/cgi-bin/koha/opac-detail.pl?biblionumber=$id";

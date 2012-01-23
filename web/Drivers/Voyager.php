@@ -1507,11 +1507,12 @@ class Voyager implements DriverInterface
      * to place Holds.
      *
      * @param string $recordId The id of the bib record
+     * @param array  $details  Item details from getHoldings return array
      *
      * @return string          URL to ILS's OPAC's place hold screen.
      * @access public
      */
-    public function getHoldLink($recordId)
+    public function getHoldLink($recordId, $details)
     {
         // Open Record Page
         $client = new Proxy_Request(null, array('useBrackets' => false));

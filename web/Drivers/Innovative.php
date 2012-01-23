@@ -286,12 +286,13 @@ class Innovative implements DriverInterface
      * the ILS OPAC. This is used for ILSs that do not support an API or method
      * to place Holds.
      *
-     * @param string $id The id of the bib record
+     * @param string $id       The id of the bib record
+     * @param array  $details  Item details from getHoldings return array
      *
      * @return string    URL to ILS's OPAC's place hold screen.
      * @access public
      */
-    public function getHoldLink($id)
+    public function getHoldLink($id, $details)
     {
         // Strip ID
         $id_ = $this->prepID($id);
