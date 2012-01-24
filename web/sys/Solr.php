@@ -1412,7 +1412,7 @@ class Solr implements IndexEngine
         $responseCode = $this->client->getResponseCode();
         $this->client->clearPostData();
 
-        if ($responseCode == 500) {
+        if (in_array($responseCode, array(400, 500))) {
             $detail = $this->client->getResponseBody();
             // Attempt to extract the most useful error message from the response:
             if (preg_match("/<title>(.*)<\/title>/msi", $detail, $matches)) {
