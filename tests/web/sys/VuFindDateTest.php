@@ -129,10 +129,21 @@ class VuFindDateTest extends PHPUnit_Framework_TestCase
         $this->_checkDate(
             '05:11', $date->convertToDisplayTime('Y-m-d H:i', '2001-01-02 05:11')
         );
+        $this->_checkDate(
+            '01-2001', $date->convertFromDisplayDate('m-Y', '01-02-2001')
+        );
 
         // Check for proper handling of known problems:
         $bad = $date->convertToDisplayDate('U', 'invalid');
         $this->assertTrue(PEAR::isError($bad));
+        $this->assertTrue(
+            (bool)stristr($bad->getMessage(), 'failed to parse time string')
+        );
+        $bad = $date->convertToDisplayDate('d-m-Y', '31-02-2001');
+        $this->assertTrue(PEAR::isError($bad));
+        $this->assertTrue(
+            (bool)stristr($bad->getMessage(), 'parsed date was invalid')
+        );
     }
 
     /**

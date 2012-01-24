@@ -120,7 +120,7 @@ class VuFindDate
         ) {
             return $date->format($outputFormat);
         } else {
-            if (is_array($getErrors['errors'])) {
+            if (is_array($getErrors['errors']) && $getErrors['error_count'] > 0) {
                 foreach ($getErrors['errors'] as $error) {
                     $errors .= $error . " ";
                 }
