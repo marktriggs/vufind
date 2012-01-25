@@ -240,7 +240,9 @@ class MarcRecord extends IndexRecord
         $xml = trim($this->marcRecord->toXML());
 
         // Prevent unprintable characters from interfering with the XSL transform:
-        $xml = str_replace(array(chr(29), chr(30), chr(31)), ' ', $xml);
+        $xml = str_replace(
+            array(chr(27), chr(28), chr(29), chr(30), chr(31)), ' ', $xml
+        );
 
         // Transform MARCXML
         $style = new DOMDocument;
@@ -303,7 +305,9 @@ class MarcRecord extends IndexRecord
         // Special case for MARC:
         if ($format == 'marc21') {
             $xml = $this->marcRecord->toXML();
-            $xml = trim(str_replace(array(chr(29), chr(30), chr(31)), ' ', $xml));
+            $xml = str_replace(
+                array(chr(27), chr(28), chr(29), chr(30), chr(31)), ' ', $xml
+            );
             $xml = simplexml_load_string($xml);
             if (!$xml || !isset($xml->record)) {
                 return false;
