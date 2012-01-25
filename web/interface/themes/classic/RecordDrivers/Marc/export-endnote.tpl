@@ -22,7 +22,7 @@
 {foreach from=$recordLanguage item=lang}
 %G {$lang}
 {/foreach}
-{* Load the three possible subject fields -- 440 is deprecated but
+{* Load the three possible series fields -- 440 is deprecated but
    still exists in many catalogs. *}
 {assign var=marcField440 value=$marc->getFields('440')}
 {assign var=marcField490 value=$marc->getFields('490')}
