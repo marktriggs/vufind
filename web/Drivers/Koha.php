@@ -93,14 +93,17 @@ class Koha implements DriverInterface
         $duedate = $status = '';
         $inum = 0;
         $loc = $shelf = '';
-        $sql = "select itemnumber as ITEMNO, location as LOCATION, holdingbranch as HLDBRNCH, " .
-               "reserves as RESERVES, itemcallnumber as CALLNO, barcode as BARCODE, copynumber as COPYNO, " .
-               "notforloan as NOTFORLOAN from items where biblionumber = $id order by itemnumber";
+        $sql = "select itemnumber as ITEMNO, location as LOCATION, " .
+            "holdingbranch as HLDBRNCH, reserves as RESERVES, itemcallnumber as " .
+            "CALLNO, barcode as BARCODE, copynumber as COPYNO, " .
+            "notforloan as NOTFORLOAN from items where biblionumber = " . $id .
+            " order by itemnumber";
         try {
             $itemSqlStmt = mysql_query($sql);
             while ($rowItem = mysql_fetch_assoc($itemSqlStmt)) {
                 $inum = $rowItem['ITEMNO'];
-                $sql = "select date_due as DUEDATE from issues where itemnumber = $inum";
+                $sql = "select date_due as DUEDATE from issues where itemnumber = " .
+                    $inum;
 
                 switch ($rowItem['NOTFORLOAN']) {
                 case 0:
@@ -127,7 +130,8 @@ class Koha implements DriverInterface
 
                 //Retrieving the full branch name
                 if (null != ($loc = $rowItem['HLDBRNCH'])) {
-                    $sql = "select branchname as BNAME from branches where branchcode = \"$loc\"";
+                    $sql = "select branchname as BNAME from branches where " .
+                        "branchcode = \"$loc\"";
                     $locSqlStmt = mysql_query($sql);
                     if ($row = mysql_fetch_assoc($locSqlStmt)) {
                         $loc = $row['BNAME'];
@@ -174,10 +178,10 @@ class Koha implements DriverInterface
      * the ILS OPAC. This is used for ILSs that do not support an API or method
      * to place Holds.
      *
-     * @param string $id       The id of the bib record
-     * @param array  $details  Item details from getHoldings return array
+     * @param string $id      The id of the bib record
+     * @param array  $details Item details from getHoldings return array
      *
-     * @return string          URL to ILS's OPAC's place hold screen.
+     * @return string         URL to ILS's OPAC's place hold screen.
      * @access public
      */
     public function getHoldLink($id, $details)
@@ -204,11 +208,16 @@ class Koha implements DriverInterface
         $fineLst = array();
         try {
             $id = $patron['id'];
-            $sql = "select round(accountlines.amount*100) as AMOUNT, issues.issuedate as CHECKOUT, " .
-                   "accountlines.description as FINE, round(accountlines.amountoutstanding*100) as BALANCE, " .
-                   "issues.date_due as DUEDATE, items.biblionumber as BIBNO from accountlines join issues on " .
-                   "accountlines.borrowernumber = issues.borrowernumber and accountlines.itemnumber = issues.itemnumber " .
-                   "join items on accountlines.itemnumber = items.itemnumber where accountlines.borrowernumber = $id";
+            $sql = "select round(accountlines.amount*100) as AMOUNT, " .
+                "issues.issuedate as CHECKOUT, " .
+                "accountlines.description as FINE, " .
+                "round(accountlines.amountoutstanding*100) as BALANCE, " .
+                "issues.date_due as DUEDATE, items.biblionumber as BIBNO " .
+                "from accountlines join issues on " .
+                "accountlines.borrowernumber = issues.borrowernumber and " .
+                "accountlines.itemnumber = issues.itemnumber " .
+                "join items on accountlines.itemnumber = items.itemnumber " .
+                "where accountlines.borrowernumber = $id";
             $sqlStmt = mysql_query($sql);
             while ($row = mysql_fetch_assoc($sqlStmt)) {
                 $fineLst[] = array(
@@ -245,10 +254,12 @@ class Koha implements DriverInterface
         $holdLst = array();
         try {
             $id = $patron['id'];
-            $sql = "select reserves.biblionumber as BIBNO, branches.branchname as BRNAME, " .
-                   "reserves.expirationdate as EXDATE, reserves.reservedate as RSVDATE from reserves " .
-                   "join branches on reserves.branchcode = branches.branchcode " .
-                   "where reserves.borrowernumber = $id";
+            $sql = "select reserves.biblionumber as BIBNO, " .
+                "branches.branchname as BRNAME, " .
+                "reserves.expirationdate as EXDATE, " .
+                "reserves.reservedate as RSVDATE from reserves " .
+                "join branches on reserves.branchcode = branches.branchcode " .
+                "where reserves.borrowernumber = $id";
             $sqlStmt = mysql_query($sql);
             while ($row = mysql_fetch_assoc($sqlStmt)) {
                 $holdLst[] = array(
@@ -283,8 +294,9 @@ class Koha implements DriverInterface
         $profile = array();
         try {
             $id = $patron['id'];
-            $sql = "select address as ADDR1, address2 as ADDR2, zipcode as ZIP, phone as PHONE, " .
-                   "categorycode as GRP from borrowers where borrowernumber = $id";
+            $sql = "select address as ADDR1, address2 as ADDR2, zipcode as ZIP, " .
+                "phone as PHONE, categorycode as GRP from borrowers " .
+                "where borrowernumber = $id";
             $sqlStmt = mysql_query($sql);
             if ($row = mysql_fetch_assoc($sqlStmt)) {
                 $profile = array(
@@ -324,9 +336,10 @@ class Koha implements DriverInterface
         $row = $sql = $sqlStmt = '';
         try {
             $id = $patron['id'];
-            $sql = "select issues.date_due as DUEDATE, items.biblionumber as BIBNO, items.barcode BARCODE, " .
-                   "issues.renewals as RENEWALS from issues join items on issues.itemnumber = items.itemnumber " .
-                   "where issues.borrowernumber = $id";
+            $sql = "select issues.date_due as DUEDATE, items.biblionumber as " .
+                "BIBNO, items.barcode BARCODE, issues.renewals as RENEWALS " .
+                "from issues join items on issues.itemnumber = items.itemnumber " .
+                "where issues.borrowernumber = $id";
             $sqlStmt = mysql_query($sql);
             while ($row = mysql_fetch_assoc($sqlStmt)) {
                 $transactionLst[] = array(
@@ -435,8 +448,9 @@ class Koha implements DriverInterface
         // into MySQL database
         $db_pwd = rtrim(base64_encode(pack('H*', md5($password))), '=');
 
-        $sql = "select borrowernumber as ID, firstname as FNAME, surname as LNAME, email as EMAIL from borrowers " .
-               "where userid = \"$username\" and password = \"$db_pwd\"";
+        $sql = "select borrowernumber as ID, firstname as FNAME, " .
+            "surname as LNAME, email as EMAIL from borrowers " .
+            "where userid = \"$username\" and password = \"$db_pwd\"";
 
         try {
             $sqlStmt = mysql_query($sql);
