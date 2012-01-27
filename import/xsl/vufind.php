@@ -158,7 +158,7 @@ class VuFind
     public static function mapString($in, $filename)
     {
         global $importPath;
-        
+
         // Load the translation map and send back the appropriate value.  Note
         // that PHP's parse_ini_file() function is not compatible with SolrMarc's
         // style of properties map, so we are parsing this manually.
@@ -248,15 +248,35 @@ class VuFind
         if (!is_array($in)) {
             $in = array($in);
         }
-        
+
         foreach ($in as $current) {
             $matches = $current->getElementsByTagName($tag);
             foreach ($matches as $match) {
                 $current->removeChild($match);
             }
         }
-        
+
         return VuFind::xmlAsText($in);
+    }
+
+    /**
+     * Proxy the explode PHP function for use in XSL transformation.
+     *
+     * @param string $delimiter Delimiter for splitting $string
+     * @param string $string    String to split
+     *
+     * @return DOMDocument
+     * @access public
+     */
+    public static function explode($delimiter, $string)
+    {
+        $parts = explode($delimiter, $string);
+        $dom = new DOMDocument('1.0', 'utf-8');
+        foreach ($parts as $part) {
+            $element = $dom->createElement('part', $part);
+            $dom->appendChild($element);
+        }
+        return $dom;
     }
 }
 ?>
