@@ -130,6 +130,10 @@
     <!-- export the source into the temporary directory -->
     <exec command="svn export ${srcdir} ${builddir}/export/vufind-${version}" />
 
+    <!-- make sure the cache and compile directories exist -->
+    <mkdir dir="${builddir}/export/vufind-${version}/web/interface/cache" />
+    <mkdir dir="${builddir}/export/vufind-${version}/web/interface/compile" />
+
     <!-- build the standard tar.gz archive -->
     <exec command="tar -C${builddir}/export -c vufind-${version} &gt; ${builddir}/packages/vufind-${version}.tar" />
     <exec command="gzip ${builddir}/packages/vufind-${version}.tar" />
