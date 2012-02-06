@@ -3,11 +3,11 @@
 {capture name=pagelinks}
   <div class="alphaBrowsePageLinks">
     {if isset ($prevpage)}
-      <div class="alphaBrowsePrevLink"><a href="{$path}/AlphaBrowse/Results?source={$source|escape:"url"}&amp;from={$from|escape:"url"}&amp;page={$prevpage|escape:"url"}">&laquo; Prev</a></div>
+      <div class="alphaBrowsePrevLink"><a href="{$path}/AlphaBrowse/Results?source={$source|escape:"url"}&amp;from={$from|escape:"url"}&amp;page={$prevpage|escape:"url"}">&laquo; {translate text="Prev"}</a></div>
     {/if}
 
     {if isset ($nextpage)}
-      <div class="alphaBrowseNextLink"><a href="{$path}/AlphaBrowse/Results?source={$source|escape:"url"}&amp;from={$from|escape:"url"}&amp;page={$nextpage|escape:"url"}">Next &raquo;</a></div>
+      <div class="alphaBrowseNextLink"><a href="{$path}/AlphaBrowse/Results?source={$source|escape:"url"}&amp;from={$from|escape:"url"}&amp;page={$nextpage|escape:"url"}">{translate text="Next"} &raquo;</a></div>
     {/if}
     <div class="clearer"><!-- empty --></div>
   </div>
