@@ -49,6 +49,13 @@ class AuthServer extends Action
     {
         global $configArray;
 
+        // Check if the OAI Server is enabled before continuing
+        if (!isset($configArray['OAI'])) {
+            header('HTTP/1.1 404 Not Found');
+            echo 'OAI Server Not Configured.';
+            return;
+        }
+
         // Collect relevant parameters for OAI server:
         $baseURL = $configArray['Site']['url'] . '/OAI/AuthServer';
         $params = empty($_GET) ? $_POST : $_GET;
