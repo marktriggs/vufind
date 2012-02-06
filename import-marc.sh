@@ -66,17 +66,20 @@ fi
 
 
 ##################################################
+# Set VUFIND_HOME
+##################################################
+if [ -z "$VUFIND_HOME" ]
+then
+  VUFIND_HOME="/usr/local/vufind"
+fi
+
+
+##################################################
 # Set SOLR_HOME
 ##################################################
 if [ -z "$SOLR_HOME" ]
 then
-  if [ -z "$VUFIND_HOME" ]
-  then
-    echo "You need to set the VUFIND_HOME environmental variable before running this script."
-    exit 1
-  else
-    SOLR_HOME="$VUFIND_HOME/solr"
-  fi
+  SOLR_HOME="$VUFIND_HOME/solr"
 fi
 
 
@@ -115,6 +118,15 @@ JAR_FILE="$VUFIND_HOME/import/SolrMarc.jar"
 #TEST_SOLR_JAR_DEF=-Done-jar.class.path=$SOLRWARLOCATIONORJARDIR
 #SOLR_JAR_DEF=`echo $TEST_SOLR_JAR_DEF | sed -e"s|-Done-jar.class.path=.*|-Done-jar.class.path=$SOLRWARLOCATIONORJARDIR|"`
 SOLR_JAR_DEF="-Dsolrmarc.solr.war.path=$VUFIND_HOME/solr/jetty/webapps/solr.war"
+
+#####################################################
+# Verify that JAR_FILE exists
+#####################################################
+if [ ! -f "$JAR_FILE" ]
+then
+  echo "Could not find $JAR_FILE.  Make sure VUFIND_HOME is set correctly."
+  exit 1
+fi
 
 #####################################################
 # Normalize target file path to absolute path
