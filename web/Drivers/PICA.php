@@ -145,14 +145,23 @@ class PICA extends DAIA
         $recordList['firstname'] = $userinfo->firstname;
         // lastname
         $recordList['lastname'] = $userinfo->lastname;
+        // email
+        $recordList['email'] = $userinfo->email;
         //Street and Number $ City $ Zip
-        $address = explode("\$", $userinfo->address);
-        // address1
-        $recordList['address1'] = $address[1];
-        // address2
-        $recordList['address2'] = $address[2];
-        // zip (Post Code)
-        $recordList['zip'] = $address[3];
+        if ($userinfo->address) {
+            $address = explode("\$", $userinfo->address);
+            // address1
+            $recordList['address1'] = $address[1];
+            // address2
+            $recordList['address2'] = $address[2];
+            // zip (Post Code)
+            $recordList['zip'] = $address[3];
+        }
+        else if ($userinfo->homeaddress) {
+            $address = explode("\$", $userinfo->homeaddress);
+            $recordList['address2'] = $address[0];
+            $recordList['zip'] = $address[1];
+        }
         // phone
         $recordList['phone'] = $userinfo->phone;
         // group
@@ -161,6 +170,30 @@ class PICA extends DAIA
             $recordList = $user;
             // add a group
             $recordList['group'] = 'No library account';
+        }
+        $recordList['expiration'] = $userinfo->libExpire;
+        $recordList['status'] = $userinfo->borrowerStatus;
+        // Get the LOANS-Page to extract a message for the user
+        $URL = "/loan/DB=1/USERINFO";
+        $POST = array(
+            "ACT" => "UI_DATA",
+            "LNG" => "DU",
+            "BOR_U" => $_SESSION['picauser']->username,
+            "BOR_PW" => $_SESSION['picauser']->cat_password
+        );
+        $postit = $this->_postit($URL, $POST);
+        // How many messages are there?
+        $messages = substr_count($postit, '<strong class="alert">');
+        $position = 0;
+        if ($messages === 2) {
+            // ignore the first message (its only the message to close the window after finishing)
+            for ($n = 0; $n<2; $n++) {
+                $pos = strpos($postit, '<strong class="alert">', $position);
+                $pos_close = strpos($postit, '</strong>', $pos);
+                $value = substr($postit, $pos+22, ($pos_close-$pos-22));
+                $position = $pos + 1;
+            }
+            $recordList['message'] = $value;
         }
         return $recordList;
     }
@@ -182,40 +215,61 @@ class PICA extends DAIA
         $URL = "/loan/DB=1/USERINFO";
         $POST = array(
             "ACT" => "UI_LOL",
+            "LNG" => "DU",
             "BOR_U" => $_SESSION['picauser']->username,
             "BOR_PW" => $_SESSION['picauser']->cat_password
         );
         $postit = $this->_postit($URL, $POST);
-
         // How many items are there?
         $holds = substr_count($postit, 'input type="checkbox" name="VB"');
-        $holdsByIframe = substr_count($postit, '<iframe');
+        $iframes = $holdsByIframe = substr_count($postit, '<iframe');
         $ppns = array();
         $expiration = array();
         $transList = array();
         $barcode = array();
         $reservations = array();
+        $titles = array();
         if ($holdsByIframe >= $holds) {
             $position = strpos($postit, '<iframe');
-            for ($i = $i; $i < $holdsByIframe; $i++) {
+            for ($i = 0; $i < $iframes; $i++) {
                 $pos = strpos($postit, 'VBAR=', $position);
                 $value = substr($postit, $pos+9, 8);
                 $completeValue = substr($postit, $pos+5, 12);
                 $barcode[] = $completeValue;
-                $ppns[] = $this->_getPpnByBarcode($value);
+                $bc = $this->_getPpnByBarcode($value);
+                $ppns[] = $bc;
                 $position = $pos + 1;
-                $position_expire = $position;
-                for ($n = 0; $n<3; $n++) {
-                    $position_expire = $this->_strposBackwards(
-                        $postit, '<td class="value-small">', $position_expire-1
+                $current_position = $position;
+                $position_state = null;
+                for ($n = 0; $n<6; $n++) {
+                    $current_position = $this->_strposBackwards(
+                        $postit, '<td class="value-small">', $current_position-1
                     );
                     if ($n === 1) {
-                        $position_reservations = $position_expire;
+                        $position_reservations = $current_position;
+                    }
+                    if ($n === 2) {
+                        $position_expire = $current_position;
+                    }
+                    if ($n === 4) {
+                        $position_state = $current_position;
+                    }
+                    if ($n === 5) {
+                        $position_title = $current_position;
                     }
                 }
-                $reservations[] = substr($postit, $position_reservations+24, 1);
-                $expiration[] = substr($postit, $position_expire+24, 10);
-                $renewals[] = $this->_getRenewals($completeValue);
+                if ($position_state !== null && substr($postit, $position_state+24, 8) !== 'bestellt') {
+                    $reservations[] = substr($postit, $position_reservations+24, 1);
+                    $expiration[] = substr($postit, $position_expire+24, 10);
+                    $renewals[] = $this->_getRenewals($completeValue);
+                    $closing_title = strpos($postit, '</td>', $position_title);
+                    $titles[] = $completeValue." ".substr($postit, $position_title+24, ($closing_title-$position_title-24));
+                }
+                else {
+                    $holdsByIframe--;
+                    array_pop($ppns);
+                    array_pop($barcode);
+                }
             }
             $holds = $holdsByIframe;
         } else {
@@ -247,7 +301,8 @@ class PICA extends DAIA
                     'duedate' => $expiration[$i],
                     'renewals' => $renewals[$i],
                     'reservations' => $reservations[$i],
-                    'vb'      => $barcode[$i]
+                    'vb'      => $barcode[$i],
+                    'title'   => $titles[$i]
                 );
             } else {
                 // There is a problem: no PPN found for this item... lets take id 0
@@ -257,10 +312,12 @@ class PICA extends DAIA
                     'duedate' => $expiration[$i],
                     'renewals' => $renewals[$i],
                     'reservations' => $reservations[$i],
-                    'vb'      => $barcode[$i]
+                    'vb'      => $barcode[$i],
+                    'title'   => $titles[$i]
                 );
             }
         }
+        //print_r($transList);
         return $transList;
     }
 
@@ -451,7 +508,7 @@ class PICA extends DAIA
                     $postit, '<td class="value-small">', $position_create+1
                 );
             }
-            $creation[] = substr($postit, $position_create+24, 10);
+            $creation[] = str_replace('-', '.', substr($postit, $position_create+24, 10));
         }
         /* items, which are ordered and have no signature yet, are not included in
          * the for-loop getthem by checkbox PPN
@@ -463,7 +520,7 @@ class PICA extends DAIA
             // get the length of PPN
                $x = strpos($postit, '"', $pos+7);
             $value = substr($postit, $pos+7, $x-$pos-7);
-            // problem: the value presnted here does not contain the checksum!
+            // problem: the value presented here does not contain the checksum!
             // so its not a valid identifier
             // we need to calculate the checksum
             $checksum = 0;
@@ -485,7 +542,7 @@ class PICA extends DAIA
                     $postit, '<td class="value-small">', $position_create+1
                 );
             }
-            $creation[] = substr($postit, $position_create+24, 10);
+            $creation[] = str_replace('-', '.', substr($postit, $position_create+24, 10));
         }
 
         /* media ordered from closed stack is not visible on the UI_LOR page
@@ -511,7 +568,7 @@ class PICA extends DAIA
             $nextClosingTd = strpos($postit_lol, '</td>', $pos);
             $value = substr($postit_lol, $pos+27, ($nextClosingTd-$pos-27));
             $ppns[] = $this->_getPpnByBarcode($value);
-            $creation[] = 'today';
+            $creation[] = date('d.m.Y');
         }
 
         for ($i = 0; $i < ($holds+$moreholds+$requests); $i++) {
@@ -804,7 +861,7 @@ class PICA extends DAIA
                 if ($data[$i][$j] == $ldapConnectionParameter['email']
                     && ($ldapConnectionParameter['email'] != "")
                 ) {
-                     $user->email = $data[$i][$data[$i][$j]][0];
+                    $user->email = $data[$i][$data[$i][$j]][0];
                 }
 
                 if ($data[$i][$j] == $ldapConnectionParameter['cat_username']
@@ -819,6 +876,12 @@ class PICA extends DAIA
                      $user->address = $data[$i][$data[$i][$j]][0];
                 }
 
+                if ($data[$i][$j] == $ldapConnectionParameter['homeaddress']
+                    && ($ldapConnectionParameter['homeaddress'] != "")
+                ) {
+                     $user->homeaddress = $data[$i][$data[$i][$j]][0];
+                }
+
                 if ($data[$i][$j] == $ldapConnectionParameter['phone']
                     && ($ldapConnectionParameter['phone'] != "")
                 ) {
@@ -829,6 +892,21 @@ class PICA extends DAIA
                     && ($ldapConnectionParameter['group'] != "")
                 ) {
                      $user->group = $data[$i][$data[$i][$j]][0];
+                }
+
+                if ($data[$i][$j] == $ldapConnectionParameter['expiration']
+                    && ($ldapConnectionParameter['expiration'] != "")
+                ) {
+                     $libExpireYear = substr($data[$i][$data[$i][$j]][0], 0, 4);
+                     $libExpireMonth = substr($data[$i][$data[$i][$j]][0], 4, 2);
+                     $libExpireDay = substr($data[$i][$data[$i][$j]][0], 6, 2);
+                     $user->libExpire = $libExpireDay.".".$libExpireMonth.".".$libExpireYear;
+                }
+
+                if ($data[$i][$j] == $ldapConnectionParameter['status']
+                    && ($ldapConnectionParameter['status'] != "")
+                ) {
+                     $user->borrowerStatus = $data[$i][$data[$i][$j]][0];
                 }
             }
         }
