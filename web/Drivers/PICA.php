@@ -156,8 +156,7 @@ class PICA extends DAIA
             $recordList['address2'] = $address[2];
             // zip (Post Code)
             $recordList['zip'] = $address[3];
-        }
-        else if ($userinfo->homeaddress) {
+        } else if ($userinfo->homeaddress) {
             $address = explode("\$", $userinfo->homeaddress);
             $recordList['address2'] = $address[0];
             $recordList['zip'] = $address[1];
@@ -186,7 +185,8 @@ class PICA extends DAIA
         $messages = substr_count($postit, '<strong class="alert">');
         $position = 0;
         if ($messages === 2) {
-            // ignore the first message (its only the message to close the window after finishing)
+            // ignore the first message (its only the message to close the window
+            // after finishing)
             for ($n = 0; $n<2; $n++) {
                 $pos = strpos($postit, '<strong class="alert">', $position);
                 $pos_close = strpos($postit, '</strong>', $pos);
@@ -258,14 +258,18 @@ class PICA extends DAIA
                         $position_title = $current_position;
                     }
                 }
-                if ($position_state !== null && substr($postit, $position_state+24, 8) !== 'bestellt') {
+                if ($position_state !== null
+                    && substr($postit, $position_state+24, 8) !== 'bestellt'
+                ) {
                     $reservations[] = substr($postit, $position_reservations+24, 1);
                     $expiration[] = substr($postit, $position_expire+24, 10);
                     $renewals[] = $this->_getRenewals($completeValue);
                     $closing_title = strpos($postit, '</td>', $position_title);
-                    $titles[] = $completeValue." ".substr($postit, $position_title+24, ($closing_title-$position_title-24));
-                }
-                else {
+                    $titles[] = $completeValue." ".substr(
+                        $postit, $position_title+24,
+                        ($closing_title-$position_title-24)
+                    );
+                } else {
                     $holdsByIframe--;
                     array_pop($ppns);
                     array_pop($barcode);
@@ -508,7 +512,8 @@ class PICA extends DAIA
                     $postit, '<td class="value-small">', $position_create+1
                 );
             }
-            $creation[] = str_replace('-', '.', substr($postit, $position_create+24, 10));
+            $creation[]
+                = str_replace('-', '.', substr($postit, $position_create+24, 10));
         }
         /* items, which are ordered and have no signature yet, are not included in
          * the for-loop getthem by checkbox PPN
@@ -542,7 +547,8 @@ class PICA extends DAIA
                     $postit, '<td class="value-small">', $position_create+1
                 );
             }
-            $creation[] = str_replace('-', '.', substr($postit, $position_create+24, 10));
+            $creation[]
+                = str_replace('-', '.', substr($postit, $position_create+24, 10));
         }
 
         /* media ordered from closed stack is not visible on the UI_LOR page
@@ -702,7 +708,8 @@ class PICA extends DAIA
         $ppn = array();
         for ($n = 0; $itemlist->item($n); $n++) {
             if (count($itemlist->item($n)->attributes) > 0) {
-                $ppn[] = $itemlist->item($n)->attributes->getNamedItem('PPN')->nodeValue;
+                $ppn[] = $itemlist->item($n)->attributes->getNamedItem('PPN')
+                    ->nodeValue;
             }
         }
         return $ppn;
@@ -766,7 +773,8 @@ class PICA extends DAIA
         $info = ldap_get_entries($ldapConnection, $ldapSearch);
         if ($info['count']) {
             // Validate the user credentials by attempting to bind to LDAP:
-            $ldapBind = @ldap_bind($ldapConnection, $info[0]['dn'], $this->_password);
+            $ldapBind
+                = @ldap_bind($ldapConnection, $info[0]['dn'], $this->_password);
             if ($ldapBind) {
                 // If the bind was successful, we can look up the full user info:
                 $ldapSearch = ldap_search(
@@ -900,7 +908,8 @@ class PICA extends DAIA
                      $libExpireYear = substr($data[$i][$data[$i][$j]][0], 0, 4);
                      $libExpireMonth = substr($data[$i][$data[$i][$j]][0], 4, 2);
                      $libExpireDay = substr($data[$i][$data[$i][$j]][0], 6, 2);
-                     $user->libExpire = $libExpireDay.".".$libExpireMonth.".".$libExpireYear;
+                     $user->libExpire
+                         = $libExpireDay.".".$libExpireMonth.".".$libExpireYear;
                 }
 
                 if ($data[$i][$j] == $ldapConnectionParameter['status']
@@ -970,7 +979,8 @@ class PICA extends DAIA
         $info = ldap_get_entries($ldapConnection, $ldapSearch);
         if ($info['count']) {
             // Validate the user credentials by attempting to bind to LDAP:
-            $ldapBind = @ldap_bind($ldapConnection, $info[0]['dn'], $this->_password);
+            $ldapBind
+                = @ldap_bind($ldapConnection, $info[0]['dn'], $this->_password);
             if ($ldapBind) {
                 // If the bind was successful, we can look up the full user info:
                 $ldapSearch = ldap_search(
