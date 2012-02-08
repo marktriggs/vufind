@@ -1,31 +1,93 @@
 <?php
 /**
  * ILS Driver for VuFind to query availability information via DAIA.
- * 
- * @author Oliver Marahrens <o.marahrens@tu-harburg.de>
- * 
- * based on the proof-of-concept-driver by Till Kinstler, GBV
+ *
+ * Based on the proof-of-concept-driver by Till Kinstler, GBV.
+ *
+ * PHP version 5
+ *
+ * Copyright (C) Oliver Goldschmidt 2010.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * @category VuFind
+ * @package  ILS_Drivers
+ * @author   Oliver Goldschmidt <o.goldschmidt@tu-harburg.de>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/building_an_ils_driver Wiki
  */
 
 require_once 'Interface.php';
 
+/**
+ * ILS Driver for VuFind to query availability information via DAIA.
+ *
+ * Based on the proof-of-concept-driver by Till Kinstler, GBV.
+ *
+ * @category VuFind
+ * @package  ILS_Drivers
+ * @author   Oliver Goldschmidt <o.goldschmidt@tu-harburg.de>
+ * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
+ * @link     http://vufind.org/wiki/building_an_ils_driver Wiki
+ */
 class DAIA implements DriverInterface
 {
-    private $baseURL;
+    private $_baseURL;
 
+    /**
+     * Constructor
+     *
+     * @access public
+     */
     public function __construct()
     {
         $configArray = parse_ini_file('conf/DAIA.ini', true);
 
-        $this->baseURL = $configArray['Global']['baseUrl'];
+        $this->_baseURL = $configArray['Global']['baseUrl'];
     }
 
+    /**
+     * Get Status
+     *
+     * This is responsible for retrieving the status information of a certain
+     * record.
+     *
+     * @param string $id The record id to retrieve the holdings for
+     *
+     * @return mixed     On success, an associative array with the following keys:
+     * id, availability (boolean), status, location, reserve, callnumber; on
+     * failure, a PEAR_Error.
+     * @access public
+     */
     public function getStatus($id)
     {
         $holding = $this->daiaToHolding($id);
         return $holding;
     }
 
+    /**
+     * Get Statuses
+     *
+     * This is responsible for retrieving the status information for a
+     * collection of records.
+     *
+     * @param array $ids The array of record ids to retrieve the status for
+     *
+     * @return mixed     An array of getStatus() return values on success,
+     * a PEAR_Error object otherwise.
+     * @access public
+     */
     public function getStatuses($ids)
     {
         $items = array();
@@ -35,11 +97,37 @@ class DAIA implements DriverInterface
         return $items;
     }
 
+     /**
+     * Get Holding
+     *
+     * This is responsible for retrieving the holding information of a certain
+     * record.
+     *
+     * @param string $id     The record id to retrieve the holdings for
+     * @param array  $patron Patron data
+     *
+     * @return mixed     On success, an associative array with the following keys:
+     * id, availability (boolean), status, location, reserve, callnumber, duedate,
+     * number, barcode; on failure, a PEAR_Error.
+     * @access public
+     */
     public function getHolding($id, $patron = false)
     {
         return $this->getStatus($id);
     }
 
+    /**
+     * Get Purchase History
+     *
+     * This is responsible for retrieving the acquisitions history data for the
+     * specific record (usually recently received issues of a serial).
+     *
+     * @param string $id The record id to retrieve the info for
+     *
+     * @return mixed     An array with the acquisitions data on success, PEAR_Error
+     * on failure
+     * @access public
+     */
     public function getPurchaseHistory($id)
     {
         return array();
@@ -49,21 +137,32 @@ class DAIA implements DriverInterface
      * Query a DAIA server and return the result as DomDocument object.
      * The returned object is an XML document containing
      * content as described in the DAIA format specification.
+     *
+     * @param string $id Document to look up.
+     *
+     * @return DomDocument Object representation of an XML document containing
+     * content as described in the DAIA format specification.
+     * @access public
      */
-    private function queryDAIA($id)
+    private function _queryDAIA($id)
     {
         $daia = new DomDocument();
-        $daia->load($this->baseURL . '?output=xml&ppn='.$id);
+        $daia->load($this->_baseURL . '?output=xml&ppn='.$id);
 
         return $daia;
     }
 
     /**
      * Flatten a DAIA response to an array of holding information.
+     *
+     * @param string $id Document to look up.
+     *
+     * @return array
+     * @access public
      */
     public function daiaToHolding($id)
     {
-        $daia = $this->queryDAIA($id);
+        $daia = $this->_queryDAIA($id);
         // get Availability information from DAIA
         $documentlist = $daia->getElementsByTagName('document');
         $status = array();
@@ -269,8 +368,18 @@ class DAIA implements DriverInterface
         return $status;
     }
 
+    /**
+     * Return an abbreviated set of status information.
+     *
+     * @param string $id The record id to retrieve the status for
+     *
+     * @return mixed     On success, an associative array with the following keys:
+     * id, availability (boolean), status, location, reserve, callnumber, duedate,
+     * number; on failure, a PEAR_Error.
+     * @access public
+     */
     public function getShortStatus($id) {
-        $daia = $this->queryDAIA($id);
+        $daia = $this->_queryDAIA($id);
         // get Availability information from DAIA
         $itemlist = $daia->getElementsByTagName('item');
         $label = "Unknown";
@@ -376,6 +485,5 @@ class DAIA implements DriverInterface
                 }
         return $holding;
     }
-
 }
 ?>
