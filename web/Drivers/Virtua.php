@@ -325,7 +325,7 @@ class Virtua implements DriverInterface
      * @param array  $patron Patron data
      *
      * @return mixed            On success, an associative array with the following
-     * keys: id, availability (boolean), status, location, reserve, callnumber, 
+     * keys: id, availability (boolean), status, location, reserve, callnumber,
      * duedate, number, barcode; on failure, a PEAR_Error.
      * @access public
      */
@@ -361,13 +361,19 @@ class Virtua implements DriverInterface
             " FROM reserve_item_v";
 
         // Build SQL Statement
-        $sql = "SELECT d.itemid as item_id, d.copyno, d.barcode, c.due_date, s.name as status, s.status_code, " .
-            "l.name as location, l.location_id, b.call_number as bib_call_num, i.call_number as item_call_num, " .
-            "iss.latest_issue, r.item_class as reserve_item_class, ic.item_class, d.units, " .
+        $sql = "SELECT d.itemid as item_id, d.copyno, d.barcode, c.due_date, " .
+            "s.name as status, s.status_code, " .
+            "l.name as location, l.location_id, b.call_number as bib_call_num, " .
+            "i.call_number as item_call_num, " .
+            "iss.latest_issue, r.item_class as reserve_item_class, " .
+            "ic.item_class, d.units, " .
             "br.bib_req, ir.item_req " .
-            "FROM   dbadmin.itemdetl2 d, dbadmin.location l, dbadmin.statdetl sd, dbadmin.item_status s, " .
-            "dbadmin.circdetl c, dbadmin.bibliographic_fields b, dbadmin.item_call_number i, item_class_v ic, " .
-            "($holds) h, ($bib_reqs) br, ($item_reqs) ir, ($issues) iss, ($reserve_class) r " .
+            "FROM   dbadmin.itemdetl2 d, dbadmin.location l, " .
+            "dbadmin.statdetl sd, dbadmin.item_status s, " .
+            "dbadmin.circdetl c, dbadmin.bibliographic_fields b, " .
+            "dbadmin.item_call_number i, item_class_v ic, " .
+            "($holds) h, ($bib_reqs) br, ($item_reqs) ir, ($issues) iss, " .
+            "($reserve_class) r " .
             "WHERE  d.location  = l.location_id " .
             "AND    d.itemclass = ic.item_class_id " .
             "AND    d.itemid    = sd.itemid (+) " .
@@ -579,7 +585,9 @@ class Virtua implements DriverInterface
                         ) {
                             // ... can this user borrow on loan items at this
                             // location?
-                            if (in_array($location, $unavailable_locs[$item_loc_code])) {
+                            if (in_array(
+                                $location, $unavailable_locs[$item_loc_code]
+                            )) {
                                 $can_req = true;
                             }
                         }
@@ -599,7 +607,9 @@ class Virtua implements DriverInterface
                             } else {
                                 // ... can the user borrow avilable items at this
                                 // location?
-                                if (in_array($location, $available_locs[$item_loc_code])) {
+                                if (in_array(
+                                    $location, $available_locs[$item_loc_code]
+                                )) {
                                     $can_req = true;
                                 }
                             }
@@ -607,7 +617,8 @@ class Virtua implements DriverInterface
                     }
                     /* DEBUGGING */
                     //$can_req = $can_req ? "Y" : "N";
-                    //$h['req_allowed'] = "O:$item_is_out L:$item_loc_code S:$item_stat_code : $can_req";
+                    //$h['req_allowed'] = "O:$item_is_out
+                    // L:$item_loc_code S:$item_stat_code : $can_req";
                     /* Normal Return value */
                     $h['req_allowed'] = $can_req;
                 }
@@ -1484,7 +1495,8 @@ class Virtua implements DriverInterface
         // Lowest priority row (numericaly, ie. 1 = most important)
         $priority = "SELECT e.campus, MIN(e.priority) as priority " .
             "FROM   usq_sr_open_except e " .
-            "WHERE to_date(:today,'dd/mm/yyyy') BETWEEN e.except_date_from AND e.except_date_to " .
+            "WHERE to_date(:today,'dd/mm/yyyy') " .
+            "BETWEEN e.except_date_from AND e.except_date_to " .
             "  AND app_$day = 1 " .
             "GROUP BY e.campus";
         // Retrieve Exceptions
@@ -1492,7 +1504,8 @@ class Virtua implements DriverInterface
             "FROM ($priority) p, usq_sr_open_except e " .
             "WHERE e.campus   = p.campus " .
             "AND   e.priority = p.priority " .
-            "AND   to_date(:today,'dd/mm/yyyy') BETWEEN e.except_date_from AND e.except_date_to " .
+            "AND   to_date(:today,'dd/mm/yyyy') " .
+            "BETWEEN e.except_date_from AND e.except_date_to " .
             "AND   app_$day = 1";
         $fields = array("today:string" => date("d/m/Y", $time));
         $exceptions = $this->_db->simpleSelect($sql, $fields);
@@ -1500,8 +1513,10 @@ class Virtua implements DriverInterface
         foreach ($exceptions as $row) {
             $times[$row['CAMPUS']] = array(
                 // Remember times come out with no date, add in today.
-                'open'   => "$today " . date($time_format, strtotime($row['OPEN_TIME'])),
-                'close'  => "$today " . date($time_format, strtotime($row['CLOSE_TIME'])),
+                'open'   => "$today "
+                    . date($time_format, strtotime($row['OPEN_TIME'])),
+                'close'  => "$today "
+                    . date($time_format, strtotime($row['CLOSE_TIME'])),
                 'status' => $row['STATUS'],
                 'reason' => $row['REASON']
             );
@@ -1693,7 +1708,10 @@ class Virtua implements DriverInterface
             $result = $client->getResponseBody();
             // Now find the sessionid. There should be one in the meta tags,
             // so we can look for the first one in the document
-            // eg. <meta http-equiv="Refresh" content="30000; url=http://libwebtest2.usq.edu.au:80/cgi-bin/chameleon?sessionid=2009071712483605131&amp;skin=homepage&amp;lng=en&amp;inst=consortium&amp;conf=.%26%23047%3bchameleon.conf&amp;timedout=1" />
+            // eg. <meta http-equiv="Refresh" content="30000;
+            // url=http://libwebtest2.usq.edu.au:80/cgi-bin/chameleon?sessionid=
+            //2009071712483605131&amp;skin=homepage&amp;lng=en&amp;inst=
+            //consortium&amp;conf=.%26%23047%3bchameleon.conf&amp;timedout=1" />
             $start = strpos($result, 'sessionid=') + 10;
             $end   = strpos($result, '&amp;skin=');
             return substr($result, $start, $end-$start);
@@ -1747,8 +1765,10 @@ class Virtua implements DriverInterface
         $post_data .= "&SourceScreen=" ."PATRONACTIVITY";
         $post_data .= "&pos="          ."1";
         $post_data .= "&patronid="     .$patron['cat_username'];
-        $post_data .= "&patronhost="   .urlencode($this->_config['Catalog']['patron_host']);
-        $post_data .= "&host="         .urlencode($this->_config['Catalog']['host_string']);
+        $post_data .= "&patronhost="
+            . urlencode($this->_config['Catalog']['patron_host']);
+        $post_data .= "&host="
+            . urlencode($this->_config['Catalog']['host_string']);
         $post_data .= "&itembarcode="  .implode("&itembarcode=", $item_list);
         $post_data .= "&submit="       ."Renew";
         $post_data .= "&reset="        ."Clear";
@@ -1781,6 +1801,32 @@ class Virtua implements DriverInterface
             }
         }
         return $return;
+    }
+
+    /**
+     * Get suppressed authority records
+     *
+     * @return array ID numbers of suppressed authority records in the system.
+     * @access public
+     */
+    public function getSuppressedAuthorityRecords()
+    {
+        $list = array();
+
+        $sql = "select auth_id " .
+            "from state_record_authority " .
+            "WHERE STATE_ID = 1";
+
+        $result = $this->_db->simpleSelect($sql);
+
+        if ($result === false) {
+            return new PEAR_Error('An error occurred while connecting to Virtua');
+        }
+
+        foreach ($result as $row) {
+            $list[] = 'vtls' .  str_pad($row['AUTH_ID'], 9, "0", STR_PAD_LEFT);
+        }
+        return $list;
     }
 
     /* Methods yet to be implemented -- see Voyager driver for examples

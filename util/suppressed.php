@@ -38,8 +38,15 @@ require_once 'sys/ConnectionManager.php';
 // Read Config file
 $configArray = readConfig();
 
+// Set core based on command line arguments
+if ($argc > 1 && $argv[1] == '--authorities'){
+    $core = 'authority';
+} else {
+    $core = 'biblio';
+}
+
 // Setup Solr Connection
-$solr = ConnectionManager::connectToIndex('Solr');
+$solr = ConnectionManager::connectToIndex('Solr', $core);
 
 // Make ILS Connection
 $catalog = ConnectionManager::connectToCatalog();
@@ -49,13 +56,26 @@ ConnectionManager::connectToDatabase();
 
 // Get Suppressed Records and Delete from index
 if ($catalog && $catalog->status) {
-    $result = $catalog->getSuppressedRecords();
-    if (!PEAR::isError($result)) {
+    // Call the appropriate driver method
+    if ($core == 'authority') {
+        $result = $catalog->getSuppressedAuthorityRecords();
+    } else {
+        $result = $catalog->getSuppressedRecords();
+    }
+    if (PEAR::isError($result)) {
+        echo "Error: " . $result->getMessage() . "\n";
+    } else if (!is_array($result)) {
+        echo "Could not obtain suppressed record list from ILS.\n";
+    } else if (empty($result)) {
+        echo "No suppressed records to delete.\n";
+    } else {
         $status = $solr->deleteRecords($result);
         if ($status) {
             // Commit and Optimize
             $solr->commit();
             $solr->optimize();
+        } else {
+            echo "Delete failed.\n";
         }
     }
 } else {
