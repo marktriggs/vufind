@@ -30,8 +30,7 @@ public String getLongLat(Record record) {
             if (subfields_d != null) {
                 while (subfieldsIter_d.hasNext()) {
                     val = subfieldsIter_d.next().getData();
-                    if (!val.matches("-?\\d+(.\\d+)?"))
-			  {
+                    if (!val.matches("-?\\d+(.\\d+)?")) {
                         return null;
                     }
                 }
@@ -41,8 +40,7 @@ public String getLongLat(Record record) {
             if (subfields_f != null) {
                 while (subfieldsIter_f.hasNext()) {
                     String val2 = subfieldsIter_f.next().getData();
-                    if (!val2.matches("-?\\d+(.\\d+)?"))
-			  {
+                    if (!val2.matches("-?\\d+(.\\d+)?")) {
                         return null;
                     }
                     val = val + ',' + val2;
