@@ -39,7 +39,7 @@ require_once 'sys/ConnectionManager.php';
 $configArray = readConfig();
 
 // Set core based on command line arguments
-if ($argc > 1 && $argv[1] == '--authorities'){
+if ($argc > 1 && $argv[1] == '--authorities') {
     $core = 'authority';
 } else {
     $core = 'biblio';
