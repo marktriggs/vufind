@@ -231,7 +231,7 @@ class CatalogConnection
             return $this->driver->checkRequestIsValid($id, $data, $patron);
         }
         // If the driver has no checkRequestIsValid method, we will assume that
-        // all requests are valid – failure can be handled later after the user
+        // all requests are valid - failure can be handled later after the user
         // attempts to place an illegal hold
         return true;
     }
