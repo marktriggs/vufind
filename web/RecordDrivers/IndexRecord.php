@@ -489,13 +489,6 @@ class IndexRecord implements RecordInterface
         global $interface;
         global $configArray;
 
-        if ("driver" == CatalogConnection::getHoldsMode()) {
-            $interface->assign('driverMode', true);
-            if (!UserAccount::isLoggedIn()) {
-                $interface->assign('showLoginMsg', true);
-            }
-        }
-
         // Only display OpenURL link if the option is turned on and we have
         // an ISSN.  We may eventually want to make this rule more flexible,
         // but for now the ISSN restriction is designed to be consistent with

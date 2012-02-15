@@ -173,6 +173,31 @@ class MarcRecord extends IndexRecord
     }
 
     /**
+     * Assign necessary Smarty variables and return a template name to
+     * load in order to display holdings extracted from the base record
+     * (i.e. URLs in MARC 856 fields) and, if necessary, the ILS driver.
+     * Returns null if no data is available.
+     *
+     * @param array $patron An array of patron data
+     *
+     * @return string Name of Smarty template file to display.
+     * @access public
+     */
+    public function getHoldings($patron = false)
+    {
+        global $interface;
+
+        if ("driver" == CatalogConnection::getHoldsMode()) {
+            $interface->assign('driverMode', true);
+            if (!UserAccount::isLoggedIn()) {
+                $interface->assign('showLoginMsg', true);
+            }
+        }
+
+        return parent::getHoldings($patron);
+    }
+
+    /**
      * Get an XML RDF representation of the data in this record.
      *
      * @return mixed XML RDF data (false if unsupported or error).
