@@ -210,7 +210,7 @@ class CatalogConnection
         }
         return $response;
     }
-    
+
     /**
      * Check Request is Valid
      *
@@ -220,10 +220,10 @@ class CatalogConnection
      * @param array  $data   Collected Holds Data
      * @param array  $patron Patron related data
      *
-     * @return mixed The result of the checkRequestIsValid function if it 
+     * @return mixed The result of the checkRequestIsValid function if it
      *               exists, true if it does not
      * @access public
-     */    
+     */
     public function checkRequestIsValid($id, $data, $patron)
     {
         $method = array($this->driver, 'checkRequestIsValid');
