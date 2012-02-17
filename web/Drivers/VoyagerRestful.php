@@ -77,7 +77,7 @@ class VoyagerRestful extends Voyager
         $this->defaultPickUpLocation
             = $this->config['Holds']['defaultPickUpLocation'];
         $this->holdCheckLimit
-            = isset($this->config['Holds']['holdCheckLimit']) 
+            = isset($this->config['Holds']['holdCheckLimit'])
             ? $this->config['Holds']['holdCheckLimit'] : "15";
     }
 
@@ -217,7 +217,7 @@ class VoyagerRestful extends Voyager
                 // This limit is set as the api is slow to return results
                 if ($i < $this->holdCheckLimit && $this->holdCheckLimit != "0") {
                     $holdType = $this->determineHoldType(
-                        $row['id'], $row['item_id'], $patron['id']
+                        $patron['id'], $row['id'], $row['item_id']
                     );
                     $addLink = $holdType ? $holdType : false;
                 } else {
@@ -231,7 +231,8 @@ class VoyagerRestful extends Voyager
             $holding[$i] += array(
                 'is_holdable' => $is_holdable,
                 'holdtype' => $holdType,
-                'addLink' => $addLink
+                'addLink' => $addLink,
+                'level' => "copy"
             );
             unset($holding[$i]['_fullRow']);
         }
@@ -252,9 +253,13 @@ class VoyagerRestful extends Voyager
      */
     public function checkRequestIsValid($id, $data, $patron)
     {
-        $mode = CatalogConnection::getHoldsMode();
-        if ($data['holdtype'] == "auto" && $mode == "driver") {
-            $result = $this->determineHoldType($id, $data['item_id'], $patron['id']);
+        $holdType = isset($data['holdtype']) ? $data['holdtype'] : "auto";
+        $level = isset($data['level']) ? $data['level'] : "copy";
+        $mode = ("title" == $level) ? CatalogConnection::getTitleHoldsMode()
+            : CatalogConnection::getHoldsMode();
+        if ("driver" == $mode && "auto" == $holdType) {
+            $itemID = isset($data['item_id']) ? $data['item_id'] : false;
+            $result = $this->determineHoldType($patron['id'], $id, $itemID);
             if (!$result || $result == 'block') {
                 return false;
             }
@@ -696,15 +701,15 @@ class VoyagerRestful extends Voyager
      *
      * Determines if a user can place a hold or recall on a specific item
      *
-     * @param string $bibId    An item's Bib ID
      * @param string $patronId The user's Patron ID
      * @param string $request  The request type (hold or recall)
+     * @param string $bibId    An item's Bib ID
      * @param string $itemId   An item's Item ID (optional)
      *
      * @return boolean         true if the request can be made, false if it cannot
      * @access protected
      */
-    protected function checkItemRequests($bibId, $patronId, $request, 
+    protected function checkItemRequests($patronId, $request, $bibId,
         $itemId = false
     ) {
         if (!empty($bibId) && !empty($patronId) && !empty($request) ) {
@@ -754,19 +759,20 @@ class VoyagerRestful extends Voyager
      *
      * Places a Hold or Recall for a particular item
      *
-     * @param string $bibId       An item's Bib ID
      * @param string $patronId    The user's Patron ID
      * @param string $request     The request type (hold or recall)
+     * @param string $level       The request level (title or copy)
      * @param array  $requestData An array of data to submit with the request,
      * may include comment, lastInterestDate and pickUpLocation
+     * @param string $bibId       An item's Bib ID
      * @param string $itemId      An item's Item ID (optional)
      *
      * @return array             An array of data from the attempted request
      * including success, status and a System Message (if available)
      * @access protected
      */
-    protected function makeItemRequests($bibId, $patronId, $request,
-        $requestData, $itemId = false
+    protected function makeItemRequests($patronId, $request, $level,
+        $requestData, $bibId, $itemId = false
     ) {
         $response = array('success' => false, 'status' =>"hold_error_fail");
 
@@ -791,8 +797,14 @@ class VoyagerRestful extends Voyager
                 "view" => "full"
             );
 
-            $xmlParameter = ("recall" == $request)
-                ? "recall-parameters" : "hold-request-parameters";
+            if ("title" == $level) {
+                $xmlParameter = ("recall" == $request)
+                    ? "recall-title-parameters" : "hold-title-parameters";
+                $request = $request . "-title";
+            } else {
+                $xmlParameter = ("recall" == $request)
+                    ? "recall-parameters" : "hold-request-parameters";
+            }
 
 
             $xml[$xmlParameter] = array(
@@ -836,29 +848,28 @@ class VoyagerRestful extends Voyager
      *
      * Determines if a user can place a hold or recall on a particular item
      *
+     * @param string $patronId The user's Patron ID
      * @param string $bibId    An item's Bib ID
      * @param string $itemId   An item's Item ID (optional)
-     * @param string $patronId The user's Patron ID
      *
-     * @return string          The name of the request method to use or false on
+     * @return string The name of the request method to use or false on
      * failure
      * @access protected
      */
-    protected function determineHoldType($bibId, $itemId, $patronId)
+    protected function determineHoldType($patronId, $bibId, $itemId = false)
     {
         // Check for account Blocks
         if ($this->checkAccountBlocks($patronId)) {
             return "block";
         }
-        
-        // Check Recalls First
-        $recall = $this->checkItemRequests($bibId, $patronId, "recall", $itemId);
 
+        // Check Recalls First
+        $recall = $this->checkItemRequests($patronId, "recall", $bibId, $itemId);
         if ($recall) {
             return "recall";
         } else {
             // Check Holds
-            $hold = $this->checkItemRequests($bibId, $patronId, "hold", $itemId);
+            $hold = $this->checkItemRequests($patronId, "hold", $bibId, $itemId);
             if ($hold) {
                 return "hold";
             }
@@ -900,17 +911,19 @@ class VoyagerRestful extends Voyager
     public function placeHold($holdDetails)
     {
         $patron = $holdDetails['patron'];
-        $type = $holdDetails['holdtype'];
+        $type = isset($holdDetails['holdtype']) && !empty($holdDetails['holdtype'])
+            ? $holdDetails['holdtype'] : "auto";
+        $level = isset($holdDetails['level']) && !empty($holdDetails['level'])
+            ? $holdDetails['level'] : "copy";
         $pickUpLocation = !empty($holdDetails['pickUpLocation'])
             ? $holdDetails['pickUpLocation'] : $this->defaultPickUpLocation;
-        $itemId = $holdDetails['item_id'];
+        $itemId = isset($holdDetails['item_id']) ? $holdDetails['item_id'] : false;
         $comment = $holdDetails['comment'];
         $bibId = $holdDetails['id'];
-
         // Request was initiated before patron was logged in -
         // Let's determine Hold Type now
         if ($type == "auto") {
-            $type = $this->determineHoldType($bibId, $itemId, $patron['id']);
+            $type = $this->determineHoldType($patron['id'], $bibId, $itemId);
             if (!$type || $type == "block") {
                 return $this->holdError("hold_error_blocked");
             }
@@ -957,10 +970,10 @@ class VoyagerRestful extends Voyager
             'comment' => $comment
         );
 
-        if ($this->checkItemRequests($bibId, $patron['id'], $type, $itemId)) {
+        if ($this->checkItemRequests($patron['id'], $type, $bibId, $itemId)) {
             // Attempt Request
             $result = $this->makeItemRequests(
-                $bibId, $patron['id'], $type, $requestData, $itemId
+                $patron['id'], $type, $level, $requestData, $bibId, $itemId
             );
             if ($result) {
                 return $result;
@@ -987,7 +1000,7 @@ class VoyagerRestful extends Voyager
         $patron = $cancelDetails['patron'];
         $count = 0;
         $response = array();
-        
+
         foreach ($details as $cancelDetails) {
             list($itemId, $cancelCode) = explode("|", $cancelDetails);
 
@@ -1017,14 +1030,14 @@ class VoyagerRestful extends Voyager
                 $node = "reply-text";
                 $reply = (string)$cancel->$node;
                 $count = ($reply == "ok") ? $count+1 : $count;
-                
+
                 $response[$itemId] = array(
                     'success' => ($reply == "ok") ? true : false,
                     'status' => ($reply == "ok")
                         ? "hold_cancel_success" : "hold_cancel_fail",
                     'sysMessage' => ($reply == "ok") ? false : $reply,
                 );
-                
+
             } else {
                 $response[$itemId] = array(
                     'success' => false, 'status' => "hold_cancel_fail"

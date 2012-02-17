@@ -252,6 +252,21 @@ class CatalogConnection
     }
 
     /**
+     * Get Title Holds Mode
+     *
+     * This is responsible for returning the Title holds mode
+     *
+     * @return string The Title Holds mode
+     * @access public
+     */
+    public static function getTitleHoldsMode()
+    {
+        global $configArray;
+        return isset($configArray['Catalog']['title_level_holds_mode'])
+            ? $configArray['Catalog']['title_level_holds_mode'] : 'disabled';
+    }
+
+    /**
      * Get Status
      *
      * This is responsible for retrieving the status information of a certain

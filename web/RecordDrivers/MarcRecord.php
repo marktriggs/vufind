@@ -44,11 +44,11 @@ class MarcRecord extends IndexRecord
     protected $marcRecord;
 
     /**
-     * Constructor.  We build the object using all the data retrieved 
-     * from the (Solr) index (which also happens to include the 
-     * 'fullrecord' field containing raw metadata).  Since we have to 
-     * make a search call to find out which record driver to construct, 
-     * we will already have this data available, so we might as well 
+     * Constructor.  We build the object using all the data retrieved
+     * from the (Solr) index (which also happens to include the
+     * 'fullrecord' field containing raw metadata).  Since we have to
+     * make a search call to find out which record driver to construct,
+     * we will already have this data available, so we might as well
      * just pass it into the constructor.
      *
      * @param array $record All fields retrieved from the index.
@@ -80,9 +80,9 @@ class MarcRecord extends IndexRecord
     }
 
     /**
-     * Assign necessary Smarty variables and return a template name to 
-     * load in order to export the record in the requested format.  For 
-     * legal values, see getExportFormats().  Returns null if format is 
+     * Assign necessary Smarty variables and return a template name to
+     * load in order to export the record in the requested format.  For
+     * legal values, see getExportFormats().  Returns null if format is
      * not supported.
      *
      * @param string $format Export format to display.
@@ -141,8 +141,8 @@ class MarcRecord extends IndexRecord
     }
 
     /**
-     * Get an array of strings representing formats in which this record's 
-     * data may be exported (empty if none).  Legal values: "RefWorks", 
+     * Get an array of strings representing formats in which this record's
+     * data may be exported (empty if none).  Legal values: "RefWorks",
      * "EndNote", "MARC", "RDF".
      *
      * @return array Strings representing export formats.
@@ -194,6 +194,14 @@ class MarcRecord extends IndexRecord
             }
         }
 
+        if ("driver" == CatalogConnection::getTitleHoldsMode()) {
+            $interface->assign('titleDriverMode', true);
+            if (!UserAccount::isLoggedIn()) {
+                $interface->assign('showTitleLoginMsg', true);
+            }
+        }
+        $interface->assign("holdingTitleHold", $this->getRealTimeTitleHold($patron));
+
         return parent::getHoldings($patron);
     }
 
@@ -233,7 +241,7 @@ class MarcRecord extends IndexRecord
      * search results.
      *
      * @param string $view The current view.
-     * 
+     *
      * @return string      Name of Smarty template file to display.
      * @access public
      */
@@ -250,8 +258,8 @@ class MarcRecord extends IndexRecord
     }
 
     /**
-     * Assign necessary Smarty variables and return a template name to 
-     * load in order to display the full record information on the Staff 
+     * Assign necessary Smarty variables and return a template name to
+     * load in order to display the full record information on the Staff
      * View tab of the record view page.
      *
      * @return string Name of Smarty template file to display.
@@ -284,8 +292,8 @@ class MarcRecord extends IndexRecord
     }
 
     /**
-     * Assign necessary Smarty variables and return a template name to 
-     * load in order to display the Table of Contents extracted from the 
+     * Assign necessary Smarty variables and return a template name to
+     * load in order to display the Table of Contents extracted from the
      * record.  Returns null if no Table of Contents is available.
      *
      * @return string Name of Smarty template file to display.
@@ -451,6 +459,41 @@ class MarcRecord extends IndexRecord
     protected function getAwards()
     {
         return $this->_getFieldArray('586');
+    }
+
+    /**
+     * Get the bibliographic level of the current record.
+     *
+     * @return string
+     * @access protected
+     */
+    protected function getBibliographicLevel()
+    {
+        $leader = $this->marcRecord->getLeader();
+        $biblioLevel = strtoupper($leader[7]);
+
+        switch ($biblioLevel) {
+        // Monograph
+        case 'M':
+            return "Monograph";
+        // Serial
+        case 'S':
+            return "Serial";
+        // Monograph Part
+        case 'A':
+            return "MonographPart";
+        // Serial Part
+        case 'B':
+            return "SerialPart";
+        // Collection
+        case 'C':
+            return "Collection";
+        // Collection Part
+        case 'D':
+            return "CollectionPart";
+        default:
+            return "Unknown";
+        }
     }
 
     /**
@@ -632,7 +675,7 @@ class MarcRecord extends IndexRecord
     /**
      * Get an array of information about record holdings, obtained in real-time
      * from the ILS.
-     * 
+     *
      * @param array $patron An array of patron data
      *
      * @return array
@@ -649,6 +692,38 @@ class MarcRecord extends IndexRecord
 
         return $holdLogic->getHoldings($id, $patron);
 
+    }
+
+    /**
+     * Get a link for placing a title level hold.
+     *
+     * @param array $patron An array of patron data
+     *
+     * @return mixed A url if a hold is possible, boolean false if not
+     * @access protected
+     */
+    protected function getRealTimeTitleHold($patron = false)
+    {
+        global $configArray;
+
+        $biblioLevel = $this->getBibliographicLevel();
+
+        if ("monograph" == strtolower($biblioLevel)
+            || stristr("part", $biblioLevel)
+        ) {
+            $titleHoldEnabled = CatalogConnection::getTitleHoldsMode();
+
+            if ($titleHoldEnabled != "disabled") {
+                include_once 'sys/HoldLogicTitle.php';
+
+                // Get ID and connect to catalog
+                $id = $this->getUniqueID();
+                $catalog = ConnectionManager::connectToCatalog();
+                $holdLogic = new HoldLogicTitle($catalog);
+                return $holdLogic->getHold($id, $patron);
+            }
+        }
+        return false;
     }
 
     /**
