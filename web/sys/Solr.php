@@ -210,15 +210,14 @@ class Solr implements IndexEngine
                     $shards[$current] = $configArray['IndexShards'][$current];
                 }
             }
-            // only set shards if it is necessary
             // if only one shard is used, take its URL as SOLR-Host-URL
             if (count($shards) === 1) {
                 $shardsKeys = array_keys($shards);
                 $this->host = 'http://'.$shards[$shardsKeys[0]];
-            } else {
-                // else (if more than one shard is used), set shards to query
-                $this->setShards($shards);
             }
+            // always set the shards -- even if only one is selected, we may
+            // need to filter fields and facets:
+            $this->setShards($shards);
         }
     }
 
@@ -529,7 +528,7 @@ class Solr implements IndexEngine
     {
         // Never strip fields if shards are disabled.
         // Return true if the current field needs to be stripped.
-        if (isset($this->_solrShards)
+        if (!empty($this->_solrShards)
             && in_array($field, $this->_getStrippedFields())
         ) {
             return true;
@@ -1350,8 +1349,10 @@ class Solr implements IndexEngine
             }
         }
 
-        // pass the shard parameter along to Solr if necessary:
-        if (!empty($this->_solrShards) && is_array($this->_solrShards)) {
+        // pass the shard parameter along to Solr if necessary; if the shard
+        // count is 0, shards are disabled; if the count is 1, only one shard
+        // is selected so the host has already been adjusted:
+        if (is_array($this->_solrShards) && count($this->_solrShards) > 1) {
             $query[] = 'shards=' . urlencode(implode(',', $this->_solrShards));
         }
         $queryString = implode('&', $query);
