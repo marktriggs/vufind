@@ -183,8 +183,6 @@ class HoldLogic
      */
     protected function driverHoldings($result)
     {
-        global $user;
-
         $holdings = array();
 
         // Are holds allows?
@@ -229,7 +227,6 @@ class HoldLogic
      */
     protected function generateHoldings($result, $type)
     {
-        global $user;
         global $configArray;
 
         $holdings = array();

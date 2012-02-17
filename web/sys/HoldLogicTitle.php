@@ -75,8 +75,6 @@ class HoldLogicTitle
 
     public function getHold($id, $patron = false)
     {
-        global $configArray;
-
         // Get Holdings Data
         if ($this->catalog && $this->catalog->status) {
 
@@ -103,8 +101,6 @@ class HoldLogicTitle
      */
     protected function driverHold($id, $patron)
     {
-        global $user;
-
         // Get Hold Details
         $checkHolds = $this->catalog->checkFunction("Holds");
         $data = array(
@@ -131,9 +127,6 @@ class HoldLogicTitle
      */
     protected function generateHold($id, $type)
     {
-        global $user;
-        global $configArray;
-
         $any_available = false;
         $addlink = false;
 
