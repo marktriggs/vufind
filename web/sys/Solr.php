@@ -338,7 +338,7 @@ class Solr implements IndexEngine
         }
 
         // Query String Parameters
-        $options = array('q' => "id:\"$id\"");
+        $options = array('q' => 'id:"' . addcslashes($id, '"') . '"');
         $result = $this->_select('GET', $options);
         if (PEAR::isError($result)) {
             PEAR::raiseError($result);
@@ -363,7 +363,10 @@ class Solr implements IndexEngine
     public function getMoreLikeThis($id)
     {
         // Query String Parameters
-        $options = array('q' => "id:$id", 'qt' => 'morelikethis');
+        $options = array(
+            'q' => 'id:"' . addcslashes($id, '"') . '"',
+            'qt' => 'morelikethis'
+        );
         $result = $this->_select('GET', $options);
         if (PEAR::isError($result)) {
             PEAR::raiseError($result);

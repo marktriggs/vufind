@@ -327,8 +327,8 @@ class IndexRecord implements RecordInterface
             }
 
             // Assemble the query parts and filter out current record:
-            $query = '(' . implode(' OR ', $parts) . ') NOT id:' .
-                $this->getUniqueID();
+            $query = '(' . implode(' OR ', $parts) . ') NOT id:"' .
+                addcslashes($this->getUniqueID(), '"') . '"';
 
             // Perform the search and return either results or an error:
             $result = $index->search($query, null, null, 0, 5);
