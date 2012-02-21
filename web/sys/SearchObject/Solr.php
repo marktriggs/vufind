@@ -560,6 +560,11 @@ class SearchObject_Solr extends SearchObject_Base
             $retVal = false;
         }
 
+        // Escape IDs:
+        for ($i = 0; $i < count($ids); $i++) {
+            $ids[$i] = '"' . addcslashes($ids[$i], '"') . '"';
+        }
+
         // Build the query:
         $this->query = 'id:(' . implode(' OR ', $ids) . ')';
 
