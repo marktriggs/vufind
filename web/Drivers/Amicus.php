@@ -142,7 +142,7 @@ class Amicus implements DriverInterface
         $otherStatuses = array();
         foreach ($statusArray as $status) {
             switch ($status) {
-            case '0':
+            case 'Disponible':
                 $notCharged = true;
                 break;
             default:
@@ -167,21 +167,31 @@ class Amicus implements DriverInterface
      * @access private
      * @return integer             Number of on loan items.
      */
-
     public function sacaStatus($copyId)
     {
-        $circulacion = "SELECT COUNT(*) AS prestado " .
-                       "FROM CIRT_ITM " .
-                       "WHERE CPY_ID_NBR = '$copyId'";
+        $circulacion = "SELECT COUNT(*) AS PRESTADO " .
+            "FROM CIRT_ITM " .
+            "WHERE CPY_ID_NBR = '$copyId'";
+
+        //$holds = "SELECT COUNT(*) AS PRESTADO FROM CIRTN_HLD " .
+        //"WHERE CPY_ID_NBR = '$copyId'";
+
         $prestados = 0;
         try {
-             $sqlStmt = $this->_db->prepare($circulacion);
-             $sqlStmt->execute();
+            $sqlStmt = $this->_db->prepare($circulacion);
+            $sqlStmt->execute();
+            //$sqlStmt2 = $this->_db->prepare($holds);
+            //$sqlStmt2->execute();
         } catch (PDOException $e) {
             return new PEAR_Error($e->getMessage());
         }
         while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
             $prestados = $row['PRESTADO'];
+            if ($row['PRESTADO'] == 0) {
+                $prestados="Disponible";
+            } else {
+                $prestados="No disponible";
+            }
         }
         return $prestados;
     }
@@ -270,16 +280,17 @@ class Amicus implements DriverInterface
         // items and holdings records.  The second (a rare case) obtains
         // information from the holdings record when no items are available.
 
-        $items = "select BIB_ITM_NBR, ILL_CDE as ON_RESERVE, LOCALIZACION.TEXTO " .
-            "as location, SHLF_LIST_SRT_FORM as callnumber, CPY_ID_NBR as " .
-            "cpy_id_nbr " .
-            "from CPY_ID, SHLF_LIST, LOCALIZACION " .
+        $items = "select BIB_ITM_NBR, ILL_CDE as ON_RESERVE, " .
+            "T_LCTN_NME_BUO.TBL_LNG_ENG_TXT " .
+            "as LOCATION, SHLF_LIST_SRT_FORM as CALLNUMBER, CPY_ID_NBR as " .
+            "CPY_ID_NBR " .
+            "from CPY_ID, SHLF_LIST, T_LCTN_NME_BUO " .
             "where CPY_ID.SHLF_LIST_KEY_NBR = SHLF_LIST.SHLF_LIST_KEY_NBR " .
-            "and CPY_ID.LCTN_NME_CDE = LOCALIZACION.LCTN_CDE ".
+            "and CPY_ID.LCTN_NME_CDE = T_LCTN_NME_BUO.TBL_VLU_CDE ".
             "and CPY_ID.BIB_ITM_NBR = '$id'";
 
         $multipleLoc = "SELECT COUNT(DISTINCT(SHLF_LIST_KEY_NBR)) AS multiple ".
-                 "FROM AMICUS.CPY_ID ".
+                 "FROM CPY_ID ".
                  "WHERE CPY_ID.BIB_ITM_NBR = '$id'";
 
         try {
@@ -319,12 +330,12 @@ class Amicus implements DriverInterface
                         $textoLoc = translate("Multiple");
                         $textoSign = translate("Multiple Locations");
                         $data[$row['BIB_ITM_NBR']] = array(
-                        'id' => $id,
-                        'status' => $prestados,
-                        'status_array' => array($prestados),
-                        'location' => $textoLoc,
-                        'reserve' => $reservados,
-                        'callnumber' => $textoSign
+                            'id' => $id,
+                            'status' => $prestados,
+                            'status_array' => array($prestados),
+                            'location' => $textoLoc,
+                            'reserve' => $reservados,
+                            'callnumber' => $textoSign
                         );
                     } else {
                         $multiple=$row['LOCATION'];
@@ -353,14 +364,14 @@ class Amicus implements DriverInterface
             // If we found any information, break out of the foreach loop;
             // we don't need to try any more queries.
             if (count($data) == 0) {
-                    $data[$id] = array(
-                        'id' => $id,
-                        'status' => '0',
-                        'status_array' => array($prestados),
-                        'location' => translate("No copies"),
-                        'reserve' => $reservados,
-                        'callnumber' => translate("No copies")
-                    );
+                $data[$id] = array(
+                    'id' => $id,
+                    'status' => $prestados,
+                    'status_array' => array($prestados),
+                    'location' => translate("No copies"),
+                    'reserve' => $reservados,
+                    'callnumber' => translate("No copies")
+                );
                 break;
             }
             if (count($data) > 0) {
@@ -374,10 +385,10 @@ class Amicus implements DriverInterface
             $availability = $this->_determineAvailability($current['status_array']);
             // If we found other statuses, we should override the display value
             // appropriately:
-            //if (count($availability['otherStatuses']) > 0) {
-            //    $current['status'] =
-            //        $this->_pickStatus($availability['otherStatuses']);
-            //}
+            if (count($availability['otherStatuses']) > 0) {
+                $current['status']
+                    = $this->_pickStatus($availability['otherStatuses']);
+            }
             $current['availability'] = $availability['available'];
             $status[] = $current;
         }
@@ -424,16 +435,13 @@ class Amicus implements DriverInterface
     {
         include_once 'File/MARC.php';
 
-        // There are two possible queries we can use to obtain status information.
-        // The first (and most common) obtains information from a combination of
-        // items and holdings records.  The second (a rare case) obtains
-        // information from the holdings record when no items are available.
-        $items = "select CPY_ID.BRCDE_NBR, CPY_ID.BIB_ITM_NBR,  LOCALIZACION.TEXTO ".
-            "as location, SHLF_LIST_SRT_FORM as callnumber, CPY_ID.CPY_ID_NBR as " .
+        $items = "select CPY_ID.BRCDE_NBR, CPY_ID.BIB_ITM_NBR, ".
+            "T_LCTN_NME_BUO.TBL_LNG_ENG_TXT ".
+            "as LOCATION, SHLF_LIST_SRT_FORM as CALLNUMBER, CPY_ID.CPY_ID_NBR as " .
             "CPY_ID_NBR " .
-            "from CPY_ID, SHLF_LIST, LOCALIZACION " .
+            "from CPY_ID, SHLF_LIST, T_LCTN_NME_BUO " .
             "where CPY_ID.SHLF_LIST_KEY_NBR = SHLF_LIST.SHLF_LIST_KEY_NBR " .
-            "AND CPY_ID.LCTN_NME_CDE = LOCALIZACION.LCTN_CDE ".
+            "AND CPY_ID.LCTN_NME_CDE = T_LCTN_NME_BUO.TBL_VLU_CDE ".
             "and CPY_ID.BIB_ITM_NBR = '$id' ".
             "order by SHLF_LIST_SRT_FORM ASC, CPY_ID.CPY_ID_NBR ASC";
 
@@ -455,43 +463,34 @@ class Amicus implements DriverInterface
             $i = 0;
             $data = array();
             while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
-                // Determine Copy Number
-
-                // Concat wrapped rows (MARC data more than 300 bytes gets split
-                // into multiple rows)
-                // This is the first time we've encountered this row number --
-                // initialize the row and start an array of statuses.
-                if (!isset($data[$row['LOCATION']])) {
-                    $multiple=$row['LOCATION'];
-                    if ($multiple=='Deposito2') {
-                        $multiple=utf8_decode("Depósito2");
-                    }
-                    if ($multiple=='Deposito') {
-                        $multiple=utf8_decode("Depósito");
-                    }
-
-                    $data[$row['LOCATION']] = array(
-                        'ID' => $row['BIB_ITM_NBR'],
-                        'LOCATION' => $multiple,
-                        'COPIAS' => array(
-                            array(
-                                'SIGNATURA'=> $row['CALLNUMBER'],
-                                'BRCDE_NBR' => $row['BRCDE_NBR'],
-                                'CPY_ID_NBR' => $row['CPY_ID_NBR'],
-                                'STATUS'=> $this->sacaStatus($row['CPY_ID_NBR']),
-                                'FECHA' => $this->sacaFecha($row['CPY_ID_NBR'])
-                            )
-                        )
-                    );
-                } else {
-                    $data[$row['LOCATION']]['COPIAS'][] = array(
-                        'SIGNATURA' => $row['CALLNUMBER'],
-                        'BRCDE_NBR' =>$row['BRCDE_NBR'],
-                        'CPY_ID_NBR' => $row['CPY_ID_NBR'],
-                        'STATUS' => $this->sacaStatus($row['CPY_ID_NBR']),
-                        'FECHA' => $this->sacaFecha($row['CPY_ID_NBR'])
-                    );
+                // Determine Location
+                $loc=$row['LOCATION'];
+                if ($loc=='Deposito2') {
+                    $loc="Depósito2";
                 }
+                if ($loc=='Deposito') {
+                    $loc="Depósito";
+                }
+
+                $status = $this->sacaStatus($row['CPY_ID_NBR']);
+                $availability = $this->_determineAvailability(array($status));
+                $signatura=$row['CALLNUMBER'];
+                $currentItem = array(
+                    'id' => $id,
+                    'availability' => $availability['available'],
+                    'status' => $status,
+                    'location' => $loc,
+                    // TODO: make this smarter if you use course reserves:
+                    'reserve' => 'N',
+                    'callnumber' => $row['CALLNUMBER'],
+                    'duedate' => $this->sacaFecha($row['CPY_ID_NBR']),
+                    // TODO: fill this in if you want "recently returned" support:
+                    'returnDate' => false,
+                    'number' => count($data) +1,
+                    'item_id' => $row['CPY_ID_NBR'],
+                    'barcode' => $row['BRCDE_NBR']
+                );
+                $data[] = $currentItem;
             }
             // If we found data, we can leave the foreach loop -- we don't need to
             // try any more queries.
@@ -499,80 +498,8 @@ class Amicus implements DriverInterface
                 break;
             }
         }
-        foreach ($data as $item  ) {
-            foreach ($item['COPIAS'] as $number  => $row2) {
-                // Get availability/status info based on the array of status codes:
-                $availability = 0;
-                if (!isset($holding[$item['LOCATION']])) {
-                    $holding[$item['LOCATION']] = array(
-                        'id' => $item['LOCATION'],
-                        'location' => $item['LOCATION'],
-                        'copias' => array(
-                            array(
-                                'SIGNATURA' => $row2['SIGNATURA'],
-                                'BRCDE_NBR' => $row2['BRCDE_NBR'],
-                                'CPY_ID_NBR' => $row2['CPY_ID_NBR'],
-                                'STATUS' => $row2['STATUS'],
-                                'FECHA' => $row2['FECHA']
-                            )
-                        )
-                    );
-                } else {
-                    $holding[$item['LOCATION']]['copias'][] = $row2;
-                }
-                // Parse Holding Record
-                $i++;
-            }
-        }
-        //echo "<pre>" . print_r ($holding) . "</pre>";
-        return $holding;
+        return $data;
     }
-
-    /* deprecated function
-    public function getHoldings($idList)
-    {
-        $sql = "select '0' as ON_RESERVE, '1' as ITEM_SEQUENCE_NUMBER, " .
-            "'libre' as status, 'localiza' as location, 'display'  as callnumber, " .
-            "'duedate' as duedate " .
-            "from CPY_ID " .
-            "where (";
-        for ($i=0; $i<count($idList); $i++) {
-            if ($i > 0) {
-                $sql .= ' OR ';
-            }
-            $sql .= "CPY_ID.BIB_ITM_NBR = '$idList[$i]'";
-        }
-        $sql .= ')';
-        try {
-            $holding = array();
-            $sqlStmt = $this->_db->prepare($sql);
-            $sqlStmt->execute();
-            while ($row = $sqlStmt->fetch(PDO::FETCH_ASSOC)) {
-                switch ($row['STATUS']) {
-                    case 'Not Charged':
-                    case 'Cataloging Review':
-                    case 'Circulation Review':
-                        $available = true;
-                        break;
-                    default:
-                        $available = false;
-                        break;
-                }
-
-                $holding[] = array('availability' => $available,
-                                   'status' => $row['STATUS'],
-                                   'location' => $row['LOCATION'],
-                                   'reserve' => $row['ON_RESERVE'],
-                                   'callnumber' => $row['CALLNUMBER'],
-                                   'duedate' => $row['DUEDATE'],
-                                   'number' => $row['ITEM_SEQUENCE_NUMBER']);
-            }
-            return $holding;
-        } catch (PDOException $e) {
-            return new PEAR_Error($e->getMessage());
-        }
-    }
-     */
 
     /**
      * Get Purchase History
