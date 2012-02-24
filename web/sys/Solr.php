@@ -691,7 +691,7 @@ class Solr implements IndexEngine
                 if ($current[0] == 'bq') {
                     $bq[] = $current[1];
                 } else if ($current[0] == 'bf') {
-                    $bq[] = '_val_:' . $current[1];
+                    $bq[] = '_val_:"' . addcslashes($current[1], '"') . '"';
                 }
             }
         }
