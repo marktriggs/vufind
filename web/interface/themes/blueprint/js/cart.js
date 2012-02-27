@@ -108,7 +108,7 @@ function removeItemFromCartCookie(item) {
     if (index != -1) {
         items.splice(index, 1);
     }
-    $.cookie(_CART_COOKIE, items.join(_CART_COOKIE_DELIM), { path: '/' });
+    $.cookie(_CART_COOKIE, items.length > 0 ? items.join(_CART_COOKIE_DELIM) : null, { path: '/' });
     return items;
 }
 
