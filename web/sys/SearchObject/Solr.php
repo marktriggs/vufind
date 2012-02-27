@@ -130,15 +130,11 @@ class SearchObject_Solr extends SearchObject_Base
         ) {
             $this->defaultSortByType = $searchSettings['DefaultSortingByType'];
         }
-        if (isset($searchSettings['HiddenFilters'])) {
-            foreach ($searchSettings['HiddenFilters'] as $field => $subfields) {
-                $this->addHiddenFilter($field.':'.'"'.$subfields.'"');
-            }
-        }
-        if (isset($searchSettings['RawHiddenFilters'])) {
-            foreach ($searchSettings['RawHiddenFilters'] as $rawFilter) {
-                $this->addHiddenFilter($rawFilter);
-            }
+        $filters = call_user_func(
+            array(get_class($this), 'getDefaultHiddenFilters'), $searchSettings
+        );
+        foreach ($filters as $filter) {
+            $this->addHiddenFilter($filter);
         }
         if (isset($searchSettings['Basic_Searches'])) {
             $this->basicTypes = $searchSettings['Basic_Searches'];
@@ -185,6 +181,35 @@ class SearchObject_Solr extends SearchObject_Base
         $this->spellSimple   = $configArray['Spelling']['simple'];
         $this->spellSkipNumeric = isset($configArray['Spelling']['skip_numeric']) ?
             $configArray['Spelling']['skip_numeric'] : true;
+    }
+
+    /**
+     * Get a list of hidden filters from the configuration file.
+     *
+     * @param array $config Contents of searches.ini; optional -- pass in to save
+     * duplicate file access if you already have access to the data.
+     *
+     * @return array
+     */
+    public static function getDefaultHiddenFilters($config = null)
+    {
+        if (is_null($config)) {
+            $config = getExtraConfigArray('searches');
+        }
+
+        $filters = array();
+        if (isset($config['HiddenFilters'])) {
+            foreach ($config['HiddenFilters'] as $field => $subfields) {
+                $filters[] = $field.':'.'"'.addcslashes($subfields, '"').'"';
+            }
+        }
+        if (isset($config['RawHiddenFilters'])) {
+            foreach ($config['RawHiddenFilters'] as $rawFilter) {
+                $filters[] = $rawFilter;
+            }
+        }
+
+        return $filters;
     }
 
     /**

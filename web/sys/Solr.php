@@ -354,16 +354,17 @@ class Solr implements IndexEngine
      *
      * Uses SOLR MLT Query Handler
      *
-     * @param string $id A Solr document ID.
+     * @param string $id     A Solr document ID.
+     * @param array  $extras Extra parameters to pass to Solr (optional)
      *
      * @throws object    PEAR Error
      * @return array     An array of query results similar to the specified record
      * @access public
      */
-    public function getMoreLikeThis($id)
+    public function getMoreLikeThis($id, $extras = array())
     {
         // Query String Parameters
-        $options = array(
+        $options = $extras + array(
             'q' => 'id:"' . addcslashes($id, '"') . '"',
             'qt' => 'morelikethis'
         );

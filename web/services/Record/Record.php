@@ -174,7 +174,11 @@ class Record extends Action
         $this->cacheId = 'Record|' . $_REQUEST['id'] . '|' . get_class($this);
         if (!$interface->is_cached($this->cacheId)) {
             // Find Similar Records
-            $similar = $this->db->getMoreLikeThis($_REQUEST['id']);
+            include_once 'sys/SearchObject/Solr.php';
+            $similar = $this->db->getMoreLikeThis(
+                $_REQUEST['id'],
+                array('fq' => SearchObject_Solr::getDefaultHiddenFilters())
+            );
 
             // Send the similar items to the template; if there is only one, we need
             // to force it to be an array or things will not display correctly.
