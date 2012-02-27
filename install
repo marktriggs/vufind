@@ -53,6 +53,8 @@ mysql -h $MYSQLHOST -u $MYSQLUSER -p$MYSQLPASS -D $MYSQLDB < mysql.sql
 
 
 ## Edit web/conf/config.ini
+sed -e "s!/usr/local/vufind!${CURRPATH}!" web/conf/config.ini > web/conf/config.ini.new
+mv web/conf/config.ini.new web/conf/config.ini
 if [ -z $MYSQLNEWPASS ]; then
   sed -e "s!mysql://root@localhost/vufind!mysql://${MYSQLNEWUSER}@${MYSQLHOST}/${MYSQLDB}!" web/conf/config.ini > web/conf/config.ini.new
 else
