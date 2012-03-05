@@ -450,7 +450,6 @@ class IndexRecord implements RecordInterface
         // Assign various values for display by the template; we'll prefix
         // everything with "extended" to avoid clashes with values assigned
         // elsewhere.
-        $interface->assign('extendedDescription', $this->getDescription());
         $interface->assign('extendedSummary', $this->getSummary());
         $interface->assign('extendedAccess', $this->getAccessRestrictions());
         $interface->assign('extendedRelated', $this->getRelationshipNotes());
@@ -1620,18 +1619,6 @@ class IndexRecord implements RecordInterface
     }
 
     /**
-     * Get the description of the record.
-     *
-     * @return string
-     * @access protected
-     */
-    protected function getDescription()
-    {
-        return isset($this->fields['description']) ?
-            $this->fields['description'] : '';
-    }
-
-    /**
      * Get the subtitle of the record.
      *
      * @return string
@@ -1663,7 +1650,18 @@ class IndexRecord implements RecordInterface
      */
     protected function getSummary()
     {
-        // Not currently stored in the Solr index
+        // We need to return an array, so if we have a description, turn it into an
+        // array as needed (it should be a flat string according to the default
+        // schema, but we might as well support the array case just to be on the safe
+        // side:
+        if (isset($this->fields['description'])
+            && !empty($this->fields['description'])
+        ) {
+            return is_array($this->fields['description'])
+                ? $this->fields['description'] : array($this->fields['description']);
+        }
+
+        // If we got this far, no description was found:
         return array();
     }
 
