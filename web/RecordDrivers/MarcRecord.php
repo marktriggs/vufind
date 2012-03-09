@@ -955,6 +955,28 @@ class MarcRecord extends IndexRecord
             }
         }
 
+        // Check for URLs in the Cumulative Index/Finding Aids note:
+        $urls = $this->marcRecord->getFields('555');
+        if ($urls) {
+            foreach ($urls as $url) {
+                // Is there an address in the current field?
+                $address = $url->getSubfield('u');
+                if ($address) {
+                    $address = $address->getData();
+
+                    // Is there a note?  If not, just use the URL itself.
+                    $desc = $url->getSubfield('a');
+                    if ($desc) {
+                        $desc = $desc->getData();
+                    } else {
+                        $desc = $address;
+                    }
+
+                    $retVal[$address] = $desc;
+                }
+            }
+        }
+
         return $retVal;
     }
 
