@@ -21,7 +21,7 @@ MarkerClusterer.CALCULATOR = function (markers, numStyles) {
   for (calcMarker in markers){
     dispText = dispText + parseInt(markers[calcMarker].getTitle());
   }
-  var dv = count;
+  var dv = dispText;
   while (dv !== 0) {
     dv = parseInt(dv / 10, 10);
     index++;
