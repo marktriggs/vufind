@@ -936,45 +936,36 @@ class MarcRecord extends IndexRecord
     {
         $retVal = array();
 
-        $urls = $this->marcRecord->getFields('856');
-        if ($urls) {
-            foreach ($urls as $url) {
-                // Is there an address in the current field?
-                $address = $url->getSubfield('u');
-                if ($address) {
-                    $address = $address->getData();
+        // Which fields/subfields should we check for URLs?
+        $fieldsToCheck = array(
+            '856' => array('y', 'z'),   // Standard URL
+            '555' => array('a')         // Cumulative index/finding aids
+        );
 
-                    // Is there a description?  If not, just use the URL itself.
-                    $desc = $url->getSubfield('z');
-                    if ($desc) {
-                        $desc = $desc->getData();
-                    } else {
-                        $desc = $address;
+        foreach ($fieldsToCheck as $field => $subfields) {
+            $urls = $this->marcRecord->getFields($field);
+            if ($urls) {
+                foreach ($urls as $url) {
+                    // Is there an address in the current field?
+                    $address = $url->getSubfield('u');
+                    if ($address) {
+                        $address = $address->getData();
+
+                        // Is there a description?  If not, just use the URL itself.
+                        foreach ($subfields as $current) {
+                            $desc = $url->getSubfield($current);
+                            if ($desc) {
+                                break;
+                            }
+                        }
+                        if ($desc) {
+                            $desc = $desc->getData();
+                        } else {
+                            $desc = $address;
+                        }
+
+                        $retVal[$address] = $desc;
                     }
-
-                    $retVal[$address] = $desc;
-                }
-            }
-        }
-
-        // Check for URLs in the Cumulative Index/Finding Aids note:
-        $urls = $this->marcRecord->getFields('555');
-        if ($urls) {
-            foreach ($urls as $url) {
-                // Is there an address in the current field?
-                $address = $url->getSubfield('u');
-                if ($address) {
-                    $address = $address->getData();
-
-                    // Is there a note?  If not, just use the URL itself.
-                    $desc = $url->getSubfield('a');
-                    if ($desc) {
-                        $desc = $desc->getData();
-                    } else {
-                        $desc = $address;
-                    }
-
-                    $retVal[$address] = $desc;
                 }
             }
         }
