@@ -435,7 +435,8 @@ class VoyagerRestful extends Voyager
 
         // Add Hierarchy
         foreach ($hierarchy as $key => $value) {
-            $hierarchyString[] = ($value !== false) ? $key. "/" . $value : $key;
+            $hierarchyString[] = ($value !== false)
+                ? urlencode($key) . "/" . urlencode($value) : urlencode($key);
         }
 
         // Add Params
