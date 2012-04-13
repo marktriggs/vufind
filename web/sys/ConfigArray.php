@@ -126,6 +126,20 @@ function readConfig($basePath = 'conf')
             = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . '..');
     }
 
+    // Auto-detect absolute path to database schema and class if necessary
+    if (isRelativeFilePath($mainArray['Database']['schema_location'])) {
+        $mainArray['Database']['schema_location'] = realpath(
+            $mainArray['Site']['local'] . DIRECTORY_SEPARATOR
+            . $mainArray['Database']['schema_location']
+        );
+    }
+    if (isRelativeFilePath($mainArray['Database']['class_location'])) {
+        $mainArray['Database']['class_location'] = realpath(
+            $mainArray['Site']['local'] . DIRECTORY_SEPARATOR
+            . $mainArray['Database']['class_location']
+        );
+    }
+
     return $mainArray;
 }
 
@@ -158,4 +172,16 @@ function determineSiteUrl($configArray)
     return $url;
 }
 
+/**
+ * Support function -- Is argument a relative file path?
+ *
+ * @param string $filePath Path to check
+ *
+ * @return boolean TRUE if argument is a relative file path, otherwise FALSE
+ */
+function isRelativeFilePath ($filePath)
+{
+    $r = !(strpos($filePath, '/') === 0 || preg_match('@[a-z]:[/\\\]@i', $filePath));
+    return $r;
+}
 ?>
