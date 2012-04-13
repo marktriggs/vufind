@@ -107,6 +107,10 @@ class MarcRecord extends IndexRecord
             $interface->assign('marc', $this->marcRecord);
             return 'RecordDrivers/Marc/export-endnote.tpl';
         case 'marc':
+            header('Content-type: application/MARC');
+            header(
+                "Content-Disposition: attachment; filename=\"VuFindExport.mrc\";"
+            );
             $interface->assign('rawMarc', $this->marcRecord->toRaw());
             return 'RecordDrivers/Marc/export-marc.tpl';
         case 'rdf':
