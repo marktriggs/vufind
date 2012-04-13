@@ -52,6 +52,9 @@ class PICA extends DAIA
     private $_password;
     private $_ldapConfigurationParameter;
 
+    protected $catalogHost;
+    protected $renewalsScript;
+
     /**
      * Constructor
      *
