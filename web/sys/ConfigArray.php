@@ -144,11 +144,6 @@ function determineSiteUrl($configArray)
         $path = $_SERVER['HTTP_X_FORWARDED_PATH'];
     } else {
         $host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost';
-        if (isset($_SERVER['SERVER_PORT'])
-            && !in_array($_SERVER['SERVER_PORT'], array(80, 443))
-        ) {
-            $host .= ':'. $_SERVER['SERVER_PORT'];
-        }
         $path = $configArray['Site']['path'];
     }
     $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')
