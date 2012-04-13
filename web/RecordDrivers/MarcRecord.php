@@ -113,6 +113,12 @@ class MarcRecord extends IndexRecord
             );
             $interface->assign('rawMarc', $this->marcRecord->toRaw());
             return 'RecordDrivers/Marc/export-marc.tpl';
+        case 'marcxml':
+            // Send this as marcXML & give it our bib as a name
+            header('Content-disposition: attachment; filename="VuFindExport.xml";');
+            header("Content-type: text/xml");
+            $interface->assign('rawMarc', $this->marcRecord->toXML());
+            return 'RecordDrivers/Marc/export-marc.tpl';
         case 'rdf':
             header("Content-type: application/rdf+xml");
             $interface->assign('rdf', $this->getRDFXML());
@@ -162,7 +168,7 @@ class MarcRecord extends IndexRecord
 
         // These are the formats we can possibly support if they are turned on in
         // config.ini:
-        $possible = array('RefWorks', 'EndNote', 'MARC', 'RDF', 'BibTeX');
+        $possible = array('RefWorks', 'EndNote', 'MARC', 'MARCXML', 'RDF', 'BibTeX');
 
         // Check which formats are currently active:
         $formats = array();
