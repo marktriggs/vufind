@@ -120,6 +120,12 @@ function readConfig($basePath = 'conf')
         $mainArray['Site']['url'] = determineSiteUrl($mainArray);
     }
 
+    // Auto-detect local web installation path if it is not provided
+    if (!isset($mainArray['Site']['local']) || empty($mainArray['Site']['local'])) {
+        $mainArray['Site']['local']
+            = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . '..');
+    }
+
     return $mainArray;
 }
 
