@@ -106,7 +106,7 @@ class JSON extends Action
         $salt = $this->_generateSalt();
 
         // HexDecode Password
-        $password = pack('H*', $_GET['password']);
+        $password = pack('H*', $_POST['ajax_password']);
 
         // Decrypt Password
         include_once 'Crypt/rc4.php';
@@ -114,7 +114,7 @@ class JSON extends Action
 
         // Put the username/password in POST fields where the authentication module
         // expects to find them:
-        $_POST['username'] = $_GET['username'];
+        $_POST['username'] = $_POST['ajax_username'];
         $_POST['password'] = $password;
 
         // Authenticate the user:
