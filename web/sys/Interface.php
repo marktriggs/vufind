@@ -182,17 +182,22 @@ class UInterface extends Smarty
         $this->assign('authMethod', $configArray['Authentication']['method']);
 
         if ($configArray['Authentication']['method'] == 'Shibboleth') {
-            if (!isset($configArray['Shibboleth']['login'])
-                || !isset($configArray['Shibboleth']['target'])
-            ) {
+            if (!isset($configArray['Shibboleth']['login'])) {
                 throw new Exception(
                     'Missing parameter in the config.ini. Check if ' .
-                    'the parameters login and target are set.'
+                    'the login parameter is set.'
                 );
             }
 
+            if (isset($configArray['Shibboleth']['target'])) {
+                $shibTarget = $configArray['Shibboleth']['target'];
+            } else {
+                $myRes = isset($configArray['Site']['defaultLoggedInModule'])
+                    ? $configArray['Site']['defaultLoggedInModule'] : 'MyResearch';
+                $shibTarget = $configArray['Site']['url'] . '/' . $myRes . '/Home';
+            }
             $sessionInitiator = $configArray['Shibboleth']['login'] .
-                '?target=' . $configArray['Shibboleth']['target'];
+                '?target=' . $shibTarget;
 
             if (isset($configArray['Shibboleth']['provider_id'])) {
                 $sessionInitiator = $sessionInitiator . '&providerId=' .
