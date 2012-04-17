@@ -197,11 +197,11 @@ class UInterface extends Smarty
                 $shibTarget = $configArray['Site']['url'] . '/' . $myRes . '/Home';
             }
             $sessionInitiator = $configArray['Shibboleth']['login'] .
-                '?target=' . $shibTarget;
+                '?target=' . urlencode($shibTarget);
 
             if (isset($configArray['Shibboleth']['provider_id'])) {
                 $sessionInitiator = $sessionInitiator . '&providerId=' .
-                    $configArray['Shibboleth']['provider_id'];
+                    urlencode($configArray['Shibboleth']['provider_id']);
             }
 
             $this->assign('sessionInitiator', $sessionInitiator);
