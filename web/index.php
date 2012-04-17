@@ -152,7 +152,15 @@ $action = (isset($_GET['action'])) ? $_GET['action'] : 'Home';
 $action = preg_replace('/[^\w]/', '', $action);
 
 // Process Authentication
-if (!$user) {
+if ($user && $configArray['Authentication']['method'] == 'Shibboleth'
+    && empty($_SERVER[$configArray['Shibboleth']['username']])
+    && isset($configArray['Shibboleth']['logout'])
+) {
+    // Special case: Process single log-out for Shibboleth
+    include_once 'services/MyResearch/Logout.php';
+    Logout::performLogout();
+    $user = false;
+} else if (!$user) {
     // Special case for Shibboleth:
     $shibLoginNeeded = ($configArray['Authentication']['method'] == 'Shibboleth'
         && $module == 'MyResearch');
