@@ -303,6 +303,23 @@ class CatalogConnection
     }
 
     /**
+     * Has Holdings
+     *
+     * Obtain information on whether or not the item has holdings
+     *
+     * @param string $id A bibliographic id
+     *
+     * @return bool true on success, false on failure
+     * @access public
+     */
+    public function hasHoldings($id)
+    {
+        // Graceful degradation -- return true if no method supported.
+        return method_exists($this->driver, 'hasHoldings') ?
+            $this->driver->hasHoldings($id) : true;
+    }
+
+    /**
      * Get Holding
      *
      * This is responsible for retrieving the holding information of a certain

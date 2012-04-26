@@ -62,9 +62,11 @@
 
         <div id="tabnav">
             <ul>
+              {if $hasHoldings}
               <li{if $tab == 'Holdings' || $tab == 'Hold'} class="active"{/if}>
                 <a href="{$url}/Record/{$id|escape:"url"}/Holdings#tabnav" class="first"><span></span>{translate text='Holdings'}</a>
               </li>
+              {/if}
               <li{if $tab == 'Description'} class="active"{/if}>
                 <a href="{$url}/Record/{$id|escape:"url"}/Description#tabnav" class="first"><span></span>{translate text='Description'}</a>
               </li>

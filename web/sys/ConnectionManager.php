@@ -64,8 +64,13 @@ class ConnectionManager
                     echo '</pre>';
                 }
             }
-        }
 
+            $loadNoILS = isset($configArray['Catalog']['loadNoILSOnFailure'])
+                ? $configArray['Catalog']['loadNoILSOnFailure'] : false;
+            if ($catalog->status == false && $loadNoILS) {
+                $catalog = new CatalogConnection("NoILS");
+            }
+        }
         return $catalog;
     }
 

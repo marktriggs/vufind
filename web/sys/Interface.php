@@ -123,16 +123,16 @@ class UInterface extends Smarty
             is_object($searchObject) ? $searchObject->getBasicTypes() : array()
         );
         $this->assign(
-            'autocomplete', 
+            'autocomplete',
             is_object($searchObject) ? $searchObject->getAutocompleteStatus() : false
         );
         $this->assign(
             'retainFiltersByDefault', $searchObject->getRetainFilterSetting()
         );
-        
+
         if (isset($configArray['Site']['showBookBag'])) {
             $this->assign(
-                'bookBag', ($configArray['Site']['showBookBag']) 
+                'bookBag', ($configArray['Site']['showBookBag'])
                 ? Cart_Model::getInstance() : false
             );
         }
@@ -206,12 +206,18 @@ class UInterface extends Smarty
 
             $this->assign('sessionInitiator', $sessionInitiator);
         }
-        
+
         $this->assign(
-            'sidebarOnLeft', 
+            'sidebarOnLeft',
             !isset($configArray['Site']['sidebarOnLeft'])
-            ? false : $configArray['Site']['sidebarOnLeft'] 
+            ? false : $configArray['Site']['sidebarOnLeft']
         );
+
+        $catalog = ConnectionManager::connectToCatalog();
+        $this->assign("offlineMode", $catalog->getOfflineMode());
+        $hideLogin = isset($configArray['Authentication']['hideLogin'])
+            ? $configArray['Authentication']['hideLogin'] : false;
+        $this->assign("hideLogin", $hideLogin ? true : $catalog->getLoginMode());
     }
 
     /**
@@ -278,7 +284,7 @@ class UInterface extends Smarty
         $this->assign('userLang', $lang);
         $this->assign('allLangs', $configArray['Languages']);
     }
-    
+
     /**
      * Initialize global interface variables (part of standard VuFind startup
      * process).  This method is designed for initializations that can't happen

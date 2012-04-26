@@ -66,28 +66,22 @@ class Record extends Action
 
         //$interface->caching = 1;
 
-        // Define Default Tab
-        $defaultTab = isset($configArray['Site']['defaultRecordTab']) ?
-            $configArray['Site']['defaultRecordTab'] : 'Holdings';
-        $tab = (isset($_GET['action'])) ? $_GET['action'] : $defaultTab;
-        $interface->assign('tab', $tab);
-
         // Store ID of current record (this is needed to generate appropriate
         // links, and it is independent of which record driver gets used).
         $interface->assign('id', $_REQUEST['id']);
 
         // Setup Search Engine Connection
         $this->db = ConnectionManager::connectToIndex();
-        
+
         // Connect to Database
         $this->catalog = ConnectionManager::connectToCatalog();
-        
+
         // Set up object for formatting dates and times:
         $this->dateFormat = new VuFindDate();
-        
+
         // Register Library Catalog Account
         if (isset($_POST['submit']) && !empty($_POST['submit'])) {
-            if (isset($_POST['cat_username']) 
+            if (isset($_POST['cat_username'])
                 && isset($_POST['cat_password'])
             ) {
                 $result = UserAccount::processCatalogLogin(
@@ -106,6 +100,24 @@ class Record extends Action
             PEAR::raiseError(new PEAR_Error('Record Does Not Exist'));
         }
         $this->recordDriver = RecordDriverFactory::initRecordDriver($record);
+
+        // Define Default Tab
+        $defaultTab = isset($configArray['Site']['defaultRecordTab']) ?
+            $configArray['Site']['defaultRecordTab'] : 'Holdings';
+
+        if (isset($configArray['Site']['hideHoldingsTabWhenEmpty']) &&
+            $configArray['Site']['hideHoldingsTabWhenEmpty']
+        ) {
+            $showHoldingsTab = $this->recordDriver->hasHoldings();
+            $interface->assign('hasHoldings', $showHoldingsTab);
+            $defaultTab =  (!$showHoldingsTab && $defaultTab == "Holdings") ?
+                "Description" : $defaultTab;
+        } else {
+            $interface->assign('hasHoldings', true);
+        }
+
+        $tab = (isset($_GET['action'])) ? $_GET['action'] : $defaultTab;
+        $interface->assign('tab', $tab);
 
         if ($this->recordDriver->hasRDF()) {
             $interface->assign(
@@ -142,7 +154,7 @@ class Record extends Action
         ) {
             $interface->assign(
                 'syndetics_plus_js',
-                "http://plus.syndetics.com/widget.php?id=" . 
+                "http://plus.syndetics.com/widget.php?id=" .
                 $configArray['Syndetics']['plus_id']
             );
         }

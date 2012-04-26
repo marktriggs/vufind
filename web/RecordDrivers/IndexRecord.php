@@ -969,6 +969,34 @@ class IndexRecord implements RecordInterface
     }
 
     /**
+     * Check if an item has holdings in order to show or hide the holdings tab
+     *
+     * @return bool
+     * @access public
+     */
+    public function hasHoldings()
+    {
+        // Show holdings tab by default
+        return true;
+    }
+
+    /**
+     * Get Status/Holdings Information from the Marc Record (support method used by
+     * the NoILS driver).
+     *
+     * @param array $field The Marc Field to retrieve
+     * @param array $data  A keyed array of data to retrieve from subfields
+     *
+     * @return array
+     * @access public
+     */
+    public function getFormattedMarcDetails($field, $data)
+    {
+        // Not supported here:
+        return array();
+    }
+
+    /**
      * Does this record have reviews available?
      *
      * @return bool

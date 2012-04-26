@@ -48,17 +48,19 @@
       <div class="searchheader">
         <div class="searchcontent">
           <div class="alignright">
-            <div id="logoutOptions"{if !$user} style="display: none;"{/if}>
-              <a href="{$path}/MyResearch/Home">{translate text="Your Account"}</a> |
-              <a href="{$path}/MyResearch/Logout">{translate text="Log Out"}</a>
-            </div>
-            <div id="loginOptions"{if $user} style="display: none;"{/if}>
-              {if $authMethod == 'Shibboleth'}
-                <a href="{$sessionInitiator}">{translate text="Institutional Login"}</a>
-              {else}
-                <a href="{$path}/MyResearch/Home">{translate text="Login"}</a>
-              {/if}
-            </div>
+            {if !$hideLogin}
+              <div id="logoutOptions"{if !$user} style="display: none;"{/if}>
+                <a href="{$path}/MyResearch/Home">{translate text="Your Account"}</a> |
+                <a href="{$path}/MyResearch/Logout">{translate text="Log Out"}</a>
+              </div>
+              <div id="loginOptions"{if $user} style="display: none;"{/if}>
+                {if $authMethod == 'Shibboleth'}
+                  <a href="{$sessionInitiator}">{translate text="Institutional Login"}</a>
+                {else}
+                  <a href="{$path}/MyResearch/Home">{translate text="Login"}</a>
+                {/if}
+              </div>
+            {/if}
             {if is_array($allLangs) && count($allLangs) > 1}
               <form method="post" name="langForm" action="">
                 <div class="hiddenLabel"><label for="mylang">{translate text="Language"}:</label></div>

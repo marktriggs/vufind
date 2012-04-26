@@ -663,6 +663,84 @@ class MarcRecord extends IndexRecord
     }
 
     /**
+     * Check if an item has holdings in order to show or hide the holdings tab
+     *
+     * @return bool
+     * @access public
+     */
+    public function hasHoldings()
+    {
+        // Get Acquisitions Data
+        $id = $this->getUniqueID();
+        $catalog = ConnectionManager::connectToCatalog();
+        if ($catalog && $catalog->status) {
+            $result = $catalog->hasHoldings($id);
+            if (PEAR::isError($result)) {
+                PEAR::raiseError($result);
+            }
+            return $result;
+        }
+        // Show holdings tab by default
+        return true;
+    }
+
+    /**
+     * Get Status/Holdings Information from the Marc Record (support method used by
+     * the NoILS driver).
+     *
+     * @param array $field The Marc Field to retrieve
+     * @param array $data  A keyed array of data to retrieve from subfields
+     *
+     * @return array
+     * @access public
+     */
+    public function getFormattedMarcDetails($field, $data)
+    {
+        // Initialize return array
+        $matches = array();
+        $i = 0;
+
+        // Try to look up the specified field, return empty array if it doesn't
+        // exist.
+        $fields = $this->marcRecord->getFields($field);
+        if (!is_array($fields)) {
+            return $matches;
+        }
+
+        // Extract all the requested subfields, if applicable.
+        foreach ($fields as $currentField) {
+            foreach ($data as $key => $info) {
+                $split = explode("|", $info);
+                if ($split[0] == "msg") {
+                    if ($split[1] == "true") {
+                        $result = true;
+                    } elseif ($split[1] == "false") {
+                        $result = false;
+                    } else {
+                        $result =$split[1];
+                    }
+                    $matches[$i][$key] = $result;
+                } else {
+                    // Default to subfield a if nothing is specified.
+                    if (count($split) < 2) {
+                        $subfields = array('a');
+                    } else {
+                        $subfields = str_split($split[1]);
+                    }
+                    $result = $this->_getSubfieldArray(
+                        $currentField, $subfields, true
+                    );
+                    $matches[$i][$key] = count($result) > 0
+                        ? (string)$result[0] : '';
+                }
+            }
+            $matches[$i]['id'] = $this->getUniqueID();
+            $i++;
+        }
+        return $matches;
+    }
+
+    /**
      * Get an array of information about record history, obtained in real-time
      * from the ILS.
      *
