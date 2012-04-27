@@ -301,14 +301,14 @@ class NoILS implements DriverInterface
     }
 
     /**
-     * Get Login Mode
+     * Get Hidden Login Mode
      *
-     * This is responsible for returning the login mode
+     * This is responsible for indicating whether login should be hidden.
      *
-     * @return boolean true if the login should be hidden, false if not
+     * @return bool true if the login should be hidden, false if not
      * @access public
      */
-    public function getLoginMode()
+    public function loginIsHidden()
     {
         return isset($this->config['settings']['hideLogin'])
             ? $this->config['settings']['hideLogin'] : false;

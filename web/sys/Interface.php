@@ -217,7 +217,7 @@ class UInterface extends Smarty
         $this->assign("offlineMode", $catalog->getOfflineMode());
         $hideLogin = isset($configArray['Authentication']['hideLogin'])
             ? $configArray['Authentication']['hideLogin'] : false;
-        $this->assign("hideLogin", $hideLogin ? true : $catalog->getLoginMode());
+        $this->assign("hideLogin", $hideLogin ? true : $catalog->loginIsHidden());
     }
 
     /**
