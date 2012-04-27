@@ -1,6 +1,6 @@
 <?php
 /**
- * Interface for ILS Drivers
+ * Driver for offline/missing ILS.
  *
  * PHP version 5
  *
@@ -21,27 +21,20 @@
  *
  * @category VuFind
  * @package  ILS_Drivers
- * @author   Andrew S. Nagy <vufind-tech@lists.sourceforge.net>
+ * @author   Luke O'Sullivan <l.osullivan@swansea.ac.uk>
+ * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_an_ils_driver Wiki
  */
-
 require_once 'Interface.php';
 
 /**
- * Catalog Specific Driver Class
- *
- * This interface class is the definition of the required methods for
- * interacting with the local catalog.
- *
- * The parameters are of no major concern as you can define the purpose of the
- * parameters for each method for whatever purpose your driver needs.
- * The most important element here is what the method will return.  In all cases
- * the method can return a PEAR_Error object if an error occurs.
+ * Driver for offline/missing ILS.
  *
  * @category VuFind
  * @package  ILS_Drivers
- * @author   Andrew S. Nagy <vufind-tech@lists.sourceforge.net>
+ * @author   Luke O'Sullivan <l.osullivan@swansea.ac.uk>
+ * @author   Demian Katz <demian.katz@villanova.edu>
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  * @link     http://vufind.org/wiki/building_an_ils_driver Wiki
  */
