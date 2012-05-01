@@ -1189,7 +1189,7 @@ legend {
 .facetsTop th span {
     font-weight: normal;
 }
-.authorbox {
+.authorbox, .authoritybox {
     border: solid 1px #999999;
     background-color: #FFFFEE;
 }

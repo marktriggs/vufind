@@ -352,7 +352,7 @@ ul.recordSet .addToFavLink {
     padding:0;
     margin:0;
 }
-.authorbox,.authorbio {
+.authorbox, .authorbio, .authoritybox {
     padding:0 0 .4em .4em;
     border-bottom: 1px #eee solid;
     margin-bottom:.5em;

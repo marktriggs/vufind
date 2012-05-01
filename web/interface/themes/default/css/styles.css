@@ -303,7 +303,7 @@ ul.menu li{
     vertical-align:text-bottom;
     margin: 0px 0px 3px 2px;
 }
-.authorbox {
+.authorbox, .authoritybox {
     padding:0 0 1em 1em;
     border-bottom: 1px #eee solid;
     margin-bottom:.5em;
