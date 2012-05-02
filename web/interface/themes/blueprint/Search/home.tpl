@@ -14,16 +14,12 @@
 
 {if $facetList}
 <div class="searchHomeBrowse">
-  {assign var=columns value=0}
   {foreach from=$facetList item=details key=field}
     {assign var=list value=$details.sortedList}
     {if $field == 'callnumber-first'}{assign var=currentSize value=10}{else}{assign var=currentSize value=5}{/if}
-    {assign var=columns value=$columns+$currentSize}
     <h2 class="span-{$currentSize}">{translate text="home_browse"} {translate text=$details.label}</h2>
   {/foreach}
-  {if $columns > 0 && $columns < 24}
-    <div class="span-{math equation="24 - x" x=$columns} last"><!-- pad out header row --></div>
-  {/if}
+  <div class="clearer"><!-- empty --></div>
   {foreach from=$facetList item=details key=field}
     {assign var=list value=$details.sortedList}
     <ul class="span-5">
