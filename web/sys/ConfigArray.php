@@ -83,7 +83,9 @@ function getExtraConfigArray($name)
 function iniMerge($config_ini, $custom_ini)
 {
     foreach ($custom_ini as $k => $v) {
-        if (is_array($v)) {
+        // Make a recursive call if we need to merge array values into an existing
+        // key...  otherwise just drop the value in place.
+        if (is_array($v) && isset($config_ini[$k])) {
             $config_ini[$k] = iniMerge($config_ini[$k], $custom_ini[$k]);
         } else {
             $config_ini[$k] = $v;
