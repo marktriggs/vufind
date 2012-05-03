@@ -502,6 +502,9 @@ class SearchObject_SolrAuth extends SearchObject_Base
     {
         // Call default initialization first:
         $this->init();
+
+        // Reset some fields potentially set to inappropriate values by init():
+        $this->filterList = array();
         $this->searchType = $this->advancedSearchType;
 
         // this section prevents the search from retrieving records that would already
