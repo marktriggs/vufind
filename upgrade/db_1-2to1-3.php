@@ -32,6 +32,9 @@
  * @link     http://vufind.org/wiki/migration_notes Wiki
  */
 
+require_once dirname(__FILE__) . '/upgrade_utils.php';
+
+
 // Die if we don't have enough parameters:
 if (!isset($argv[3]) || !isset($argv[2]) || !isset($argv[1])) {
     die("\n\nMissing command line parameter... aborting database upgrade.\n\n");
@@ -41,13 +44,7 @@ $mysql_admin_user = $argv[1];
 $mysql_admin_pw = $argv[2];
 $old_config = $argv[3];
 
-// Try to read the ini file:
-$basePath = $old_config . '/web/conf';
-if (!file_exists($basePath . '/config.ini')) {
-    die("\n\nCan't open {$basePath}/config.ini; aborting database upgrade.\n\n");
-}
-require_once dirname(__FILE__) . '/../web/sys/ConfigArray.php';
-$configArray = readConfig($basePath);
+$configArray = readVuFindConfig($old_config);
 
 ?>
 
@@ -59,32 +56,13 @@ script, just to be on the safe side!
 
 <?php
 
-// get connection credentials from config.ini
-$match = preg_match(
-    "/mysql:\/\/([^:]+):([^@]+)@([^\/]+)\/(.+)/",
-    $configArray['Database']['database'], $mysql_conn
-);
-if (!$match) {
-    echo "Can't determine data needed to access your MySQL database. You have " .
-        $configArray['Database']['database'] .
-        "\nas connection string in your config.ini.\n";
-    exit(0);
-}
-
-if ($mysql_admin_user=="") {
-    $mysql_admin_user="root";
-}
-$mysql_host = $mysql_conn[3];
-$mysql_db = $mysql_conn[4];
-if ($mysql_db=="") {
-    $mysql_db="vufind";
-}
+$mysql = readMySQLSettings($configArray);
 
 echo "\nUsing the following values to access your MySQL database:\n";
 echo "MySQL admin username: " . $mysql_admin_user . "\n";
-echo "MySQL VuFind username: " . $mysql_conn[1] . "\n";
-echo "MySQL database: " . $mysql_db . "\n";
-echo "MySQL host: " . $mysql_host . "\n";
+echo "MySQL VuFind username: " . $mysql['vufind'] . "\n";
+echo "MySQL database: " . $mysql['database'] . "\n";
+echo "MySQL host: " . $mysql['host'] . "\n";
 
 $line = "n";
 
@@ -96,7 +74,7 @@ while ($line != "y") {
 }
 
 // create a PDO with connection to database
-$dsn = 'mysql:host=' . $mysql_host . ';dbname=' . $mysql_db;
+$dsn = 'mysql:host=' . $mysql['host'] . ';dbname=' . $mysql['database'];
 try {
     $db = new PDO($dsn, $mysql_admin_user, $mysql_admin_pw);
 } catch(PDOException $e) {
@@ -115,31 +93,13 @@ addNewTables();
 updateExistingTables();
 
 // fix name of vufind.ini file:
-fixIniFile($mysql_db);
+fixIniFile($mysql['database']);
 
 // clean up anonymous tags (this should not be necessary after release 1.1, but
 // it doesn't hurt to retain the check just in case the data gets corrupted or
 // this cleanup step was skipped during a previous upgrade process):
 cleanUpAnonymousTags();
 
-/**
- * Support function to execute a SQL statement.
- *
- * @param string $sqlStatement SQL to execute.
- * @param array  $bindParams   Bind parameters to pass with SQL.
- *
- * @return object              PDO SQL object (on success; does not return on error).
- */
-function executeSQL($sqlStatement, $bindParams = array())
-{
-    global $db;
-
-    $sql = $db->prepare($sqlStatement);
-    if (!$sql->execute($bindParams)) {
-        die("Problem executing: {$sqlStatement}");
-    }
-    return $sql;
-}
 
 /**
  * Rename the vufind.ini file to match the correct database name (if necessary).
@@ -287,30 +247,6 @@ function updateExistingTables()
         echo "No table updates necessary.\n\n";
     }
      */
-}
-
-/**
- * readline() does not exist on Windows.  This is a simple wrapper for portability.
- *
- * @param string $prompt Prompt to display to the user.
- *
- * @return string        User-entered response.
- */
-function getInput($prompt)
-{
-    // Standard function for most uses
-    if (function_exists('readline')) {
-        $in = readline($prompt);
-        return $in;
-    } else {
-        // Or use our own if it doesn't exist (windows)
-        print $prompt;
-        $fp = fopen("php://stdin", "r");
-        $in = fgets($fp, 4094); // Maximum windows buffer size
-        fclose($fp);
-        // Seems to keep the carriage return if you don't trim
-        return trim($in);
-    }
 }
 
 ?>
