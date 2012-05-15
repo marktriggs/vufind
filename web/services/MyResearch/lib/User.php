@@ -61,6 +61,7 @@ class User extends DB_DataObject
     public $home_library;                         // string(100)  not_null
     public $major;                           // string(100)  not_null
     public $created;                         // datetime(19)  not_null binary
+    public $hashed_password;              // string(60)
 
     /* Static get */
     function staticGet($k,$v=NULL) { return DB_DataObject::staticGet('User',$k,$v); }
