@@ -123,8 +123,13 @@ class Account extends Action
             if (!$user->find()) {
                 // We need to reassign the username since we cleared it out when
                 // we did the search for duplicate email addresses:
+
+                $authN = AuthenticationFactory::initAuthentication('DB');
+
                 $user->username = $_POST['username'];
-                $user->password = $_POST['password'];
+
+                $authN->setPasswordForUser($user, $_POST['password']);
+
                 $user->firstname = $_POST['firstname'];
                 $user->lastname = $_POST['lastname'];
                 $user->created = date('Y-m-d h:i:s');
