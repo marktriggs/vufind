@@ -190,6 +190,22 @@ CREATE TABLE `oai_resumption` (
 
 
 --
+-- Table structure for table `capabilities`
+--
+
+DROP TABLE IF EXISTS `capabilities`;
+CREATE TABLE `capabilities` (
+  `id` int(11) NOT NULL auto_increment,
+  `capability` varchar(128),
+  `value` varchar(128),
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `capability` (`capability`),
+  INDEX (`capability`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
+
+
+
+--
 -- Constraints for dumped tables
 --
 

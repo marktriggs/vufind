@@ -196,6 +196,24 @@ expires timestamp NOT NULL default '1970-01-01 00:00:00',
 PRIMARY KEY (id)
 );
 
+
+--
+-- Table structure for table `capabilities`
+--
+
+DROP TABLE IF EXISTS "capabilities";
+
+CREATE TABLE capabilities (
+id SERIAL,
+capability varchar(128),
+value varchar(128),
+PRIMARY KEY (id),
+UNIQUE (capabilities)
+);
+CREATE INDEX capability_idx on capabilities(capability);
+
+
+
 -- 
 -- Constraints for dumped tables
 -- 
