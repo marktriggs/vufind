@@ -32,6 +32,7 @@ require_once 'User_resource.php';
 require_once 'User_list.php';
 require_once 'Resource_tags.php';
 require_once 'Tags.php';
+require_once 'services/MyResearch/lib/Capabilities.php';
 
 /**
  * Table Definition for user
@@ -447,4 +448,78 @@ class User extends DB_DataObject
         return true;
     }
 
+
+    function isEncryptionEnabled()
+    {
+        return (Capabilities::getCapability("CAT_ENCRYPTION", "no") === "yes");
+    }
+
+
+    function getEncryptionProvider()
+    {
+        return new PassThroughEncryption();
+    }
+
+
+    function fetch()
+    {
+        $ret = parent::fetch();
+
+        if ($this->isEncryptionEnabled()) {
+            /* Transparently use the encrypted one */
+            $crypt = $this->getEncryptionProvider();
+            $this->cat_password = $crypt->decrypt($this->encrypted_cat_password);
+        }
+
+        return $ret;
+    }
+
+
+    function storeUserSecurely($op)
+    {
+        if ($this->isEncryptionEnabled()) {
+            /* Store the password encrypted */
+            $pw = $this->cat_password;
+
+            $crypt = $this->getEncryptionProvider();
+            $this->encrypted_cat_password = $crypt->encrypt($pw);
+
+            $this->cat_password = '';
+            $ret = parent::$op();
+            $this->cat_password = $pw;
+
+            return $ret;
+        } else {
+            return parent::$op();
+        }
+    }
+
+
+    function insert()
+    {
+        return $this->storeUserSecurely('insert');
+    }
+
+
+    function update()
+    {
+        return $this->storeUserSecurely('update');
+    }
 }
+
+
+class PassThroughEncryption
+{
+    public function encrypt($s)
+    {
+        return "SECURE:" . $s;
+    }
+
+
+    public function decrypt($s)
+    {
+        return "INSECURE:" . $s;
+    }
+}
+
+

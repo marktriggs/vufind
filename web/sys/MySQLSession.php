@@ -27,6 +27,8 @@
  */
 require_once 'SessionInterface.php';
 require_once 'services/MyResearch/lib/Session.php';
+require_once 'Crypt/Encryption.php';
+
 
 /**
  * MySQL session handler
@@ -50,6 +52,8 @@ class MySQLSession extends SessionInterface
      */
     static public function read($sess_id)
     {
+        $crypt = Encryption::getInstance();
+
         $s = new Session();
         $s->session_id = $sess_id;
 
@@ -58,7 +62,7 @@ class MySQLSession extends SessionInterface
             if ($s->last_used + self::$lifetime > time()) {
                 $s->last_used = time();
                 $s->update();
-                return $s->data;
+                return $crypt->decrypt($s->data);
             } else {
                 $s->delete();
                 return '';
@@ -84,10 +88,12 @@ class MySQLSession extends SessionInterface
      */
     static public function write($sess_id, $data)
     {
+        $crypt = Encryption::getInstance();
+
         $s = new Session();
         $s->session_id = $sess_id;
         if ($s->find(true)) {
-            $s->data = $data;
+            $s->data = $crypt->encrypt($data);
             return $s->update();
         } else {
             return false;
