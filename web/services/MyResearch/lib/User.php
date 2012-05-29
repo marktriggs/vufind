@@ -32,8 +32,8 @@ require_once 'User_resource.php';
 require_once 'User_list.php';
 require_once 'Resource_tags.php';
 require_once 'Tags.php';
-require_once 'services/MyResearch/lib/Capabilities.php';
 require_once 'Crypt/Encryption.php';
+require_once 'services/MyResearch/lib/Capabilities.php';
 
 /**
  * Table Definition for user
@@ -59,6 +59,7 @@ class User extends DB_DataObject
     public $email;                           // string(250)  not_null
     public $cat_username;                    // string(50)
     public $cat_password;                    // string(50)
+    public $encrypted_cat_password;          // blob(65535)  blob
     public $college;                         // string(100)  not_null
     public $home_library;                         // string(100)  not_null
     public $major;                           // string(100)  not_null
@@ -72,18 +73,23 @@ class User extends DB_DataObject
     ###END_AUTOCODE
     // @codingStandardsIgnoreEnd
 
+
+    public $original_cat_password = false;
+
+
     /**
-     * Sleep method for serialization.
+     * Sleep method for serialization.  Any properties that need to be
+     * accessible to the User object stored in the session must be listed here.
      *
      * @return array
      * @access public
-     * @todo   Investigate if this is still necessary.
      */
     public function __sleep()
     {
         return array(
             'id', 'username', 'password', 'cat_username', 'cat_password',
-            'firstname', 'lastname', 'email', 'college', 'home_library', 'major'
+            'firstname', 'lastname', 'email', 'college', 'home_library', 'major',
+            'original_cat_password'
         );
     }
 
@@ -450,20 +456,24 @@ class User extends DB_DataObject
     }
 
 
-    function isEncryptionEnabled()
-    {
-        return (Capabilities::getCapability("CAT_ENCRYPTION", "no") === "yes");
-    }
-
-
     function fetch()
     {
         $ret = parent::fetch();
+        $crypt = Encryption::getInstance();
 
-        if ($this->isEncryptionEnabled()) {
-            /* Transparently use the encrypted one */
-            $crypt = Encryption::getInstance();
-            $this->cat_password = $crypt->decrypt($this->encrypted_cat_password);
+        if ($this->encrypted_cat_password) {
+            if (Capabilities::getCapability('ENCRYPTION_MODE', 'hybrid') === 'hybrid') {
+                /* We want to use the encrypted password, but leave the
+                 * unencrypted one in the database in case they want to roll
+                 * back. */
+                $this->original_cat_password = $this->cat_password;
+                $this->cat_password = '';
+            }
+
+            if (!$this->cat_password) {
+                /* Transparently use the encrypted one */
+                $this->cat_password = $crypt->decrypt($this->encrypted_cat_password);
+            }
         }
 
         return $ret;
@@ -472,22 +482,26 @@ class User extends DB_DataObject
 
     function storeUserSecurely($op)
     {
-        if ($this->isEncryptionEnabled()) {
-            $crypt = Encryption::getInstance();
+        $crypt = Encryption::getInstance();
 
-            /* Store the password encrypted */
-            $pw = $this->cat_password;
+        /* Store the password encrypted */
+        $pw = $this->cat_password;
+        $this->cat_password = '';
 
-            $this->encrypted_cat_password = $crypt->encrypt($pw);
+        if (Capabilities::getCapability('ENCRYPTION_MODE', 'hybrid') === 'hybrid') {
+            if ($this->original_cat_password) {
+                /* If they're running in hybrid encryption mode, store their original password too. */
+                $pw = $this->original_cat_password;
+            }
 
-            $this->cat_password = '';
-            $ret = parent::$op();
             $this->cat_password = $pw;
-
-            return $ret;
-        } else {
-            return parent::$op();
         }
+
+        $this->encrypted_cat_password = $crypt->encrypt($pw);
+        $ret = parent::$op();
+        $this->cat_password = $pw;
+
+        return $ret;
     }
 
 

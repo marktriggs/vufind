@@ -23,6 +23,9 @@
  * @license  http://opensource.org/licenses/gpl-2.0.php GNU General Public License
  */
 
+require_once 'services/MyResearch/lib/Capabilities.php';
+
+
 abstract class Encryption
 {
     abstract public function __construct($configArray);
@@ -54,8 +57,11 @@ abstract class Encryption
     {
         global $configArray;
 
-        require_once 'MCryptEncryption.php';
-        return new MCryptEncryption($configArray);
+        $encryption_scheme = Capabilities::getCapability("ENCRYPTION", "Plaintext");
+        $class = $encryption_scheme . 'Encryption';
+
+        require_once $class . ".php";
+        return new $class($configArray);
     }
 }
 

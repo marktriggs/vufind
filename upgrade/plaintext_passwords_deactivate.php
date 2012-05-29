@@ -78,8 +78,16 @@ before proceeding with this script, just to be on the safe side!
             "PASSWORD_MODE set to 'hybrid'\n");
     }
 
-    Capabilities::setCapability('PASSWORD_MODE', 'hashed');
+    $encryption = Capabilities::getCapability('ENCRYPTION', 'plaintext');
 
+    if ($encryption !== 'MCrypt') {
+        die("\n\nAborted!  We were expecting to see " .
+            "ENCRYPTION set to 'MCrypt'\n");
+    }
+
+
+    Capabilities::setCapability('PASSWORD_MODE', 'hashed');
+    Capabilities::setCapability('ENCRYPTION_MODE', 'encrypt-only');
 
     $authN = AuthenticationFactory::initAuthentication('DB');
 
@@ -100,8 +108,9 @@ before proceeding with this script, just to be on the safe side!
                 echo "Removing stored password for " . $user->username . "... ";
 
                 fprintf($rollback,
-                        "update user set password = '%s' where username = '%s';\n",
+                        "update user set password = '%s', cat_password = '%s' where username = '%s';\n",
                         mysql_real_escape_string($user->password),
+                        mysql_real_escape_string($user->cat_password),
                         mysql_real_escape_string($user->username));
 
                 $user->password = '';

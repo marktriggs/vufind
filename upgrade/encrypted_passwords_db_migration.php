@@ -108,14 +108,23 @@ function updateExistingTables()
     }
 
     if (isset($columns['hashed_password'])) {
-        echo "No table updates necessary.\n\n";
-        return;
+        echo "Already have a hashed_password column.\n\n";
+    } else {
+        executeSQL(
+            "ALTER TABLE user " .
+            "  ADD COLUMN hashed_password  varchar(60) DEFAULT NULL;"
+            );
     }
 
-    executeSQL(
-        "ALTER TABLE user " .
-        "  ADD COLUMN hashed_password  varchar(60) DEFAULT NULL;"
-        );
+    if (isset($columns['encrypted_cat_password'])) {
+        echo "Already have a encrypted_cat_password column.\n\n";
+    } else {
+        executeSQL(
+            "ALTER TABLE user " .
+            "  ADD COLUMN encrypted_cat_password text DEFAULT NULL;"
+            );
+    }
+
     echo "done!\n\n";
 }
 

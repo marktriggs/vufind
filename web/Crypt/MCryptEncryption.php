@@ -75,8 +75,9 @@ class MCryptEncryption extends Encryption
         $ciphertext = base64_decode($parts[1]);
         $key = $this->getKey();
 
-        return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $ciphertext,
-                              MCRYPT_MODE_CBC, $iv);
+        return rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $key, $ciphertext,
+                                    MCRYPT_MODE_CBC, $iv),
+                     "\0");
     }
 }
 
